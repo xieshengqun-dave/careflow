@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   View, Text, TextInput, FlatList, TouchableOpacity,
-  StyleSheet, ActivityIndicator, StatusBar, SafeAreaView, ScrollView,
+  StyleSheet, ActivityIndicator, StatusBar, ScrollView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
 import { searchClinics, type ClinicWithDoctors } from "@/lib/api/clinics";
@@ -110,7 +111,7 @@ export default function ClinicSearchScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* Top bar */}
-      <SafeAreaView style={styles.topBar}>
+      <SafeAreaView style={styles.topBar} edges={["top"]}>
         <View style={styles.topRow}>
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} accessibilityLabel="Back">
             <Icon name="arrow-back-outline" size={22} color="#1E293B" />

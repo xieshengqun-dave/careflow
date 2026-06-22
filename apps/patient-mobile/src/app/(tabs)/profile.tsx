@@ -5,11 +5,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   StatusBar,
   Alert,
   Switch,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon, type IoniconName } from "@/components/Icon";
 import { useAuthStore } from "@/store/authStore";
@@ -202,7 +202,7 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
 
-      <SafeAreaView style={styles.headerBg}>
+      <SafeAreaView style={styles.headerBg} edges={["top"]}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Profile</Text>
         </View>

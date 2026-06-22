@@ -1,8 +1,9 @@
 import { useState } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, Alert, StatusBar, SafeAreaView,
+  KeyboardAvoidingView, Platform, Alert, StatusBar,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "@/store/authStore";
 import { updateProfile } from "@/lib/auth";
 
@@ -33,7 +34,7 @@ export default function OnboardingScreen() {
     >
       <StatusBar barStyle="light-content" backgroundColor="#0284c7" />
       <View style={styles.hero}>
-        <SafeAreaView>
+        <SafeAreaView edges={["top"]}>
           <Text style={styles.heroText}>👋</Text>
           <Text style={styles.heroTitle}>Welcome to CareFlow</Text>
           <Text style={styles.heroSub}>Let's get your profile set up.</Text>

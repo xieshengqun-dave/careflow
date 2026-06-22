@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { requireRole } from "@/lib/auth";
 import { UserMenu } from "@/components/shared/UserMenu";
@@ -19,7 +20,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="flex h-screen bg-slate-50">
       <aside className="w-56 flex flex-col border-r bg-white shrink-0">
         <div className="p-5">
-          <h1 className="text-xl font-bold text-primary">CareFlow</h1>
+          <Image src="/logo.png" alt="CareFlow" width={140} height={63} priority />
           <p className="text-xs text-muted-foreground mt-0.5">Clinic Portal</p>
         </div>
         <Separator />

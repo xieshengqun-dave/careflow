@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
 
@@ -7,7 +8,7 @@ export default function CheckInScreen() {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView>
+      <SafeAreaView edges={["top"]}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Check-in</Text>
         </View>

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, Alert, ScrollView, SafeAreaView,
+  View, Text, TextInput, TouchableOpacity, StyleSheet, Image,
+  KeyboardAvoidingView, Platform, Alert, ScrollView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
 import { supabase } from "@/lib/supabase";
@@ -40,10 +41,12 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           {/* Logo area */}
           <View style={styles.logoArea}>
-            <View style={styles.logoIcon}>
-              <Text style={styles.logoPlus}>✚</Text>
-            </View>
-            <Text style={styles.logoText}>CareFlow</Text>
+            <Image
+              source={require("../../../assets/images/logo.png")}
+              style={styles.logoImage}
+              resizeMode="contain"
+              accessibilityLabel="CareFlow"
+            />
             <Text style={styles.logoSub}>Smart Queue & Appointment Management for Clinics</Text>
           </View>
 
@@ -132,16 +135,7 @@ const styles = StyleSheet.create({
   scroll: { flexGrow: 1, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 32 },
 
   logoArea: { alignItems: "center", paddingVertical: 32 },
-  logoIcon: {
-    width: 72, height: 72, borderRadius: 20,
-    backgroundColor: "#1A6FD8",
-    justifyContent: "center", alignItems: "center",
-    marginBottom: 12,
-    shadowColor: "#1A6FD8", shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35, shadowRadius: 12, elevation: 8,
-  },
-  logoPlus: { fontSize: 38, color: "#ffffff", fontWeight: "700", lineHeight: 44 },
-  logoText: { fontSize: 30, fontWeight: "800", color: "#1A6FD8", letterSpacing: -0.5 },
+  logoImage: { width: 220, height: 99, marginBottom: 8 },
   logoSub: { fontSize: 12, color: "#94A3B8", textAlign: "center", marginTop: 4, maxWidth: 220, lineHeight: 18 },
 
   card: {

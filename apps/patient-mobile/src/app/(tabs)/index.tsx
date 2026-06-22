@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, RefreshControl, TextInput, SafeAreaView, StatusBar,
+  StyleSheet, RefreshControl, TextInput, StatusBar,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
 import { useAuthStore } from "@/store/authStore";
@@ -118,7 +119,7 @@ export default function HomeScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
 
       {/* Header */}
-      <SafeAreaView style={styles.headerBg}>
+      <SafeAreaView style={styles.headerBg} edges={["top"]}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Text style={styles.greet}>{greeting()},</Text>

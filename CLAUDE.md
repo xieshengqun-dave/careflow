@@ -41,7 +41,15 @@ import { Icon } from "@/components/Icon";
 - **Primary color:** `#1A6FD8`
 - **Design tokens:** `src/constants/theme.ts` — Colors, FontSize, FontWeight, Spacing, Radius, Shadow
 - **Mockups:** `/UI/*.png` — match these exactly for all screens
+- **Logo:** `assets/images/logo.png` (copied from `/UI/logo.png`) — also used to generate `assets/icon.png`, `assets/adaptive-icon.png`, `assets/splash.png` (referenced by `app.json`). If the logo changes, regenerate these.
 - No real clinic/doctor photos in DB — use colored placeholder Views based on name hash (6 preset colors, show initial letter)
+
+### Critical: SafeAreaView must come from `react-native-safe-area-context`
+**Never import `SafeAreaView` from `"react-native"`.** The core RN component is iOS-only and is a no-op on Android, causing headers to render under the status bar. Always:
+```typescript
+import { SafeAreaView } from "react-native-safe-area-context";
+```
+The root layout (`src/app/_layout.tsx`) wraps everything in `<SafeAreaProvider>` for this to work. For header-only wrappers (not full-screen), pass `edges={["top"]}` so it doesn't also eat a bottom inset.
 
 ### Navigation (Expo Router)
 ```
@@ -126,7 +134,13 @@ Has two views toggled via `?view=` param:
 Status actions (Check In, Complete, No Show, Cancel) use `useTransition` for non-blocking updates.
 
 ### Auth
-`requireRole(roles[])` in `src/lib/auth.ts` — returns user with `clinicId`. Staff roles: `doctor`, `receptionist`, `clinic_admin`, `super_admin`.
+`requireRole(roles[])` in `src/lib/auth.ts` — returns user with `clinicId`. Staff roles: `doctor`, `receptionist`, `clinic_admin`, `super_admin`. Auth is email+password (`supabase.auth.signInWithPassword`), not OTP — that's patient-mobile only. Seed accounts in `supabase/seed.sql` have an **empty password**, so they can't actually sign in until a password is set via Supabase Dashboard → Authentication → Users → Reset Password.
+
+### Dashboard (`/dashboard`)
+Rebuilt to match the `/UI/Clinic Dashboard.png` mockup: metric cards (Today's Appointments, In Queue, Patients Today, Completed Today — swapped the mockup's "Revenue Today" since there's no fee column in the schema), a live queue breakdown donut (`recharts`), today's appointments list, doctor schedule, a status bar chart, and a real recent-activity feed built from `updated_at` timestamps. All data is real — no fabricated numbers. Logic lives in `src/lib/queries/dashboard.ts`; components in `src/components/dashboard/`.
+
+### Tailwind requires `postcss.config.mjs`
+`apps/clinic-web/postcss.config.mjs` (tailwindcss + autoprefixer) is required for the `@tailwind` directives in `globals.css` to compile — without it, the whole app renders with zero CSS. Don't delete it.
 
 ---
 
@@ -160,6 +174,9 @@ These two migrations were written but must be run manually in the Supabase SQL E
 ### Timezone
 All dates use Malaysian time (MYT, UTC+8). Use `getMYTToday()` from `@careflow/shared` for the current date string.
 
+### No fee/price column anywhere in the schema
+Neither `appointments` nor `doctors` has a fee/price column (checked all migrations). Don't `select` `consultation_fee` or similar — Postgrest will error on the unknown column and the **entire query silently returns no rows** (this caused "no upcoming appointments" to show even with real data — fixed in `appointments.tsx`, but `queue/join.tsx` still selects `consultation_fee` and `consultation_duration` on `doctors`, and queries `queues.status` instead of `queues.is_active` — these are believed broken too and not yet fixed). If you need real revenue/fee data, add a migration first rather than fabricating a number.
+
 ---
 
 ## Shared Package (`packages/shared`)
@@ -179,3 +196,7 @@ All dates use Malaysian time (MYT, UTC+8). Use `getMYTToday()` from `@careflow/s
 5. **`book_appointment()` is a stored function** — call via `supabase.rpc('book_appointment', {...})`, not direct insert
 6. **Doctor name** is in `auth.users` / `profiles`, not in `doctors` table — always join through `clinic_staff → users`
 7. **Ratings and geolocation** are not in the DB — placeholders (4.8★, distances) are hardcoded in the UI
+8. **`SafeAreaView` must come from `react-native-safe-area-context`**, never `"react-native"` core — see Patient Mobile App section above
+9. **No fee/price column in the schema** — never `select` `consultation_fee`; see Database section above
+10. **patient-mobile Login (`(auth)/login.tsx`) is a dev-mode stub** — it calls `supabase.auth.signInWithPassword()` with a hardcoded dev account instead of the real phone-OTP flow, and never navigates to `otp.tsx`. The OTP screen itself works if reached directly (`/​(auth)/otp?phone=...`), but real OTP login is not wired up yet.
+11. **clinic-web requires `apps/clinic-web/postcss.config.mjs`** to exist or Tailwind produces zero CSS — see Clinic Web App section above

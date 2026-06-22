@@ -8,9 +8,9 @@ import {
   RefreshControl,
   ActivityIndicator,
   Alert,
-  SafeAreaView,
   StatusBar,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
 import { supabase } from "@/lib/supabase";
@@ -101,7 +101,6 @@ async function fetchAppointments(tab: TabKey): Promise<FullAppointment[]> {
       id,
       appointment_date,
       status,
-      consultation_fee,
       time_slots (
         start_time,
         duration_minutes
@@ -146,7 +145,7 @@ async function fetchAppointments(tab: TabKey): Promise<FullAppointment[]> {
       specialization: doc?.specialization ?? null,
       clinicName: clinic?.name ?? "",
       clinicAddress: clinic?.address ?? "",
-      fee: (appt as unknown as { consultation_fee: number | null }).consultation_fee ?? null,
+      fee: null,
       duration: slot?.duration_minutes ?? null,
     };
   });

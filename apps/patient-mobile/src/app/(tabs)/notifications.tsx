@@ -7,9 +7,9 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
-  SafeAreaView,
   StatusBar,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon, type IoniconName } from "@/components/Icon";
 import { getDerivedNotifications, type AppNotification } from "@/lib/api/notifications";
@@ -199,7 +199,7 @@ export default function NotificationsScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
 
       {/* Header */}
-      <SafeAreaView style={styles.headerBg}>
+      <SafeAreaView style={styles.headerBg} edges={["top"]}>
         <View style={styles.headerRow}>
           <Text style={styles.headerTitle}>Notifications</Text>
           <TouchableOpacity onPress={markAllRead} activeOpacity={0.7}>
