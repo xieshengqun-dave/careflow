@@ -1,15 +1,31 @@
 import { redirect } from "next/navigation";
-import { Calendar, Users, Clock, TrendingDown } from "lucide-react";
+import Link from "next/link";
+import { Calendar, Users, ClipboardCheck, ListChecks, Plus } from "lucide-react";
 import { requireRole } from "@/lib/auth";
-import { getDashboardMetrics } from "@/lib/queries/dashboard";
+import {
+  getDashboardMetrics,
+  getQueueStatusBreakdown,
+  getDoctorScheduleToday,
+  getRecentActivity,
+} from "@/lib/queries/dashboard";
+import { getClinicAppointments } from "@/lib/queries/appointments";
 import { MetricCard } from "@/components/dashboard/MetricCard";
+import { QueueOverviewChart } from "@/components/dashboard/QueueOverviewChart";
+import { TodaysOverviewChart } from "@/components/dashboard/TodaysOverviewChart";
+import { TodaysAppointmentsList } from "@/components/dashboard/TodaysAppointmentsList";
+import { DoctorScheduleToday } from "@/components/dashboard/DoctorScheduleToday";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { ExportReportButton } from "@/components/dashboard/ExportReportButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { getMYTToday } from "@careflow/shared";
 
 export default async function DashboardPage() {
   const user = await requireRole(["doctor", "receptionist", "clinic_admin", "super_admin"]);
   if (!user) redirect("/login");
 
-  const today = new Date().toLocaleDateString("en-MY", {
+  const todayDate = getMYTToday();
+  const todayLabel = new Date().toLocaleDateString("en-MY", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
     timeZone: "Asia/Kuala_Lumpur",
   });
@@ -18,16 +34,43 @@ export default async function DashboardPage() {
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const firstName = user.fullName.split(" ")[0];
 
-  let metrics = { todayAppointments: 0, walkInPatients: 0, avgWaitMinutes: null as number | null, noShowRate: 0 };
-  if (user.clinicId) {
-    try { metrics = await getDashboardMetrics(user.clinicId); } catch { /* no data yet */ }
+  const clinicId = user.clinicId ?? "";
+  let metrics = { todayAppointments: 0, inQueueCount: 0, patientsToday: 0, completedToday: 0, avgWaitMinutes: null as number | null, noShowRate: 0 };
+  let queueBreakdown = { waiting: 0, called: 0, inConsultation: 0, completed: 0, cancelled: 0 };
+  let todaysAppointments: Awaited<ReturnType<typeof getClinicAppointments>> = [];
+  let doctorSchedule: Awaited<ReturnType<typeof getDoctorScheduleToday>> = [];
+  let recentActivity: Awaited<ReturnType<typeof getRecentActivity>> = [];
+
+  if (clinicId) {
+    try {
+      [metrics, queueBreakdown, todaysAppointments, doctorSchedule, recentActivity] = await Promise.all([
+        getDashboardMetrics(clinicId),
+        getQueueStatusBreakdown(clinicId),
+        getClinicAppointments(clinicId, todayDate),
+        getDoctorScheduleToday(clinicId),
+        getRecentActivity(clinicId),
+      ]);
+    } catch {
+      /* no data yet */
+    }
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">{greeting}, {firstName}</h1>
-        <p className="text-muted-foreground text-sm mt-0.5">{today}</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-semibold">{greeting}, {firstName}</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">{todayLabel}</p>
+        </div>
+        <div className="flex gap-2">
+          <ExportReportButton appointments={todaysAppointments} date={todayDate} />
+          <Button size="sm" asChild>
+            <Link href="/appointments?view=slots">
+              <Plus className="h-4 w-4 mr-1.5" />
+              New Appointment
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -38,59 +81,78 @@ export default async function DashboardPage() {
           icon={<Calendar className="h-5 w-5" />}
         />
         <MetricCard
-          title="Walk-in Patients"
-          value={metrics.walkInPatients}
-          description="Queue walk-ins today"
+          title="In Queue"
+          value={metrics.inQueueCount}
+          description="Waiting, called, or with doctor"
           icon={<Users className="h-5 w-5" />}
         />
         <MetricCard
-          title="Avg. Wait Time"
-          value={metrics.avgWaitMinutes !== null ? `${metrics.avgWaitMinutes} min` : "—"}
-          description="Join to called, today"
-          icon={<Clock className="h-5 w-5" />}
+          title="Patients Today"
+          value={metrics.patientsToday}
+          description="Unique patients seen or scheduled"
+          icon={<ClipboardCheck className="h-5 w-5" />}
         />
         <MetricCard
-          title="No-Show Rate"
-          value={`${metrics.noShowRate}%`}
-          description="Missed appointments today"
-          icon={<TrendingDown className="h-5 w-5" />}
+          title="Completed Today"
+          value={metrics.completedToday}
+          description="Consultations finished today"
+          icon={<ListChecks className="h-5 w-5" />}
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
-          <CardHeader><CardTitle className="text-base">Quick Navigation</CardTitle></CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>Use the sidebar to manage your clinic.</p>
-            <ul className="space-y-1.5 mt-2">
-              {[
-                ["Doctors", "Add and manage doctor profiles"],
-                ["Schedules", "Set weekly availability per doctor"],
-                ["Settings",  "Update clinic information"],
-              ].map(([label, desc]) => (
-                <li key={label} className="flex items-start gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                  <span><strong className="text-foreground">{label}</strong> — {desc}</span>
-                </li>
-              ))}
-            </ul>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Live Queue Overview</CardTitle>
+            <Link href="/queue" className="text-sm text-primary hover:underline">Manage Queue</Link>
+          </CardHeader>
+          <CardContent>
+            <QueueOverviewChart breakdown={queueBreakdown} />
+            {metrics.avgWaitMinutes !== null && (
+              <p className="text-xs text-muted-foreground mt-4">
+                Average wait today: <span className="font-medium text-slate-700">{metrics.avgWaitMinutes} min</span>
+              </p>
+            )}
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Session</CardTitle></CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            {[
-              ["Signed in as", user.fullName],
-              ["Role", user.role.replace("_", " ")],
-              ["Clinic ID", user.clinicId ? user.clinicId.slice(0, 8) + "…" : "—"],
-              ["Date (MYT)", new Date().toLocaleDateString("en-MY", { timeZone: "Asia/Kuala_Lumpur" })],
-            ].map(([label, val]) => (
-              <div key={label as string} className="flex justify-between">
-                <span className="text-muted-foreground">{label}</span>
-                <span className="font-medium capitalize">{val}</span>
-              </div>
-            ))}
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Today&apos;s Appointments</CardTitle>
+            <Link href="/appointments?view=list" className="text-sm text-primary hover:underline">View Calendar</Link>
+          </CardHeader>
+          <CardContent>
+            <TodaysAppointmentsList appointments={todaysAppointments} />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Doctor Schedule Today</CardTitle>
+            <Link href="/schedules" className="text-sm text-primary hover:underline">View Full Schedule</Link>
+          </CardHeader>
+          <CardContent>
+            <DoctorScheduleToday doctors={doctorSchedule} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Today&apos;s Overview</CardTitle>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <TodaysOverviewChart appointments={todaysAppointments} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RecentActivity items={recentActivity} />
           </CardContent>
         </Card>
       </div>
