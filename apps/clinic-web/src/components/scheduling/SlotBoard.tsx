@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import type { GeneratedSlot } from "@careflow/shared";
 import type { DoctorSlotData } from "@/lib/queries/slots";
 import { SlotCell } from "./SlotCell";
@@ -85,12 +85,9 @@ export function SlotBoard({ doctors, date }: SlotBoardProps) {
             const timeStr = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 
             return (
-              <>
+              <Fragment key={startMin}>
                 {/* Time label */}
-                <div
-                  key={`time-${startMin}`}
-                  className="px-2 py-2 border-b border-r text-[11px] text-muted-foreground font-medium flex items-center"
-                >
+                <div className="px-2 py-2 border-b border-r text-[11px] text-muted-foreground font-medium flex items-center">
                   {formatTime(timeStr)}
                 </div>
 
@@ -120,7 +117,7 @@ export function SlotBoard({ doctors, date }: SlotBoardProps) {
                     </div>
                   );
                 })}
-              </>
+              </Fragment>
             );
           })}
         </div>

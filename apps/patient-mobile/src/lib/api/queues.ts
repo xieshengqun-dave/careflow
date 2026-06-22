@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { getMYTToday } from "@careflow/shared";
 
 export interface ClinicQueue {
   queueId: string;
@@ -7,7 +8,6 @@ export interface ClinicQueue {
   specialization: string | null;
   consultationDuration: number;
   waitingCount: number;
-  status: "ACTIVE" | "CLOSED";
 }
 
 export interface QueueEntryStatus {
@@ -25,24 +25,23 @@ export interface QueueEntryStatus {
 }
 
 export async function getClinicActiveQueues(clinicId: string): Promise<ClinicQueue[]> {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getMYTToday();
 
   const { data } = await supabase
     .from("queues")
     .select(`
       id,
-      status,
       doctors (
         id,
         specialization,
-        consultation_duration,
+        consultation_duration_minutes,
         clinic_staff ( full_name )
       ),
       queue_entries ( id, status )
     `)
     .eq("clinic_id", clinicId)
     .eq("queue_date", today)
-    .eq("status", "ACTIVE");
+    .eq("is_active", true);
 
   if (!data) return [];
 
@@ -50,7 +49,7 @@ export async function getClinicActiveQueues(clinicId: string): Promise<ClinicQue
     const doc = q.doctors as unknown as {
       id: string;
       specialization: string | null;
-      consultation_duration: number;
+      consultation_duration_minutes: number;
       clinic_staff: { full_name: string } | Array<{ full_name: string }> | null;
     } | null;
     const staff = Array.isArray(doc?.clinic_staff) ? doc?.clinic_staff[0] : doc?.clinic_staff;
@@ -62,9 +61,8 @@ export async function getClinicActiveQueues(clinicId: string): Promise<ClinicQue
       doctorId: doc?.id ?? "",
       doctorName: staff?.full_name ?? "Doctor",
       specialization: doc?.specialization ?? null,
-      consultationDuration: doc?.consultation_duration ?? 15,
+      consultationDuration: doc?.consultation_duration_minutes ?? 15,
       waitingCount,
-      status: q.status as "ACTIVE" | "CLOSED",
     };
   });
 }
@@ -129,7 +127,7 @@ export async function getQueueEntryStatus(entryId: string): Promise<QueueEntrySt
       called_at,
       queues (
         doctors (
-          consultation_duration,
+          consultation_duration_minutes,
           clinic_staff ( full_name )
         ),
         clinics ( name )
@@ -142,7 +140,7 @@ export async function getQueueEntryStatus(entryId: string): Promise<QueueEntrySt
 
   const queue = data.queues as unknown as {
     doctors: {
-      consultation_duration: number;
+      consultation_duration_minutes: number;
       clinic_staff: { full_name: string } | Array<{ full_name: string }> | null;
     } | null;
     clinics: { name: string } | null;
@@ -170,7 +168,7 @@ export async function getQueueEntryStatus(entryId: string): Promise<QueueEntrySt
     position: count ?? 0,
     doctorName: staff?.full_name ?? "Doctor",
     clinicName: queue?.clinics?.name ?? "",
-    consultationDuration: doc?.consultation_duration ?? 15,
+    consultationDuration: doc?.consultation_duration_minutes ?? 15,
   };
 }
 
@@ -190,7 +188,7 @@ export async function getMyActiveQueueEntries(): Promise<QueueEntryStatus[]> {
       called_at,
       queues (
         doctors (
-          consultation_duration,
+          consultation_duration_minutes,
           clinic_staff ( full_name )
         ),
         clinics ( name )
@@ -205,7 +203,7 @@ export async function getMyActiveQueueEntries(): Promise<QueueEntryStatus[]> {
   return data.map((row) => {
     const queue = row.queues as unknown as {
       doctors: {
-        consultation_duration: number;
+        consultation_duration_minutes: number;
         clinic_staff: { full_name: string } | Array<{ full_name: string }> | null;
       } | null;
       clinics: { name: string } | null;
@@ -224,7 +222,7 @@ export async function getMyActiveQueueEntries(): Promise<QueueEntryStatus[]> {
       position: 0,
       doctorName: staff?.full_name ?? "Doctor",
       clinicName: queue?.clinics?.name ?? "",
-      consultationDuration: doc?.consultation_duration ?? 15,
+      consultationDuration: doc?.consultation_duration_minutes ?? 15,
     };
   });
 }

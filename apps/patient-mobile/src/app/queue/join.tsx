@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
 import { supabase } from "@/lib/supabase";
 import { joinQueue } from "@/lib/api/queues";
+import { getMYTToday } from "@careflow/shared";
 
 // ─── types ───────────────────────────────────────────────────────────────────
 
@@ -22,7 +23,6 @@ interface ActiveQueue {
   doctorName: string;
   specialization: string | null;
   consultationDuration: number;
-  consultationFee: number | null;
   waitingCount: number;
   clinicName: string;
   clinicAddress: string;
@@ -58,7 +58,7 @@ export default function JoinQueueScreen() {
     async function fetchQueue() {
       // If a specific queueId was passed, use it directly
       // Otherwise fetch the active queue for the clinic
-      const today = new Date().toISOString().slice(0, 10);
+      const today = getMYTToday();
 
       let query = supabase
         .from("queues")
@@ -67,14 +67,13 @@ export default function JoinQueueScreen() {
           doctors (
             id,
             specialization,
-            consultation_duration,
-            consultation_fee,
+            consultation_duration_minutes,
             clinic_staff ( full_name )
           ),
           clinics ( name, address ),
           queue_entries ( status )
         `)
-        .eq("status", "ACTIVE")
+        .eq("is_active", true)
         .eq("queue_date", today);
 
       if (paramQueueId) {
@@ -90,8 +89,7 @@ export default function JoinQueueScreen() {
       const doc = data.doctors as unknown as {
         id: string;
         specialization: string | null;
-        consultation_duration: number;
-        consultation_fee: number | null;
+        consultation_duration_minutes: number;
         clinic_staff: { full_name: string } | Array<{ full_name: string }> | null;
       } | null;
       const clinic = data.clinics as unknown as { name: string; address: string } | null;
@@ -104,8 +102,7 @@ export default function JoinQueueScreen() {
         doctorId: doc?.id ?? "",
         doctorName: (staff as { full_name: string } | null)?.full_name ?? "Doctor",
         specialization: doc?.specialization ?? null,
-        consultationDuration: doc?.consultation_duration ?? 15,
-        consultationFee: doc?.consultation_fee ?? null,
+        consultationDuration: doc?.consultation_duration_minutes ?? 15,
         waitingCount,
         clinicName: clinic?.name ?? "",
         clinicAddress: clinic?.address ?? "",
@@ -199,9 +196,7 @@ export default function JoinQueueScreen() {
               </View>
               <View style={styles.feeBox}>
                 <Text style={styles.feeLabel}>Consultation Fee</Text>
-                <Text style={styles.feeAmount}>
-                  RM {queue.consultationFee != null ? String(queue.consultationFee) : "–"}
-                </Text>
+                <Text style={styles.feeAmount}>—</Text>
                 <Text style={styles.feePerVisit}>Per Visit</Text>
               </View>
             </View>
