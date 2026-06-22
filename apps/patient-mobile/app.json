@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "CareFlow",
+    "slug": "careflow-patient",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "careflow",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f0f9ff"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "my.careflow.patient",
+      "infoPlist": {
+        "NSUserNotificationsUsageDescription": "CareFlow sends queue and appointment notifications."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#f0f9ff"
+      },
+      "package": "my.careflow.patient"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
