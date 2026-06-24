@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { supabase } from "@/lib/supabase";
+import { registerForPushNotificationsAsync } from "@/lib/api/devices";
 
 export interface PatientUser {
   id: string;
@@ -54,6 +55,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
       },
       isLoading: false,
     });
+
+    // Fire-and-forget: never block auth/navigation on push registration.
+    void registerForPushNotificationsAsync();
   },
 
   signOut: async () => {
