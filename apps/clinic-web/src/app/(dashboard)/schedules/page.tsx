@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
-import { ScheduleGrid } from "@/components/schedules/ScheduleGrid";
+import { ScheduleView } from "@/components/schedules/ScheduleView";
 
 async function getDoctorsWithSchedules(clinicId: string) {
   const supabase = await createServerClient();
@@ -41,17 +41,15 @@ export default async function SchedulesPage() {
           <p className="text-muted-foreground text-sm">No doctors found. Add doctors first.</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {doctors.map((doc: any) => (
-            <ScheduleGrid
-              key={doc.id}
-              doctorId={doc.id}
-              doctorName={doc.staff?.full_name ?? "Unknown Doctor"}
-              slots={doc.doctor_schedules ?? []}
-              canManage={canManage}
-            />
-          ))}
-        </div>
+        <ScheduleView
+          doctors={doctors.map((doc: any) => ({
+            id: doc.id,
+            name: doc.staff?.full_name ?? "Unknown Doctor",
+            specialization: doc.specialization ?? null,
+            slots: doc.doctor_schedules ?? [],
+          }))}
+          canManage={canManage}
+        />
       )}
     </div>
   );
