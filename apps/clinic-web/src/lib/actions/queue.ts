@@ -183,30 +183,14 @@ export async function addWalkIn(data: {
     patientId = authData.user.id;
   }
 
-  // Get next queue number atomically enough for MVP
-  const { data: queueRow } = await supabase
-    .from("queues")
-    .select("current_number")
-    .eq("id", data.queueId)
-    .single();
-
-  const nextNumber = ((queueRow?.current_number as number) ?? 0) + 1;
-
-  await supabase
-    .from("queues")
-    .update({ current_number: nextNumber })
-    .eq("id", data.queueId);
-
-  const { error: insertError } = await supabase.from("queue_entries").insert({
-    queue_id: data.queueId,
-    patient_id: patientId,
-    queue_number: nextNumber,
-    type: "WALK_IN",
-    priority: data.priority,
-    status: "WAITING",
+  const { error: joinError } = await supabase.rpc("join_queue", {
+    p_queue_id: data.queueId,
+    p_type: "WALK_IN",
+    p_priority: data.priority,
+    p_patient_id: patientId,
   });
 
-  if (insertError) return { error: insertError.message };
+  if (joinError) return { error: joinError.message };
   revalidatePath("/queue");
   return { success: true };
 }

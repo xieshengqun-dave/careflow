@@ -74,44 +74,21 @@ export async function joinQueue(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  // Check if already in this queue
-  const { data: existing } = await supabase
-    .from("queue_entries")
-    .select("id")
-    .eq("queue_id", queueId)
-    .eq("patient_id", user.id)
-    .in("status", ["WAITING", "CALLED", "IN_CONSULTATION"])
-    .maybeSingle();
+  const { data, error } = await supabase.rpc("join_queue", {
+    p_queue_id: queueId,
+    p_type: "WALK_IN",
+    p_priority: priority,
+  });
 
-  if (existing) return { error: "You are already in this queue." };
+  if (error) {
+    const hint = error.message.includes("ALREADY_IN_QUEUE")
+      ? "You are already in this queue."
+      : error.message;
+    return { error: hint };
+  }
 
-  // Get next queue number
-  const { data: last } = await supabase
-    .from("queue_entries")
-    .select("queue_number")
-    .eq("queue_id", queueId)
-    .order("queue_number", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const nextNumber = (last?.queue_number ?? 0) + 1;
-
-  const { data, error } = await supabase
-    .from("queue_entries")
-    .insert({
-      queue_id: queueId,
-      patient_id: user.id,
-      queue_number: nextNumber,
-      type: "WALK_IN",
-      priority,
-      status: "WAITING",
-      joined_at: new Date().toISOString(),
-    })
-    .select("id, queue_number")
-    .single();
-
-  if (error) return { error: error.message };
-  return { entryId: data.id, queueNumber: data.queue_number };
+  const row = Array.isArray(data) ? data[0] : data;
+  return { entryId: row.id, queueNumber: row.queue_number };
 }
 
 export async function getQueueEntryStatus(entryId: string): Promise<QueueEntryStatus | null> {

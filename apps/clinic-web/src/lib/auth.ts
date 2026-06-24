@@ -1,5 +1,6 @@
 import { createServerClient } from "./supabase/server";
-import type { UserRole, AuthUser } from "@careflow/shared";
+import type { AuthUser, UserRole } from "@careflow/shared";
+import { STAFF_ROLE_MAP } from "@careflow/shared";
 
 export async function getServerUser(): Promise<AuthUser | null> {
   const supabase = await createServerClient();
@@ -10,14 +11,21 @@ export async function getServerUser(): Promise<AuthUser | null> {
     .from("clinic_staff")
     .select("role, clinic_id")
     .eq("user_id", user.id)
-    .single();
+    .eq("is_active", true)
+    .maybeSingle();
+
+  // Fail closed: no active staff row means no staff access, not a default role.
+  if (!staffData) return null;
+
+  const role = STAFF_ROLE_MAP[staffData.role];
+  if (!role) return null;
 
   return {
     id: user.id,
     email: user.email ?? null,
     phone: user.phone ?? null,
-    role: (staffData?.role?.toLowerCase() as UserRole) ?? "receptionist",
-    clinicId: staffData?.clinic_id ?? null,
+    role,
+    clinicId: staffData.clinic_id,
     fullName: user.user_metadata?.full_name ?? user.email ?? "Staff",
   };
 }

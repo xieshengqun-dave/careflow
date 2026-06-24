@@ -99,10 +99,6 @@ export async function getMyAppointments(): Promise<MyAppointment[]> {
 }
 
 export async function cancelAppointment(appointmentId: string): Promise<{ error?: string }> {
-  const { error } = await supabase
-    .from("appointments")
-    .update({ status: "CANCELLED" })
-    .eq("id", appointmentId);
-
+  const { error } = await supabase.rpc("cancel_appointment", { p_appointment_id: appointmentId });
   return error ? { error: error.message } : {};
 }
