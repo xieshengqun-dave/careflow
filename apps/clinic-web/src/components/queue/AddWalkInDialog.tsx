@@ -5,25 +5,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { addWalkIn } from "@/lib/actions/queue";
 
 interface Props {
-  queueId: string;
+  queueId?: string;
+  doctorOptions?: { queueId: string; doctorName: string }[];
+  trigger?: React.ReactNode;
 }
 
-export function AddWalkInDialog({ queueId }: Props) {
+export function AddWalkInDialog({ queueId, doctorOptions, trigger }: Props) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [priority, setPriority] = useState<1 | 2 | 3>(3);
+  const [selectedQueueId, setSelectedQueueId] = useState(queueId ?? doctorOptions?.[0]?.queueId ?? "");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      const result = await addWalkIn({ queueId, patientName: name, phoneNumber: phone, priority });
+      const result = await addWalkIn({ queueId: selectedQueueId, patientName: name, phoneNumber: phone, priority });
       if (result.error) {
         setError(result.error);
       } else {
@@ -38,13 +42,26 @@ export function AddWalkInDialog({ queueId }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">+ Walk-in</Button>
+        {trigger ?? <Button variant="outline" size="sm">+ Walk-in</Button>}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[360px]">
         <DialogHeader>
           <DialogTitle>Add Walk-in Patient</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          {doctorOptions && doctorOptions.length > 0 && (
+            <div className="space-y-1.5">
+              <Label>Doctor</Label>
+              <Select value={selectedQueueId} onValueChange={setSelectedQueueId}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {doctorOptions.map((d) => (
+                    <SelectItem key={d.queueId} value={d.queueId}>{d.doctorName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="space-y-1.5">
             <Label htmlFor="name">Patient Name</Label>
             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" required />
@@ -77,7 +94,7 @@ export function AddWalkInDialog({ queueId }: Props) {
           {error && <p className="text-xs text-red-600">{error}</p>}
           <div className="flex justify-end gap-2 pt-1">
             <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" size="sm" disabled={isPending}>
+            <Button type="submit" size="sm" disabled={isPending || !selectedQueueId}>
               {isPending ? "Adding…" : "Add to Queue"}
             </Button>
           </div>

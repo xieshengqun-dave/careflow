@@ -13,7 +13,7 @@ const statusStyles: Record<SlotStatus | "SELECTED", string> = {
   BOOKED:    "bg-red-50 border-red-300 text-red-700 cursor-not-allowed opacity-80",
   BREAK:     "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed",
   BLOCKED:   "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed",
-  SELECTED:  "bg-blue-100 border-blue-400 text-blue-800 ring-2 ring-blue-400 cursor-pointer",
+  SELECTED:  "bg-cf-primary-50 border-cf-primary-600 text-cf-primary-800 ring-2 ring-cf-primary-600 cursor-pointer",
 };
 
 const statusLabel: Record<SlotStatus, string> = {

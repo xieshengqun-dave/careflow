@@ -14,6 +14,119 @@ export interface QueueEntryData {
   calledAt: string | null;
 }
 
+/** A single row in the combined, cross-doctor "Current Queue" table. */
+export interface CombinedQueueEntry {
+  id: string;
+  queueId: string;
+  queueNumber: number;
+  type: QueueEntryType;
+  priority: number;
+  status: QueueEntryStatus;
+  joinedAt: string;
+  calledAt: string | null;
+  patientName: string;
+  patientPhone: string | null;
+  doctorId: string;
+  doctorName: string;
+  specialization: string | null;
+}
+
+export interface CombinedQueueSummary {
+  entries: CombinedQueueEntry[];
+  totalInQueue: number;
+  avgWaitMinutes: number | null;
+  nextQueueNumber: number | null;
+  queuesOpen: number;
+}
+
+export async function getCombinedQueue(clinicId: string): Promise<CombinedQueueSummary> {
+  const supabase = await createServerClient();
+  const today = getMYTToday();
+
+  const { data: queuesData } = await supabase
+    .from("queues")
+    .select(`
+      id,
+      doctor_id,
+      doctors (
+        specialization,
+        clinic_staff ( full_name )
+      ),
+      queue_entries (
+        id,
+        queue_number,
+        type,
+        priority,
+        status,
+        joined_at,
+        called_at,
+        profiles ( full_name, phone_number )
+      )
+    `)
+    .eq("clinic_id", clinicId)
+    .eq("queue_date", today)
+    .eq("is_active", true);
+
+  const entries: CombinedQueueEntry[] = [];
+
+  for (const queue of queuesData ?? []) {
+    const doc = queue.doctors as unknown as {
+      specialization: string | null;
+      clinic_staff: { full_name: string } | Array<{ full_name: string }> | null;
+    } | null;
+    const staff = Array.isArray(doc?.clinic_staff) ? doc?.clinic_staff[0] : doc?.clinic_staff;
+    const rawEntries = (queue.queue_entries as unknown as Array<Record<string, unknown>>) ?? [];
+
+    for (const e of rawEntries) {
+      const status = e.status as QueueEntryStatus;
+      if (!["WAITING", "CALLED", "IN_CONSULTATION"].includes(status)) continue;
+      const profile = e.profiles as unknown as { full_name: string | null; phone_number: string | null } | null;
+
+      entries.push({
+        id: e.id as string,
+        queueId: queue.id as string,
+        queueNumber: e.queue_number as number,
+        type: e.type as QueueEntryType,
+        priority: e.priority as number,
+        status,
+        joinedAt: e.joined_at as string,
+        calledAt: (e.called_at as string | null) ?? null,
+        patientName: profile?.full_name ?? "Patient",
+        patientPhone: profile?.phone_number ?? null,
+        doctorId: queue.doctor_id as string,
+        doctorName: staff?.full_name ?? "Doctor",
+        specialization: doc?.specialization ?? null,
+      });
+    }
+  }
+
+  entries.sort((a, b) => a.priority - b.priority || a.queueNumber - b.queueNumber);
+
+  // Average wait time today across all entries that have actually been called (real data only)
+  const { data: calledToday } = await supabase
+    .from("queue_entries")
+    .select("joined_at, called_at, queues!inner(clinic_id, queue_date)")
+    .eq("queues.clinic_id", clinicId)
+    .eq("queues.queue_date", today)
+    .not("called_at", "is", null);
+
+  const waits = (calledToday ?? [])
+    .map((r: { joined_at: string; called_at: string | null }) =>
+      r.called_at ? (new Date(r.called_at).getTime() - new Date(r.joined_at).getTime()) / 60000 : null)
+    .filter((w): w is number => w !== null);
+  const avgWaitMinutes = waits.length > 0 ? Math.round(waits.reduce((a, b) => a + b, 0) / waits.length) : null;
+
+  const nextWaiting = entries.find((e) => e.status === "WAITING");
+
+  return {
+    entries,
+    totalInQueue: entries.length,
+    avgWaitMinutes,
+    nextQueueNumber: nextWaiting?.queueNumber ?? null,
+    queuesOpen: (queuesData ?? []).length,
+  };
+}
+
 export interface DoctorQueueData {
   queueId: string;
   doctorId: string;

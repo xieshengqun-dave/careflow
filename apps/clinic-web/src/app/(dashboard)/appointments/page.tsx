@@ -1,10 +1,13 @@
 import { redirect } from "next/navigation";
-import { getMYTToday } from "@careflow/shared";
+import Link from "next/link";
+import { Plus } from "lucide-react";
+import { getMYTToday, formatMYTDate } from "@careflow/shared";
 import { requireRole } from "@/lib/auth";
 import { getDoctorSlotsForDate } from "@/lib/queries/slots";
 import { getClinicAppointments } from "@/lib/queries/appointments";
 import { ScheduleBoard } from "@/components/scheduling/ScheduleBoard";
 import { AppointmentList } from "@/components/scheduling/AppointmentList";
+import { Button } from "@/components/ui/button";
 
 export default async function AppointmentsPage({
   searchParams,
@@ -17,6 +20,7 @@ export default async function AppointmentsPage({
   const { date, view } = await searchParams;
   const selectedDate = date ?? getMYTToday();
   const activeView = view === "list" ? "list" : "slots";
+  const dateLabel = formatMYTDate(selectedDate, "EEEE, d MMMM yyyy");
 
   const [doctors, appointments] = await Promise.all([
     getDoctorSlotsForDate(user.clinicId ?? "", selectedDate),
@@ -25,11 +29,11 @@ export default async function AppointmentsPage({
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">Appointments</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {selectedDate} · {appointments.length} appointment{appointments.length !== 1 ? "s" : ""}
+            {dateLabel} · {appointments.length} appointment{appointments.length !== 1 ? "s" : ""}
           </p>
         </div>
         <div className="flex gap-2">
@@ -37,7 +41,7 @@ export default async function AppointmentsPage({
             href={`/appointments?date=${selectedDate}&view=slots`}
             className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${
               activeView === "slots"
-                ? "bg-sky-600 text-white border-sky-600"
+                ? "bg-cf-primary-700 text-white border-cf-primary-700"
                 : "text-slate-600 border-slate-200 hover:bg-slate-50"
             }`}
           >
@@ -47,12 +51,18 @@ export default async function AppointmentsPage({
             href={`/appointments?date=${selectedDate}&view=list`}
             className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${
               activeView === "list"
-                ? "bg-sky-600 text-white border-sky-600"
+                ? "bg-cf-primary-700 text-white border-cf-primary-700"
                 : "text-slate-600 border-slate-200 hover:bg-slate-50"
             }`}
           >
             List View
           </a>
+          <Button size="sm" asChild>
+            <Link href="/appointments?view=slots">
+              <Plus className="h-4 w-4 mr-1.5" />
+              New Appointment
+            </Link>
+          </Button>
         </div>
       </div>
 

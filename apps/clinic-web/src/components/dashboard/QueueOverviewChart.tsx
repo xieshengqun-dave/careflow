@@ -4,11 +4,11 @@ import { PieChart, Pie, Cell } from "recharts";
 import type { QueueStatusBreakdown } from "@/lib/queries/dashboard";
 
 const SEGMENTS: Array<{ key: keyof QueueStatusBreakdown; label: string; color: string }> = [
-  { key: "waiting", label: "Waiting", color: "#f59e0b" },
-  { key: "called", label: "Called", color: "#3b82f6" },
-  { key: "inConsultation", label: "With Doctor", color: "#10b981" },
-  { key: "completed", label: "Completed", color: "#94a3b8" },
-  { key: "cancelled", label: "Cancelled", color: "#ef4444" },
+  { key: "waiting", label: "Waiting", color: "#F59E0B" },
+  { key: "called", label: "Called", color: "#2563EB" },
+  { key: "inConsultation", label: "With Doctor", color: "#16A34A" },
+  { key: "completed", label: "Completed", color: "#94A3B8" },
+  { key: "cancelled", label: "Cancelled", color: "#EF4444" },
 ];
 
 export function QueueOverviewChart({ breakdown }: { breakdown: QueueStatusBreakdown }) {

@@ -32,7 +32,7 @@ export default async function SchedulesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Schedules</h1>
+        <h1 className="text-2xl font-semibold">Schedule</h1>
         <p className="text-muted-foreground text-sm mt-0.5">Weekly availability per doctor</p>
       </div>
 

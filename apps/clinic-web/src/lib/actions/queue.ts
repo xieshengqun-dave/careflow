@@ -117,6 +117,20 @@ export async function skipEntry(entryId: string) {
   return { success: true };
 }
 
+export async function moveToTop(entryId: string) {
+  const { user, supabase } = await getAuthedSupabase();
+  if (!user || !supabase) return { error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("queue_entries")
+    .update({ priority: 1 })
+    .eq("id", entryId);
+
+  if (error) return { error: error.message };
+  revalidatePath("/queue");
+  return { success: true };
+}
+
 export async function removeEntry(entryId: string) {
   const { user, supabase } = await getAuthedSupabase();
   if (!user || !supabase) return { error: "Unauthorized" };

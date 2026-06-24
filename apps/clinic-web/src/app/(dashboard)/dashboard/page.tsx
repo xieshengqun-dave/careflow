@@ -25,9 +25,13 @@ export default async function DashboardPage() {
   if (!user) redirect("/login");
 
   const todayDate = getMYTToday();
-  const todayLabel = new Date().toLocaleDateString("en-MY", {
+  const now = new Date();
+  const todayLabel = now.toLocaleDateString("en-MY", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
     timeZone: "Asia/Kuala_Lumpur",
+  });
+  const timeLabel = now.toLocaleTimeString("en-MY", {
+    hour: "numeric", minute: "2-digit", timeZone: "Asia/Kuala_Lumpur",
   });
 
   const hour = new Date().getHours();
@@ -60,7 +64,15 @@ export default async function DashboardPage() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-semibold">{greeting}, {firstName}</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">{todayLabel}</p>
+          <div className="flex items-center gap-2 text-muted-foreground text-sm mt-0.5">
+            <span>{todayLabel}</span>
+            <span className="text-slate-300">·</span>
+            <span>{timeLabel}</span>
+            <span className="flex items-center gap-1 text-cf-green-600 font-medium">
+              <span className="h-1.5 w-1.5 rounded-full bg-cf-green-500" />
+              Live
+            </span>
+          </div>
         </div>
         <div className="flex gap-2">
           <ExportReportButton appointments={todaysAppointments} date={todayDate} />
@@ -79,24 +91,28 @@ export default async function DashboardPage() {
           value={metrics.todayAppointments}
           description="Booked appointments today"
           icon={<Calendar className="h-5 w-5" />}
+          tint="primary"
         />
         <MetricCard
           title="In Queue"
           value={metrics.inQueueCount}
           description="Waiting, called, or with doctor"
           icon={<Users className="h-5 w-5" />}
+          tint="green"
         />
         <MetricCard
           title="Patients Today"
           value={metrics.patientsToday}
           description="Unique patients seen or scheduled"
           icon={<ClipboardCheck className="h-5 w-5" />}
+          tint="purple"
         />
         <MetricCard
           title="Completed Today"
           value={metrics.completedToday}
           description="Consultations finished today"
           icon={<ListChecks className="h-5 w-5" />}
+          tint="amber"
         />
       </div>
 

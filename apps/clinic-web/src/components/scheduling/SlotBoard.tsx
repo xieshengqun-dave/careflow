@@ -125,8 +125,8 @@ export function SlotBoard({ doctors, date }: SlotBoardProps) {
 
       {/* Booking panel */}
       {selected && (
-        <div className="rounded-lg border bg-blue-50 border-blue-200 px-4 py-3 flex items-center justify-between gap-4">
-          <p className="text-sm text-blue-800">
+        <div className="rounded-lg border bg-cf-primary-50 border-cf-primary-200 px-4 py-3 flex items-center justify-between gap-4">
+          <p className="text-sm text-cf-primary-800">
             <span className="font-semibold">{selected.doctorName}</span>
             {" — "}
             {formatTime(selected.slot.start)}–{formatTime(selected.slot.end)}

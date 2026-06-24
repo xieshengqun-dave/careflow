@@ -4,11 +4,11 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from "recharts";
 import type { ClinicAppointment } from "@/lib/queries/appointments";
 
 const STATUS_COLOR: Record<string, string> = {
-  Pending: "#f59e0b",
-  Confirmed: "#10b981",
-  "Checked In": "#3b82f6",
-  Completed: "#94a3b8",
-  "No Show": "#f97316",
+  Pending: "#F59E0B",
+  Confirmed: "#16A34A",
+  "Checked In": "#2563EB",
+  Completed: "#94A3B8",
+  "No Show": "#B45309",
 };
 
 const STATUS_LABEL: Record<ClinicAppointment["status"], string> = {
@@ -41,7 +41,7 @@ export function TodaysOverviewChart({ appointments }: { appointments: ClinicAppo
       <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} width={80} />
       <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={18}>
         {data.map((d) => (
-          <Cell key={d.name} fill={STATUS_COLOR[d.name] ?? "#3b82f6"} />
+          <Cell key={d.name} fill={STATUS_COLOR[d.name] ?? "#2563EB"} />
         ))}
       </Bar>
     </BarChart>
