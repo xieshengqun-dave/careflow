@@ -12,8 +12,11 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
+import { Card } from "@/components/ui/Card";
 import { supabase } from "@/lib/supabase";
 import { getQueueEntryStatus, leaveQueue, type QueueEntryStatus } from "@/lib/api/queues";
+import { palette, radius, spacing } from "@/theme/careflow-tokens";
+import { fontFamily, textStyle } from "@/theme/typography";
 
 // ─── types ───────────────────────────────────────────────────────────────────
 
@@ -26,11 +29,11 @@ interface LiveUpdate {
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-const AVATAR_COLORS = ["#1A6FD8", "#0D9488", "#7C3AED", "#DB2777", "#EA580C", "#65A30D"];
+const AVATAR_COLORS = [palette.primary600, palette.green600, palette.purple600, "#DB2777", "#EA580C", "#65A30D"];
 function avatarColor(name: string) {
   let h = 0;
   for (const c of name) h = (h * 31 + c.charCodeAt(0)) | 0;
-  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length] ?? "#1A6FD8";
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length] ?? palette.primary600;
 }
 function getInitials(name: string) {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -49,24 +52,16 @@ function formatTimeShort(isoOrHHMM: string) {
   return isoOrHHMM.slice(0, 5);
 }
 
+/** Builds the live updates feed purely from this entry's own real timestamps — no fabricated data. */
 function buildLiveUpdates(entry: QueueEntryStatus): LiveUpdate[] {
   const updates: LiveUpdate[] = [
     {
       id: "join",
       time: formatTimeShort(entry.joinedAt),
-      message: "Queue joined",
+      message: "You joined the queue",
       type: "join",
     },
   ];
-
-  if (entry.position < 10) {
-    updates.push({
-      id: "pos",
-      time: formatTimeShort(new Date(Date.now() - 5 * 60 * 1000).toISOString()),
-      message: `${entry.position + 5} people ahead`,
-      type: "progress",
-    });
-  }
 
   if (entry.status === "CALLED" || entry.status === "IN_CONSULTATION") {
     updates.push({
@@ -212,10 +207,10 @@ function liveUpdateIcon(type: LiveUpdate["type"]) {
 
 function liveUpdateColor(type: LiveUpdate["type"]) {
   switch (type) {
-    case "join": return "#1A6FD8";
-    case "progress": return "#64748B";
-    case "doctor": return "#16A34A";
-    default: return "#94A3B8";
+    case "join": return palette.primary600;
+    case "progress": return palette.slate500;
+    case "doctor": return palette.green600;
+    default: return palette.slate400;
   }
 }
 
@@ -295,7 +290,7 @@ export default function QueueTrackingScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1A6FD8" />
+        <ActivityIndicator size="large" color={palette.primary600} />
       </View>
     );
   }
@@ -326,11 +321,11 @@ export default function QueueTrackingScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()}>
-          <Icon name="arrow-back-outline" size={20} color="#1E293B" />
+          <Icon name="chevron-back" size={20} color={palette.slate900} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Queue Tracking</Text>
         <TouchableOpacity style={styles.refreshBtn} onPress={() => void load()}>
-          <Icon name="refresh-outline" size={16} color="#1A6FD8" />
+          <Icon name="refresh-outline" size={16} color={palette.primary600} />
           <Text style={styles.refreshText}>Refresh</Text>
         </TouchableOpacity>
       </View>
@@ -338,10 +333,10 @@ export default function QueueTrackingScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
 
         {/* Status banner */}
-        <View style={styles.statusBanner}>
+        <Card style={styles.statusBanner}>
           <View style={styles.statusBannerLeft}>
             <View style={styles.bellIconBox}>
-              <Icon name="notifications-outline" size={20} color="#1A6FD8" />
+              <Icon name="notifications-outline" size={20} color={palette.primary600} />
             </View>
             <View>
               <Text style={styles.statusBannerTitle}>You're in the queue!</Text>
@@ -350,14 +345,10 @@ export default function QueueTrackingScreen() {
               </Text>
             </View>
           </View>
-          {/* Decorative illustration placeholder */}
-          <View style={styles.bannerIllustration}>
-            <Icon name="people" size={32} color="#DBEAFE" />
-          </View>
-        </View>
+        </Card>
 
         {/* Doctor info card */}
-        <View style={styles.doctorCard}>
+        <Card style={styles.doctorCard}>
           <View style={styles.doctorCardLeft}>
             <View style={[styles.doctorAvatar, { backgroundColor: color }]}>
               <Text style={styles.doctorAvatarText}>{getInitials(entry.doctorName)}</Text>
@@ -365,29 +356,26 @@ export default function QueueTrackingScreen() {
             <View style={styles.doctorInfo}>
               <View style={styles.doctorNameRow}>
                 <Text style={styles.doctorName}>{entry.doctorName}</Text>
-                <Icon name="checkmark-circle" size={14} color="#1A6FD8" />
+                <Icon name="checkmark-circle" size={14} color={palette.primary600} />
               </View>
-              <Text style={styles.doctorSpec}>Family Medicine Specialist</Text>
               <View style={styles.clinicRow}>
-                <Icon name="location-outline" size={12} color="#64748B" />
+                <Icon name="location-outline" size={12} color={palette.slate500} />
                 <Text style={styles.clinicName}>{entry.clinicName}</Text>
               </View>
             </View>
           </View>
           <View style={styles.feeBox}>
             <Text style={styles.feeLabel}>Consultation Fee</Text>
-            <Text style={styles.feeAmount}>RM 50</Text>
-            <Text style={styles.feePerVisit}>Per Visit</Text>
+            <Text style={styles.feeAmount}>—</Text>
           </View>
-        </View>
+        </Card>
 
         {/* Large queue number + stats */}
-        <View style={styles.statsCard}>
+        <Card style={styles.statsCard}>
           <View style={styles.statsRow}>
             <View style={styles.statCol}>
               <Text style={styles.statColLabel}>Your Queue Number</Text>
               <Text style={styles.queueNumber}>{queueLabel}</Text>
-              <Text style={styles.statColSub}>{entry.position * 2 + 3} of patients</Text>
             </View>
             <View style={styles.statColDivider} />
             <View style={styles.statCol}>
@@ -408,16 +396,16 @@ export default function QueueTrackingScreen() {
             <View style={styles.statCol}>
               <Text style={styles.statColLabel}>People Ahead of You</Text>
               <View style={styles.peopleAheadRow}>
-                <Icon name="people-outline" size={16} color="#1A6FD8" />
+                <Icon name="people-outline" size={16} color={palette.primary600} />
                 <Text style={styles.statColBig}>{entry.position}</Text>
               </View>
               <Text style={styles.statColSub}>Last updated: {lastUpdated}</Text>
             </View>
           </View>
-        </View>
+        </Card>
 
         {/* Progress tracker */}
-        <View style={styles.progressCard}>
+        <Card style={styles.progressCard}>
           <View style={styles.progressTracker}>
             {PROGRESS_STEPS.map((step, i) => {
               let state: "done" | "current" | "future";
@@ -435,22 +423,14 @@ export default function QueueTrackingScreen() {
               );
             })}
           </View>
-
-          {/* Step counts */}
-          <View style={styles.progressStepNums}>
-            <Text style={styles.progressStepNum}>2:20</Text>
-            <Text style={styles.progressStepNum}>2:20</Text>
-            <Text style={styles.progressStepNum}>2:22</Text>
-            <Text style={styles.progressStepNum}>4</Text>
-          </View>
-        </View>
+        </Card>
 
         {/* Live Queue Updates */}
         <View style={styles.liveSection}>
           <Text style={styles.liveSectionTitle}>Live Queue Updates</Text>
-          <View style={styles.liveList}>
-            {liveUpdates.map((update) => (
-              <View key={update.id} style={styles.liveItem}>
+          <Card style={styles.liveList} padded={false}>
+            {liveUpdates.map((update, i) => (
+              <View key={update.id} style={[styles.liveItem, i === liveUpdates.length - 1 && styles.liveItemLast]}>
                 <View style={[styles.liveIconBox, { backgroundColor: liveUpdateColor(update.type) + "15" }]}>
                   <Icon name={liveUpdateIcon(update.type)} size={16} color={liveUpdateColor(update.type)} />
                 </View>
@@ -460,32 +440,13 @@ export default function QueueTrackingScreen() {
                 <Text style={styles.liveTime}>{update.time}</Text>
               </View>
             ))}
-
-            {/* Simulated additional updates from mockup */}
-            {[
-              { label: "Patient #1 has been called in", time: "9:36 AM", color: "#1A6FD8", icon: "megaphone-outline" },
-              { label: "Patient #2 has been called in", time: "9:39 AM", color: "#1A6FD8", icon: "megaphone-outline" },
-              { label: "Patient #3 has been called in", time: "9:41 AM", color: "#1A6FD8", icon: "megaphone-outline" },
-              { label: "Patient #4 is now with the doctor", time: "9:42 AM", color: "#16A34A", icon: "medkit-outline" },
-              { label: "Patient #5 is now with the doctor", time: "9:45 AM", color: "#16A34A", icon: "medkit-outline" },
-            ].map((item, i) => (
-              <View key={i} style={styles.liveItem}>
-                <View style={[styles.liveIconBox, { backgroundColor: item.color + "15" }]}>
-                  <Icon name={item.icon} size={16} color={item.color} />
-                </View>
-                <View style={styles.liveContent}>
-                  <Text style={styles.liveMessage}>{item.label}</Text>
-                </View>
-                <Text style={styles.liveTime}>{item.time}</Text>
-              </View>
-            ))}
-          </View>
+          </Card>
         </View>
 
         {/* Please Note */}
         <View style={styles.noteCard}>
           <View style={styles.noteHeader}>
-            <Icon name="information-circle-outline" size={16} color="#EA580C" />
+            <Icon name="information-circle-outline" size={16} color={palette.amber700} />
             <Text style={styles.noteTitle}>Please Note</Text>
           </View>
           <View style={styles.noteList}>
@@ -510,11 +471,8 @@ export default function QueueTrackingScreen() {
       {/* Bottom bar */}
       <View style={styles.bottomBar}>
         <View style={styles.bottomBarInfo}>
-          <Icon name="time-outline" size={14} color="#64748B" />
+          <Icon name="time-outline" size={14} color={palette.slate500} />
           <Text style={styles.bottomBarInfoText}>
-            Queue closes at 9:00 PM Today
-          </Text>
-          <Text style={styles.bottomBarNotify}>
             You will be notified when it's your turn
           </Text>
         </View>
@@ -526,7 +484,7 @@ export default function QueueTrackingScreen() {
             activeOpacity={0.8}
           >
             {leaving ? (
-              <ActivityIndicator size="small" color="#EF4444" />
+              <ActivityIndicator size="small" color={palette.red500} />
             ) : (
               <Text style={styles.leaveBtnText}>Leave Queue</Text>
             )}
@@ -549,11 +507,11 @@ export default function QueueTrackingScreen() {
 // ─── styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F7FA" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
-  errorText: { fontSize: 15, color: "#64748B" },
-  backLink: { paddingVertical: 8 },
-  backLinkText: { fontSize: 14, color: "#1A6FD8", fontWeight: "600" },
+  container: { flex: 1, backgroundColor: palette.appBg },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", gap: spacing.md },
+  errorText: { fontSize: 15, color: palette.slate500 },
+  backLink: { paddingVertical: spacing.sm },
+  backLinkText: { fontSize: 14, color: palette.primary600, fontFamily: fontFamily(600) },
   scroll: { paddingBottom: 20 },
   bottomSpacer: { height: 140 },
 
@@ -562,46 +520,40 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
     paddingTop: 52,
-    paddingBottom: 12,
-    backgroundColor: "#FFFFFF",
+    paddingBottom: spacing.md,
+    backgroundColor: palette.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: palette.border,
   },
   headerBtn: {
     width: 36,
     height: 36,
-    borderRadius: 10,
-    backgroundColor: "#F8FAFC",
+    borderRadius: radius.sm,
+    backgroundColor: palette.slate100,
     justifyContent: "center",
     alignItems: "center",
   },
-  headerTitle: { fontSize: 16, fontWeight: "700", color: "#1E293B" },
+  headerTitle: { ...textStyle("h3"), color: palette.slate900 },
   refreshBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    backgroundColor: "#EFF6FF",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+    gap: spacing.xs,
+    backgroundColor: palette.primary50,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.sm,
   },
-  refreshText: { fontSize: 12, color: "#1A6FD8", fontWeight: "600" },
+  refreshText: { fontSize: 12, color: palette.primary600, fontFamily: fontFamily(600) },
 
   // Status banner
   statusBanner: {
-    backgroundColor: "#EFF6FF",
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    overflow: "hidden",
+    backgroundColor: palette.primary50,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
   },
-  statusBannerLeft: { flex: 1, flexDirection: "row", gap: 12, alignItems: "flex-start" },
+  statusBannerLeft: { flex: 1, flexDirection: "row", gap: spacing.md, alignItems: "flex-start" },
   bellIconBox: {
     width: 40,
     height: 40,
@@ -611,35 +563,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexShrink: 0,
   },
-  statusBannerTitle: { fontSize: 14, fontWeight: "700", color: "#1E293B", marginBottom: 3 },
-  statusBannerSub: { fontSize: 12, color: "#64748B", lineHeight: 17, flex: 1 },
-  bannerIllustration: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#BFDBFE",
-    justifyContent: "center",
-    alignItems: "center",
-    flexShrink: 0,
-    marginLeft: 8,
-  },
+  statusBannerTitle: { fontSize: 14, fontFamily: fontFamily(700), color: palette.slate900, marginBottom: 3 },
+  statusBannerSub: { fontSize: 12, color: palette.slate500, lineHeight: 17, flex: 1 },
 
   // Doctor card
   doctorCard: {
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 16,
-    marginTop: 12,
-    borderRadius: 16,
-    padding: 14,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
     flexDirection: "row",
     alignItems: "flex-start",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
   },
-  doctorCardLeft: { flex: 1, flexDirection: "row", gap: 10 },
+  doctorCardLeft: { flex: 1, flexDirection: "row", gap: spacing.sm },
   doctorAvatar: {
     width: 52,
     height: 52,
@@ -648,58 +582,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexShrink: 0,
   },
-  doctorAvatarText: { fontSize: 18, fontWeight: "800", color: "#FFFFFF" },
+  doctorAvatarText: { fontSize: 18, fontFamily: fontFamily(800), color: "#FFFFFF" },
   doctorInfo: { flex: 1, gap: 3 },
-  doctorNameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  doctorName: { fontSize: 14, fontWeight: "700", color: "#1E293B" },
-  doctorSpec: { fontSize: 11, color: "#64748B" },
+  doctorNameRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+  doctorName: { fontSize: 14, fontFamily: fontFamily(700), color: palette.slate900 },
   clinicRow: { flexDirection: "row", alignItems: "center", gap: 3 },
-  clinicName: { fontSize: 11, color: "#64748B", flex: 1 },
+  clinicName: { fontSize: 11, color: palette.slate500, flex: 1 },
   feeBox: { alignItems: "flex-end", gap: 2, flexShrink: 0 },
-  feeLabel: { fontSize: 10, color: "#94A3B8" },
-  feeAmount: { fontSize: 15, fontWeight: "800", color: "#1A6FD8" },
-  feePerVisit: { fontSize: 10, color: "#94A3B8" },
+  feeLabel: { fontSize: 10, color: palette.slate400 },
+  feeAmount: { fontSize: 15, fontFamily: fontFamily(800), color: palette.primary600 },
 
   // Stats card
   statsCard: {
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 16,
-    marginTop: 12,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
   },
   statsRow: { flexDirection: "row", alignItems: "flex-start" },
-  statCol: { flex: 1, alignItems: "center", gap: 4 },
-  statColDivider: { width: 1, backgroundColor: "#E2E8F0", alignSelf: "stretch", marginHorizontal: 4 },
+  statCol: { flex: 1, alignItems: "center", gap: spacing.xs },
+  statColDivider: { width: 1, backgroundColor: palette.slate200, alignSelf: "stretch", marginHorizontal: spacing.xs },
   statColLabel: {
     fontSize: 10,
-    color: "#94A3B8",
-    fontWeight: "600",
+    color: palette.slate400,
+    fontFamily: fontFamily(600),
     textAlign: "center",
     lineHeight: 14,
   },
-  queueNumber: { fontSize: 36, fontWeight: "800", color: "#1A6FD8", lineHeight: 44 },
-  statColBig: { fontSize: 24, fontWeight: "800", color: "#1E293B" },
-  statColSub: { fontSize: 10, color: "#94A3B8", textAlign: "center", lineHeight: 14 },
-  peopleAheadRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  queueNumber: { fontSize: 36, fontFamily: fontFamily(800), color: palette.primary600, lineHeight: 44 },
+  statColBig: { fontSize: 24, fontFamily: fontFamily(800), color: palette.slate900 },
+  statColSub: { fontSize: 10, color: palette.slate400, textAlign: "center", lineHeight: 14 },
+  peopleAheadRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
 
   // Progress tracker
   progressCard: {
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 16,
-    marginTop: 12,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    padding: spacing.xl,
   },
   progressTracker: {
     flexDirection: "row",
@@ -719,14 +636,14 @@ const styles = StyleSheet.create({
     height: 28,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 6,
+    marginBottom: spacing.xs,
   },
   pulseRing: {
     position: "absolute",
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#1A6FD8",
+    backgroundColor: palette.primary600,
   },
   progressCircle: {
     width: 24,
@@ -735,108 +652,88 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  progressCircleDone: { backgroundColor: "#1A6FD8" },
-  progressCircleCurrent: { backgroundColor: "#1A6FD8" },
-  progressCircleFuture: { backgroundColor: "#E2E8F0" },
+  progressCircleDone: { backgroundColor: palette.primary600 },
+  progressCircleCurrent: { backgroundColor: palette.primary600 },
+  progressCircleFuture: { backgroundColor: palette.slate200 },
   progressDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#CBD5E1",
+    backgroundColor: palette.slate200,
   },
   progressDotCurrent: { backgroundColor: "#FFFFFF" },
   progressLabel: {
     fontSize: 10,
-    color: "#94A3B8",
+    color: palette.slate400,
     textAlign: "center",
     lineHeight: 13,
     paddingHorizontal: 2,
   },
-  progressLabelCurrent: { color: "#1A6FD8", fontWeight: "700" },
-  progressLabelFuture: { color: "#CBD5E1" },
+  progressLabelCurrent: { color: palette.primary600, fontFamily: fontFamily(700) },
+  progressLabelFuture: { color: palette.slate200 },
   progressLine: {
     flex: 0.5,
     height: 2,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: palette.slate200,
     marginTop: 11,
     alignSelf: "flex-start",
   },
-  progressLineDone: { backgroundColor: "#1A6FD8" },
-  progressStepNums: {
-    flexDirection: "row",
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
-  },
-  progressStepNum: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 10,
-    color: "#94A3B8",
-    fontWeight: "500",
-  },
+  progressLineDone: { backgroundColor: palette.primary600 },
 
   // Live updates
   liveSection: {
-    marginHorizontal: 16,
-    marginTop: 12,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
   },
   liveSectionTitle: {
     fontSize: 15,
-    fontWeight: "700",
-    color: "#1E293B",
-    marginBottom: 10,
+    fontFamily: fontFamily(700),
+    color: palette.slate900,
+    marginBottom: spacing.sm,
   },
   liveList: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    padding: spacing.xs,
   },
   liveItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    padding: 12,
+    gap: spacing.sm,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#F8FAFC",
+    borderBottomColor: palette.slate100,
   },
+  liveItemLast: { borderBottomWidth: 0 },
   liveIconBox: {
     width: 32,
     height: 32,
-    borderRadius: 8,
+    borderRadius: radius.sm,
     justifyContent: "center",
     alignItems: "center",
     flexShrink: 0,
   },
   liveContent: { flex: 1 },
-  liveMessage: { fontSize: 13, color: "#1E293B", fontWeight: "500" },
-  liveTime: { fontSize: 11, color: "#94A3B8", flexShrink: 0 },
+  liveMessage: { fontSize: 13, color: palette.slate900, fontFamily: fontFamily(500) },
+  liveTime: { fontSize: 11, color: palette.slate400, flexShrink: 0 },
 
   // Note card
   noteCard: {
-    backgroundColor: "#FFFBEB",
+    backgroundColor: palette.amber100,
     borderWidth: 1,
     borderColor: "#FDE68A",
-    marginHorizontal: 16,
-    marginTop: 12,
-    borderRadius: 12,
-    padding: 14,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    borderRadius: radius.md,
+    padding: spacing.md,
   },
-  noteHeader: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 },
-  noteTitle: { fontSize: 13, fontWeight: "700", color: "#92400E" },
-  noteList: { gap: 6 },
-  noteItem: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
+  noteHeader: { flexDirection: "row", alignItems: "center", gap: spacing.xs, marginBottom: spacing.sm },
+  noteTitle: { fontSize: 13, fontFamily: fontFamily(700), color: palette.amber700 },
+  noteList: { gap: spacing.xs },
+  noteItem: { flexDirection: "row", alignItems: "flex-start", gap: spacing.sm },
   noteBullet: {
     width: 5,
     height: 5,
     borderRadius: 3,
-    backgroundColor: "#D97706",
+    backgroundColor: palette.amber700,
     marginTop: 6,
     flexShrink: 0,
   },
@@ -848,38 +745,37 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingTop: 12,
+    backgroundColor: palette.surface,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
     paddingBottom: 32,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
-    gap: 10,
+    borderTopColor: palette.border,
+    gap: spacing.sm,
   },
   bottomBarInfo: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: spacing.xs,
     flexWrap: "wrap",
   },
-  bottomBarInfoText: { fontSize: 12, color: "#64748B" },
-  bottomBarNotify: { fontSize: 12, color: "#64748B" },
+  bottomBarInfoText: { fontSize: 12, color: palette.slate500 },
 
   leaveBtn: {
     borderWidth: 1.5,
     borderColor: "#FCA5A5",
     backgroundColor: "#FFF1F2",
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
   },
   leaveBtnDisabled: { opacity: 0.5 },
-  leaveBtnText: { fontSize: 15, fontWeight: "700", color: "#EF4444" },
+  leaveBtnText: { fontSize: 15, fontFamily: fontFamily(700), color: palette.red500 },
   doneBtn: {
-    backgroundColor: "#1A6FD8",
-    borderRadius: 12,
-    paddingVertical: 14,
+    backgroundColor: palette.primary700,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
     alignItems: "center",
   },
-  doneBtnText: { fontSize: 15, fontWeight: "700", color: "#FFFFFF" },
+  doneBtnText: { fontSize: 15, fontFamily: fontFamily(700), color: "#FFFFFF" },
 });

@@ -12,7 +12,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon, type IoniconName } from "@/components/Icon";
+import { Card } from "@/components/ui/Card";
 import { useAuthStore } from "@/store/authStore";
+import { palette, radius, spacing } from "@/theme/careflow-tokens";
+import { fontFamily, textStyle } from "@/theme/typography";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -48,7 +51,7 @@ function SettingsCard({ section }: { section: SettingsSection }) {
   return (
     <View style={styles.settingsCard}>
       <Text style={styles.settingsSectionTitle}>{section.title}</Text>
-      <View style={styles.settingsCardInner}>
+      <Card style={styles.settingsCardInner} padded={false}>
         {section.rows.map((row, idx) => (
           <TouchableOpacity
             key={row.label}
@@ -66,11 +69,11 @@ function SettingsCard({ section }: { section: SettingsSection }) {
             </View>
             <Text style={styles.settingsLabel}>{row.label}</Text>
             {row.rightElement ?? (
-              <Icon name="chevron-forward-outline" size={16} color="#CBD5E1" />
+              <Icon name="chevron-forward-outline" size={16} color={palette.slate200} />
             )}
           </TouchableOpacity>
         ))}
-      </View>
+      </Card>
     </View>
   );
 }
@@ -104,15 +107,15 @@ export default function ProfileScreen() {
       rows: [
         {
           icon: "person-outline",
-          iconColor: "#1A6FD8",
-          iconBg: "#EFF6FF",
+          iconColor: palette.primary600,
+          iconBg: palette.primary50,
           label: "Edit Profile",
           onPress: () => {},
         },
         {
           icon: "call-outline",
-          iconColor: "#0D9488",
-          iconBg: "#CCFBF1",
+          iconColor: palette.green600,
+          iconBg: palette.green50,
           label: "Change Phone Number",
           onPress: () => {},
         },
@@ -123,22 +126,22 @@ export default function ProfileScreen() {
       rows: [
         {
           icon: "notifications-outline",
-          iconColor: "#7C3AED",
-          iconBg: "#F3E8FF",
+          iconColor: palette.purple600,
+          iconBg: palette.purple50,
           label: "Notifications",
           rightElement: (
             <Switch
               value={notifEnabled}
               onValueChange={setNotifEnabled}
-              trackColor={{ false: "#E2E8F0", true: "#BFDBFE" }}
-              thumbColor={notifEnabled ? "#1A6FD8" : "#94A3B8"}
+              trackColor={{ false: palette.slate200, true: "#BFDBFE" }}
+              thumbColor={notifEnabled ? palette.primary600 : palette.slate400}
             />
           ),
         },
         {
           icon: "language-outline",
-          iconColor: "#D97706",
-          iconBg: "#FEF3C7",
+          iconColor: palette.amber700,
+          iconBg: palette.amber100,
           label: "Language",
           onPress: () => {},
         },
@@ -149,22 +152,22 @@ export default function ProfileScreen() {
       rows: [
         {
           icon: "help-circle-outline",
-          iconColor: "#059669",
-          iconBg: "#D1FAE5",
+          iconColor: palette.green700,
+          iconBg: palette.green50,
           label: "Help & FAQ",
           onPress: () => {},
         },
         {
           icon: "chatbubble-ellipses-outline",
-          iconColor: "#1A6FD8",
-          iconBg: "#EFF6FF",
+          iconColor: palette.primary600,
+          iconBg: palette.primary50,
           label: "Contact Support",
           onPress: () => {},
         },
         {
           icon: "star-outline",
-          iconColor: "#D97706",
-          iconBg: "#FEF3C7",
+          iconColor: palette.amber700,
+          iconBg: palette.amber100,
           label: "Rate App",
           onPress: () => {},
         },
@@ -175,22 +178,22 @@ export default function ProfileScreen() {
       rows: [
         {
           icon: "shield-checkmark-outline",
-          iconColor: "#64748B",
-          iconBg: "#F1F5F9",
+          iconColor: palette.slate500,
+          iconBg: palette.slate100,
           label: "Privacy Policy",
           onPress: () => {},
         },
         {
           icon: "document-text-outline",
-          iconColor: "#64748B",
-          iconBg: "#F1F5F9",
+          iconColor: palette.slate500,
+          iconBg: palette.slate100,
           label: "Terms of Service",
           onPress: () => {},
         },
         {
           icon: "information-circle-outline",
-          iconColor: "#64748B",
-          iconBg: "#F1F5F9",
+          iconColor: palette.slate500,
+          iconBg: palette.slate100,
           label: "App Version",
           rightElement: <Text style={styles.versionValue}>1.0.0</Text>,
         },
@@ -200,7 +203,7 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
+      <StatusBar barStyle="dark-content" backgroundColor={palette.appBg} />
 
       <SafeAreaView style={styles.headerBg} edges={["top"]}>
         <View style={styles.header}>
@@ -213,7 +216,7 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.scroll}
       >
         {/* Avatar + Info */}
-        <View style={styles.profileCard}>
+        <Card style={styles.profileCard}>
           <View style={styles.avatarRing}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{ini}</Text>
@@ -224,10 +227,10 @@ export default function ProfileScreen() {
             <Text style={styles.userPhone}>{user.phone}</Text>
           ) : null}
           <TouchableOpacity style={styles.editProfileBtn} activeOpacity={0.8}>
-            <Icon name="create-outline" size={14} color="#1A6FD8" />
+            <Icon name="create-outline" size={14} color={palette.primary600} />
             <Text style={styles.editProfileBtnText}>Edit Profile</Text>
           </TouchableOpacity>
-        </View>
+        </Card>
 
         {/* Settings sections */}
         {sections.map((section) => (
@@ -242,7 +245,7 @@ export default function ProfileScreen() {
           accessibilityLabel="Sign out"
           accessibilityRole="button"
         >
-          <Icon name="log-out-outline" size={18} color="#DC2626" />
+          <Icon name="log-out-outline" size={18} color={palette.red600} />
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
 
@@ -255,161 +258,110 @@ export default function ProfileScreen() {
 // ─── Styles ─────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F7FA" },
-  headerBg: { backgroundColor: "#FFFFFF" },
+  container: { flex: 1, backgroundColor: palette.appBg },
+  headerBg: { backgroundColor: palette.surface },
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 14,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
   },
-  headerTitle: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#1E293B",
-  },
+  headerTitle: { ...textStyle("h1"), color: palette.slate900 },
 
   scroll: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
     paddingBottom: 40,
   },
 
   // Profile card
   profileCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    paddingVertical: 28,
-    paddingHorizontal: 20,
+    borderRadius: radius.xl,
+    paddingVertical: spacing["2xl"],
+    paddingHorizontal: spacing.xl,
     alignItems: "center",
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 3,
+    marginBottom: spacing.xl,
   },
   avatarRing: {
     width: 92,
     height: 92,
     borderRadius: 46,
     borderWidth: 3,
-    borderColor: "#EFF6FF",
+    borderColor: palette.primary50,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 14,
+    marginBottom: spacing.md,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#1A6FD8",
+    backgroundColor: palette.primary600,
     justifyContent: "center",
     alignItems: "center",
   },
-  avatarText: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  userName: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1E293B",
-    marginBottom: 4,
-  },
-  userPhone: {
-    fontSize: 14,
-    color: "#64748B",
-    marginBottom: 14,
-  },
+  avatarText: { fontSize: 28, fontFamily: fontFamily(700), color: "#FFFFFF" },
+  userName: { fontSize: 20, fontFamily: fontFamily(700), color: palette.slate900, marginBottom: spacing.xs },
+  userPhone: { fontSize: 14, color: palette.slate500, marginBottom: spacing.md },
   editProfileBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: spacing.xs,
     borderWidth: 1.5,
-    borderColor: "#1A6FD8",
-    borderRadius: 10,
-    paddingHorizontal: 18,
-    paddingVertical: 8,
+    borderColor: palette.primary600,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
   },
-  editProfileBtnText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#1A6FD8",
-  },
+  editProfileBtnText: { fontSize: 13, fontFamily: fontFamily(600), color: palette.primary600 },
 
   // Settings card
-  settingsCard: {
-    marginBottom: 16,
-  },
+  settingsCard: { marginBottom: spacing.lg },
   settingsSectionTitle: {
     fontSize: 11,
-    fontWeight: "600",
-    color: "#94A3B8",
+    fontFamily: fontFamily(600),
+    color: palette.slate400,
     textTransform: "uppercase",
     letterSpacing: 0.6,
-    marginBottom: 8,
-    paddingHorizontal: 4,
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.xs,
   },
-  settingsCardInner: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 1,
-  },
+  settingsCardInner: { overflow: "hidden" },
   settingsRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 12,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    gap: spacing.md,
   },
   settingsRowBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: "#F8FAFC",
+    borderBottomColor: palette.slate100,
   },
   settingsIconWrap: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: radius.sm,
     justifyContent: "center",
     alignItems: "center",
     flexShrink: 0,
   },
-  settingsLabel: {
-    flex: 1,
-    fontSize: 15,
-    color: "#1E293B",
-    fontWeight: "500",
-  },
-  versionValue: {
-    fontSize: 13,
-    color: "#94A3B8",
-    fontWeight: "500",
-  },
+  settingsLabel: { flex: 1, fontSize: 15, color: palette.slate900, fontFamily: fontFamily(500) },
+  versionValue: { fontSize: 13, color: palette.slate400, fontFamily: fontFamily(500) },
 
   // Sign out
   signOutBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: spacing.sm,
     borderWidth: 1.5,
     borderColor: "#FECDD3",
     backgroundColor: "#FFF1F2",
-    borderRadius: 14,
-    paddingVertical: 15,
-    marginTop: 4,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.lg,
+    marginTop: spacing.xs,
   },
-  signOutText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#DC2626",
-  },
+  signOutText: { fontSize: 15, fontFamily: fontFamily(600), color: palette.red600 },
 
   footerSpacer: { height: 20 },
 });

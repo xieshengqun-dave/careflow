@@ -6,28 +6,51 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
+import { sendOTP } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { palette, radius, spacing } from "@/theme/careflow-tokens";
+import { fontFamily, textStyle } from "@/theme/typography";
+
+// Dev-only test account — see HANDOFF.md. Real phone OTP delivery is blocked
+// by an invalid Twilio config on the Supabase project (not fixable from the
+// app); this lets you log in and test the rest of the app in the meantime.
+const DEV_TEST_EMAIL = "test.patient@careflow.asia";
+const DEV_TEST_PASSWORD = "CareFlowTest2026";
 
 export default function LoginScreen() {
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const [devLoading, setDevLoading] = useState(false);
 
-  const handleSend = async () => {
-    if (loading) return;
-    setLoading(true);
+  const handleDevLogin = async () => {
+    if (devLoading) return;
+    setDevLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email: "dev@careflow.my",
-        password: "CareFlow2026",
+        email: DEV_TEST_EMAIL,
+        password: DEV_TEST_PASSWORD,
       });
-      if (error) {
-        Alert.alert(
-          "Login failed",
-          "Run the dev patient SQL in Supabase first.\n\n" + error.message
-        );
-      }
+      if (error) Alert.alert("Dev login failed", error.message);
       // Navigation handled automatically by useAuth → onAuthStateChange → loadUser
+    } finally {
+      setDevLoading(false);
+    }
+  };
+
+  const handleSend = async () => {
+    if (loading || phone.length < 9) return;
+    setLoading(true);
+    try {
+      const fullPhone = `+60${phone}`;
+      const { error } = await sendOTP(fullPhone);
+      if (error) {
+        Alert.alert("Could not send OTP", error.message);
+        return;
+      }
+      router.push({ pathname: "/(auth)/otp", params: { phone: fullPhone } });
     } catch {
       Alert.alert("Error", "Something went wrong. Please try again.");
     } finally {
@@ -42,7 +65,7 @@ export default function LoginScreen() {
           {/* Logo area */}
           <View style={styles.logoArea}>
             <Image
-              source={require("../../../assets/images/logo.png")}
+              source={require("../../../assets/images/careflow-mark.png")}
               style={styles.logoImage}
               resizeMode="contain"
               accessibilityLabel="CareFlow"
@@ -51,7 +74,7 @@ export default function LoginScreen() {
           </View>
 
           {/* Form card */}
-          <View style={styles.card}>
+          <Card style={styles.card}>
             <Text style={styles.heading}>Welcome Back</Text>
             <Text style={styles.subheading}>Login to continue to your account</Text>
 
@@ -60,12 +83,12 @@ export default function LoginScreen() {
               <View style={styles.prefix}>
                 <Text style={styles.flag}>🇲🇾</Text>
                 <Text style={styles.prefixCode}>+60</Text>
-                <Icon name="chevron-down-outline" size={14} color="#64748B" />
+                <Icon name="chevron-down-outline" size={14} color={palette.slate500} />
               </View>
               <TextInput
                 style={styles.phoneInput}
                 placeholder="12-345 6789"
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor={palette.slate400}
                 keyboardType="phone-pad"
                 value={phone}
                 onChangeText={(t) => setPhone(t.replace(/\D/g, "").slice(0, 11))}
@@ -75,19 +98,15 @@ export default function LoginScreen() {
                 accessibilityLabel="Phone number"
               />
             </View>
-            <Text style={styles.hint}>Enter your number to continue</Text>
+            <Text style={styles.hint}>We will send a 6-digit OTP to your mobile number</Text>
 
-            <TouchableOpacity
-              style={[styles.sendBtn, loading && styles.sendBtnDisabled]}
+            <Button
+              label={loading ? "Sending…" : "Send OTP"}
               onPress={handleSend}
-              disabled={loading}
-              activeOpacity={0.85}
-              accessibilityRole="button"
-              accessibilityLabel="Login"
-            >
-              <Text style={styles.sendBtnText}>{loading ? "Signing in…" : "Continue"}</Text>
-              {!loading && <Icon name="arrow-forward-outline" size={18} color="#ffffff" />}
-            </TouchableOpacity>
+              loading={loading}
+              icon="arrow-forward"
+              style={styles.sendBtn}
+            />
 
             <View style={styles.dividerRow}>
               <View style={styles.dividerLine} />
@@ -101,7 +120,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
-              <Icon name="logo-apple" size={18} color="#1E293B" />
+              <Icon name="logo-apple" size={18} color={palette.slate900} />
               <Text style={styles.socialBtnText}>Continue with Apple</Text>
             </TouchableOpacity>
 
@@ -111,19 +130,35 @@ export default function LoginScreen() {
               {" "}and{" "}
               <Text style={styles.termsLink}>Privacy Policy</Text>
             </Text>
-          </View>
+          </Card>
+
+          {__DEV__ && (
+            <TouchableOpacity
+              style={[styles.devBtn, devLoading && styles.devBtnDisabled]}
+              onPress={handleDevLogin}
+              disabled={devLoading}
+              activeOpacity={0.85}
+            >
+              <Icon name="bug-outline" size={16} color={palette.amber700} />
+              <Text style={styles.devBtnText}>
+                {devLoading ? "Signing in…" : "Dev: Skip Login (Test Patient)"}
+              </Text>
+            </TouchableOpacity>
+          )}
 
           {/* Help row */}
-          <TouchableOpacity style={styles.helpRow} activeOpacity={0.7}>
-            <View style={styles.helpIcon}>
-              <Icon name="headset-outline" size={18} color="#1A6FD8" />
-            </View>
-            <View style={styles.helpText}>
-              <Text style={styles.helpTitle}>Need help?</Text>
-              <Text style={styles.helpSub}>Contact our support team</Text>
-            </View>
-            <Icon name="chevron-forward-outline" size={16} color="#94A3B8" />
-          </TouchableOpacity>
+          <Card style={styles.helpRow} padded={false}>
+            <TouchableOpacity style={styles.helpRowInner} activeOpacity={0.7}>
+              <View style={styles.helpIcon}>
+                <Icon name="headset-outline" size={18} color={palette.primary600} />
+              </View>
+              <View style={styles.helpText}>
+                <Text style={styles.helpTitle}>Need help?</Text>
+                <Text style={styles.helpSub}>Contact our support team</Text>
+              </View>
+              <Icon name="chevron-forward-outline" size={16} color={palette.slate400} />
+            </TouchableOpacity>
+          </Card>
         </ScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>
@@ -131,74 +166,70 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#F5F7FA" },
-  scroll: { flexGrow: 1, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 32 },
+  root: { flex: 1, backgroundColor: palette.appBg },
+  scroll: { flexGrow: 1, paddingHorizontal: spacing.xl, paddingTop: spacing.xl, paddingBottom: spacing["2xl"] },
 
-  logoArea: { alignItems: "center", paddingVertical: 32 },
-  logoImage: { width: 220, height: 99, marginBottom: 8 },
-  logoSub: { fontSize: 12, color: "#94A3B8", textAlign: "center", marginTop: 4, maxWidth: 220, lineHeight: 18 },
+  logoArea: { alignItems: "center", paddingVertical: spacing["3xl"] },
+  logoImage: { width: 160, height: 114, marginBottom: spacing.xs },
+  logoSub: { ...textStyle("body"), color: palette.slate400, textAlign: "center", marginTop: spacing.xs, maxWidth: 220, lineHeight: 18 },
 
-  card: {
-    backgroundColor: "#FFFFFF", borderRadius: 20, padding: 24,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06, shadowRadius: 12, elevation: 3,
-    marginBottom: 16,
-  },
-  heading: { fontSize: 24, fontWeight: "700", color: "#1E293B", marginBottom: 4 },
-  subheading: { fontSize: 14, color: "#64748B", marginBottom: 24, lineHeight: 20 },
+  card: { marginBottom: spacing.lg, padding: spacing["2xl"], borderRadius: radius.xl },
+  heading: { ...textStyle("h1"), color: palette.slate900, marginBottom: spacing.xs },
+  subheading: { ...textStyle("body"), color: palette.slate500, marginBottom: spacing["2xl"], lineHeight: 20 },
 
-  label: { fontSize: 13, fontWeight: "600", color: "#334155", marginBottom: 8 },
+  label: { ...textStyle("label"), color: palette.slate700, marginBottom: spacing.sm },
   phoneRow: {
     flexDirection: "row", alignItems: "center",
-    borderWidth: 1.5, borderColor: "#E2E8F0",
-    borderRadius: 12, overflow: "hidden",
-    marginBottom: 8, backgroundColor: "#F8FAFC",
+    borderWidth: 1.5, borderColor: palette.slate200,
+    borderRadius: radius.md, overflow: "hidden",
+    marginBottom: spacing.sm, backgroundColor: palette.slate100,
   },
-  phoneRowActive: { borderColor: "#1A6FD8", backgroundColor: "#FFFFFF" },
+  phoneRowActive: { borderColor: palette.primary600, backgroundColor: palette.surface },
   prefix: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    paddingHorizontal: 12, paddingVertical: 14,
-    backgroundColor: "#F1F5F9",
-    borderRightWidth: 1, borderRightColor: "#E2E8F0",
+    flexDirection: "row", alignItems: "center", gap: spacing.xs,
+    paddingHorizontal: spacing.md, paddingVertical: 14,
+    backgroundColor: palette.slate100,
+    borderRightWidth: 1, borderRightColor: palette.slate200,
   },
   flag: { fontSize: 16 },
-  prefixCode: { fontSize: 14, fontWeight: "600", color: "#334155" },
-  phoneInput: { flex: 1, paddingHorizontal: 14, paddingVertical: 14, fontSize: 16, color: "#1E293B" },
-  hint: { fontSize: 12, color: "#94A3B8", marginBottom: 20, lineHeight: 18 },
+  prefixCode: { ...textStyle("body"), fontFamily: fontFamily(600), color: palette.slate700 },
+  phoneInput: { flex: 1, paddingHorizontal: spacing.md, paddingVertical: 14, fontSize: 16, fontFamily: fontFamily(400), color: palette.slate900 },
+  hint: { ...textStyle("caption"), fontFamily: fontFamily(400), color: palette.slate400, marginBottom: spacing.xl, lineHeight: 18 },
 
-  sendBtn: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
-    backgroundColor: "#1A6FD8", borderRadius: 12, paddingVertical: 15, marginBottom: 24,
-  },
-  sendBtnDisabled: { backgroundColor: "#93C5FD" },
-  sendBtnText: { color: "#FFFFFF", fontSize: 16, fontWeight: "700" },
+  sendBtn: { marginBottom: spacing["2xl"] },
 
-  dividerRow: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 16 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: "#E2E8F0" },
-  dividerText: { fontSize: 12, color: "#94A3B8", fontWeight: "500" },
+  dividerRow: { flexDirection: "row", alignItems: "center", gap: spacing.md, marginBottom: spacing.lg },
+  dividerLine: { flex: 1, height: 1, backgroundColor: palette.slate200 },
+  dividerText: { ...textStyle("caption"), color: palette.slate400 },
 
   socialBtn: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10,
-    borderWidth: 1.5, borderColor: "#E2E8F0", borderRadius: 12,
-    paddingVertical: 13, marginBottom: 12, backgroundColor: "#FFFFFF",
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.sm,
+    borderWidth: 1.5, borderColor: palette.slate200, borderRadius: radius.md,
+    paddingVertical: 13, marginBottom: spacing.md, backgroundColor: palette.surface,
   },
-  googleIcon: { fontSize: 16, fontWeight: "700", color: "#1A73E8" },
-  socialBtnText: { fontSize: 14, fontWeight: "600", color: "#1E293B" },
+  googleIcon: { fontSize: 16, fontFamily: fontFamily(700), color: "#1A73E8" },
+  socialBtnText: { ...textStyle("body"), fontFamily: fontFamily(600), color: palette.slate900 },
 
-  terms: { fontSize: 11, color: "#94A3B8", textAlign: "center", lineHeight: 18, marginTop: 8 },
-  termsLink: { color: "#1A6FD8", fontWeight: "500" },
+  terms: { ...textStyle("caption"), fontFamily: fontFamily(400), color: palette.slate400, textAlign: "center", lineHeight: 18, marginTop: spacing.xs },
+  termsLink: { color: palette.primary600, fontFamily: fontFamily(500) },
 
-  helpRow: {
-    flexDirection: "row", alignItems: "center", gap: 12,
-    backgroundColor: "#FFFFFF", borderRadius: 14, padding: 14,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+  devBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.sm,
+    backgroundColor: palette.amber100, borderWidth: 1.5, borderColor: "#FDE68A", borderStyle: "dashed",
+    borderRadius: radius.md, paddingVertical: 13, marginBottom: spacing.lg,
+  },
+  devBtnDisabled: { opacity: 0.6 },
+  devBtnText: { color: palette.amber700, ...textStyle("label") },
+
+  helpRow: { borderRadius: radius.lg },
+  helpRowInner: {
+    flexDirection: "row", alignItems: "center", gap: spacing.md, padding: spacing.md,
   },
   helpIcon: {
-    width: 40, height: 40, borderRadius: 10,
-    backgroundColor: "#EFF6FF", justifyContent: "center", alignItems: "center",
+    width: 40, height: 40, borderRadius: radius.md,
+    backgroundColor: palette.primary50, justifyContent: "center", alignItems: "center",
   },
   helpText: { flex: 1 },
-  helpTitle: { fontSize: 14, fontWeight: "600", color: "#1E293B" },
-  helpSub: { fontSize: 12, color: "#94A3B8" },
+  helpTitle: { ...textStyle("body"), fontFamily: fontFamily(600), color: palette.slate900 },
+  helpSub: { ...textStyle("caption"), fontFamily: fontFamily(400), color: palette.slate400 },
 });

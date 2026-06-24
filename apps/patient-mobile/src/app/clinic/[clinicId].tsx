@@ -5,13 +5,17 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { searchClinics, type ClinicWithDoctors } from "@/lib/api/clinics";
 import { getClinicActiveQueues, type ClinicQueue } from "@/lib/api/queues";
+import { palette, radius, spacing } from "@/theme/careflow-tokens";
+import { fontFamily, textStyle } from "@/theme/typography";
 
-const CLINIC_COLORS = ["#1A6FD8","#0D9488","#7C3AED","#DB2777","#EA580C","#65A30D"];
+const CLINIC_COLORS = [palette.primary600, palette.green600, palette.purple600, "#DB2777", "#EA580C", "#65A30D"];
 function clinicColor(name: string) {
   let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) | 0;
-  return CLINIC_COLORS[Math.abs(h) % CLINIC_COLORS.length] ?? "#1A6FD8";
+  return CLINIC_COLORS[Math.abs(h) % CLINIC_COLORS.length] ?? palette.primary600;
 }
 
 function DoctorCard({
@@ -28,7 +32,6 @@ function DoctorCard({
 
   return (
     <TouchableOpacity
-      style={styles.doctorCard}
       onPress={() =>
         router.push({
           pathname: `/booking/${doctor.doctorId}`,
@@ -37,22 +40,22 @@ function DoctorCard({
       }
       activeOpacity={0.85}
     >
-      <View style={styles.doctorAvatar}>
-        <Text style={styles.doctorAvatarText}>{initials}</Text>
-      </View>
-      <View style={styles.doctorInfo}>
-        <View style={styles.doctorNameRow}>
-          <Text style={styles.doctorName}>{doctor.fullName}</Text>
-          <View style={styles.verifiedBadge}>
-            <Icon name="checkmark-circle" size={14} color="#1A6FD8" />
-          </View>
+      <Card style={styles.doctorCard}>
+        <View style={styles.doctorAvatar}>
+          <Text style={styles.doctorAvatarText}>{initials}</Text>
         </View>
-        <Text style={styles.doctorSpec}>{doctor.specialization ?? "General Practice"}</Text>
-        <Text style={styles.doctorSlot}>
-          {queue ? `Next: ${queue.waitingCount > 0 ? `~${queue.waitingCount * queue.consultationDuration} min wait` : "Available now"}` : "Schedule available"}
-        </Text>
-      </View>
-      <Icon name="chevron-forward-outline" size={16} color="#94A3B8" />
+        <View style={styles.doctorInfo}>
+          <View style={styles.doctorNameRow}>
+            <Text style={styles.doctorName}>{doctor.fullName}</Text>
+            <Icon name="checkmark-circle" size={14} color={palette.primary600} />
+          </View>
+          <Text style={styles.doctorSpec}>{doctor.specialization ?? "General Practice"}</Text>
+          <Text style={styles.doctorSlot}>
+            {queue ? `Next: ${queue.waitingCount > 0 ? `~${queue.waitingCount * queue.consultationDuration} min wait` : "Available now"}` : "Schedule available"}
+          </Text>
+        </View>
+        <Icon name="chevron-forward-outline" size={16} color={palette.slate400} />
+      </Card>
     </TouchableOpacity>
   );
 }
@@ -78,7 +81,7 @@ export default function ClinicDetailsScreen() {
   }, [clinicId]);
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color="#1A6FD8" /></View>;
+    return <View style={styles.center}><ActivityIndicator size="large" color={palette.primary600} /></View>;
   }
   if (!clinic) {
     return <View style={styles.center}><Text style={styles.errorText}>Clinic not found.</Text></View>;
@@ -99,17 +102,18 @@ export default function ClinicDetailsScreen() {
           {/* Overlay buttons */}
           <View style={styles.photoOverlay}>
             <TouchableOpacity style={styles.overlayBtn} onPress={() => router.back()}>
-              <Icon name="arrow-back-outline" size={20} color="#FFFFFF" />
+              <Icon name="chevron-back" size={20} color={palette.slate900} />
             </TouchableOpacity>
             <View style={styles.overlayRight}>
               <TouchableOpacity style={styles.overlayBtn}>
-                <Icon name="heart-outline" size={20} color="#FFFFFF" />
+                <Icon name="heart-outline" size={20} color={palette.slate900} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.overlayBtn}>
-                <Icon name="share-outline" size={20} color="#FFFFFF" />
+                <Icon name="share-outline" size={20} color={palette.slate900} />
               </TouchableOpacity>
             </View>
           </View>
+          <Text style={styles.photoHeaderLabel}>[ clinic interior photo ]</Text>
           <Text style={styles.photoHeaderText}>{clinic.name.charAt(0)}</Text>
         </View>
 
@@ -125,6 +129,7 @@ export default function ClinicDetailsScreen() {
           <Text style={styles.clinicName}>{clinic.name}</Text>
           <View style={styles.typeRow}>
             <View style={styles.typeBadge}>
+              <Icon name="checkmark-circle" size={12} color={palette.primary600} />
               <Text style={styles.typeBadgeText}>
                 {services[0] ?? "General Practice"}
               </Text>
@@ -132,17 +137,18 @@ export default function ClinicDetailsScreen() {
           </View>
           <View style={styles.ratingHoursRow}>
             <View style={styles.ratingInline}>
-              <Icon name="star" size={13} color="#F59E0B" />
+              <Icon name="star" size={13} color={palette.star} />
               <Text style={styles.ratingNum}>4.8</Text>
               <Text style={styles.ratingCount}>(320 Reviews)</Text>
             </View>
             <Text style={styles.dot}>·</Text>
-            <Text style={styles.hoursText}>8:00 AM – 10:00 PM</Text>
+            <Text style={styles.openNowInline}>Open</Text>
+            <Text style={styles.hoursText}>· 8:00 AM – 10:00 PM</Text>
           </View>
         </View>
 
         {/* Action buttons */}
-        <View style={styles.actionButtons}>
+        <Card style={styles.actionButtons}>
           {([
             { icon: "call-outline", label: "Call" },
             { icon: "navigate-outline", label: "Directions" },
@@ -151,19 +157,19 @@ export default function ClinicDetailsScreen() {
           ] as const).map((a) => (
             <TouchableOpacity key={a.label} style={styles.actionBtn} activeOpacity={0.7}>
               <View style={styles.actionBtnIcon}>
-                <Icon name={a.icon} size={18} color="#1A6FD8" />
+                <Icon name={a.icon} size={18} color={palette.primary600} />
               </View>
               <Text style={styles.actionBtnLabel}>{a.label}</Text>
             </TouchableOpacity>
           ))}
-        </View>
+        </Card>
 
         {/* Address */}
         {clinic.address ? (
-          <View style={styles.infoCard}>
+          <Card style={styles.infoCard}>
             <View style={styles.infoRow}>
-              <View style={[styles.infoIcon, { backgroundColor: "#EFF6FF" }]}>
-                <Icon name="location-outline" size={16} color="#1A6FD8" />
+              <View style={[styles.infoIcon, { backgroundColor: palette.primary50 }]}>
+                <Icon name="location-outline" size={16} color={palette.primary600} />
               </View>
               <View style={styles.infoText}>
                 <Text style={styles.infoLabel}>Address</Text>
@@ -172,16 +178,16 @@ export default function ClinicDetailsScreen() {
                 </Text>
               </View>
             </View>
-            <View style={[styles.infoRow, { marginTop: 12 }]}>
-              <View style={[styles.infoIcon, { backgroundColor: "#F0FDF4" }]}>
-                <Icon name="time-outline" size={16} color="#16A34A" />
+            <View style={[styles.infoRow, { marginTop: spacing.md }]}>
+              <View style={[styles.infoIcon, { backgroundColor: palette.green50 }]}>
+                <Icon name="time-outline" size={16} color={palette.green600} />
               </View>
               <View style={styles.infoText}>
                 <Text style={styles.infoLabel}>Operating Hours</Text>
                 <Text style={styles.infoValue}>8:00 AM – 10:00 PM  <Text style={styles.openNow}>Open Now</Text></Text>
               </View>
             </View>
-          </View>
+          </Card>
         ) : null}
 
         {/* About */}
@@ -200,7 +206,7 @@ export default function ClinicDetailsScreen() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.serviceScroll}>
               {services.map((s, i) => (
                 <View key={i} style={styles.serviceChip}>
-                  <Icon name="checkmark-circle-outline" size={12} color="#1A6FD8" />
+                  <Icon name="checkmark-circle-outline" size={12} color={palette.primary600} />
                   <Text style={styles.serviceChipText}>{s}</Text>
                 </View>
               ))}
@@ -229,8 +235,13 @@ export default function ClinicDetailsScreen() {
       {/* Bottom bar */}
       <View style={styles.bottomBar}>
         {anyQueue ? (
-          <TouchableOpacity
-            style={styles.joinBtn}
+          <Button
+            label="Join Queue"
+            variant="secondary"
+            icon="people-outline"
+            iconPosition="left"
+            fullWidth={false}
+            style={styles.flexBtn}
             onPress={() =>
               router.push({
                 pathname: "/queue/join",
@@ -243,19 +254,19 @@ export default function ClinicDetailsScreen() {
                 },
               })
             }
-            activeOpacity={0.85}
-          >
-            <Icon name="people-outline" size={17} color="#1A6FD8" />
-            <Text style={styles.joinBtnText}>Join Queue</Text>
-          </TouchableOpacity>
+          />
         ) : (
-          <View style={[styles.joinBtn, styles.joinBtnDisabled]}>
-            <Icon name="people-outline" size={17} color="#94A3B8" />
-            <Text style={[styles.joinBtnText, { color: "#94A3B8" }]}>No Queue</Text>
+          <View style={[styles.flexBtn, styles.joinBtnDisabled]}>
+            <Icon name="people-outline" size={17} color={palette.slate400} />
+            <Text style={styles.joinBtnDisabledText}>No Queue</Text>
           </View>
         )}
-        <TouchableOpacity
-          style={styles.bookBtn}
+        <Button
+          label="Book Appointment"
+          icon="calendar-outline"
+          iconPosition="left"
+          fullWidth={false}
+          style={[styles.flexBtn, styles.bookBtnFlex]}
           onPress={() => {
             if (clinic.doctors[0]) {
               router.push({
@@ -266,132 +277,115 @@ export default function ClinicDetailsScreen() {
               Alert.alert("No doctors available for booking.");
             }
           }}
-          activeOpacity={0.85}
-        >
-          <Icon name="calendar-outline" size={17} color="#FFFFFF" />
-          <Text style={styles.bookBtnText}>Book Appointment</Text>
-        </TouchableOpacity>
+        />
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F7FA" },
+  container: { flex: 1, backgroundColor: palette.appBg },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  errorText: { fontSize: 15, color: "#64748B" },
+  errorText: { ...textStyle("body"), color: palette.slate500 },
   scroll: { paddingBottom: 20 },
 
   photoHeader: { height: 180, justifyContent: "flex-end", alignItems: "center" },
   photoOverlay: {
     position: "absolute", top: 44, left: 0, right: 0,
     flexDirection: "row", justifyContent: "space-between",
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
   },
   overlayBtn: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(255,255,255,0.9)",
     justifyContent: "center", alignItems: "center",
   },
-  overlayRight: { flexDirection: "row", gap: 8 },
-  photoHeaderText: { fontSize: 72, fontWeight: "800", color: "rgba(255,255,255,0.3)", marginBottom: 24 },
+  overlayRight: { flexDirection: "row", gap: spacing.sm },
+  photoHeaderText: { fontSize: 72, fontFamily: fontFamily(800), color: "rgba(255,255,255,0.3)", marginBottom: 4 },
+  photoHeaderLabel: { ...textStyle("caption"), fontFamily: fontFamily(400), color: "rgba(255,255,255,0.7)", marginBottom: spacing.lg },
 
-  avatarOverlap: { alignItems: "center", marginTop: -36, marginBottom: 8, zIndex: 10 },
+  avatarOverlap: { alignItems: "center", marginTop: -36, marginBottom: spacing.sm, zIndex: 10 },
   clinicAvatar: {
     width: 72, height: 72, borderRadius: 36,
-    backgroundColor: "#FFFFFF", borderWidth: 3,
+    backgroundColor: palette.surface, borderWidth: 3,
     justifyContent: "center", alignItems: "center",
     shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.10, shadowRadius: 8, elevation: 4,
   },
-  clinicAvatarText: { fontSize: 28, fontWeight: "800" },
+  clinicAvatarText: { fontSize: 28, fontFamily: fontFamily(800) },
 
-  clinicInfo: { alignItems: "center", paddingHorizontal: 20, marginBottom: 16 },
-  clinicName: { fontSize: 22, fontWeight: "700", color: "#1E293B", textAlign: "center", marginBottom: 8 },
-  typeRow: { flexDirection: "row", gap: 8, marginBottom: 8 },
-  typeBadge: { backgroundColor: "#EFF6FF", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 4 },
-  typeBadgeText: { fontSize: 12, color: "#1A6FD8", fontWeight: "600" },
-  ratingHoursRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  ratingInline: { flexDirection: "row", alignItems: "center", gap: 4 },
-  ratingNum: { fontSize: 13, fontWeight: "700", color: "#1E293B" },
-  ratingCount: { fontSize: 12, color: "#94A3B8" },
-  dot: { color: "#CBD5E1" },
-  hoursText: { fontSize: 12, color: "#64748B" },
+  clinicInfo: { alignItems: "center", paddingHorizontal: spacing.xl, marginBottom: spacing.lg },
+  clinicName: { ...textStyle("h1"), color: palette.slate900, textAlign: "center", marginBottom: spacing.sm },
+  typeRow: { flexDirection: "row", gap: spacing.sm, marginBottom: spacing.sm },
+  typeBadge: { flexDirection: "row", alignItems: "center", gap: spacing.xs, backgroundColor: palette.primary50, borderRadius: radius.sm, paddingHorizontal: spacing.md, paddingVertical: spacing.xs },
+  typeBadgeText: { ...textStyle("label"), color: palette.primary600 },
+  ratingHoursRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  ratingInline: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+  ratingNum: { fontSize: 13, fontFamily: fontFamily(700), color: palette.slate900 },
+  ratingCount: { fontSize: 12, color: palette.slate400 },
+  dot: { color: palette.slate200 },
+  openNowInline: { fontSize: 12, fontFamily: fontFamily(600), color: palette.green600 },
+  hoursText: { fontSize: 12, color: palette.slate500 },
 
   actionButtons: {
     flexDirection: "row", justifyContent: "space-around",
-    backgroundColor: "#FFFFFF", marginHorizontal: 16, borderRadius: 16,
-    paddingVertical: 16, marginBottom: 12,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
+    marginHorizontal: spacing.lg, paddingVertical: spacing.lg, marginBottom: spacing.md,
   },
-  actionBtn: { alignItems: "center", gap: 6 },
+  actionBtn: { alignItems: "center", gap: spacing.xs },
   actionBtnIcon: {
-    width: 44, height: 44, borderRadius: 12,
-    backgroundColor: "#EFF6FF", justifyContent: "center", alignItems: "center",
+    width: 44, height: 44, borderRadius: radius.md,
+    backgroundColor: palette.primary50, justifyContent: "center", alignItems: "center",
   },
-  actionBtnLabel: { fontSize: 11, color: "#64748B", fontWeight: "500" },
+  actionBtnLabel: { fontSize: 11, color: palette.slate500, fontFamily: fontFamily(500) },
 
-  infoCard: {
-    backgroundColor: "#FFFFFF", marginHorizontal: 16, borderRadius: 16,
-    padding: 16, marginBottom: 12,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
-  },
-  infoRow: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
-  infoIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: "center", alignItems: "center" },
+  infoCard: { marginHorizontal: spacing.lg, marginBottom: spacing.md },
+  infoRow: { flexDirection: "row", gap: spacing.md, alignItems: "flex-start" },
+  infoIcon: { width: 36, height: 36, borderRadius: radius.sm, justifyContent: "center", alignItems: "center" },
   infoText: { flex: 1 },
-  infoLabel: { fontSize: 11, color: "#94A3B8", fontWeight: "600", textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 2 },
-  infoValue: { fontSize: 13, color: "#1E293B", lineHeight: 19 },
-  openNow: { color: "#16A34A", fontWeight: "600" },
+  infoLabel: { fontSize: 11, color: palette.slate400, fontFamily: fontFamily(600), textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 2 },
+  infoValue: { fontSize: 13, color: palette.slate900, lineHeight: 19 },
+  openNow: { color: palette.green600, fontFamily: fontFamily(600) },
 
-  section: { paddingHorizontal: 16, marginBottom: 16 },
-  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
-  sectionTitle: { fontSize: 16, fontWeight: "700", color: "#1E293B", marginBottom: 12 },
-  viewAll: { fontSize: 13, color: "#1A6FD8", fontWeight: "500" },
-  aboutText: { fontSize: 13, color: "#64748B", lineHeight: 21 },
-  serviceScroll: { gap: 8 },
+  section: { paddingHorizontal: spacing.lg, marginBottom: spacing.lg },
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.md },
+  sectionTitle: { ...textStyle("h3"), color: palette.slate900, marginBottom: spacing.md },
+  viewAll: { ...textStyle("label"), color: palette.primary600 },
+  aboutText: { fontSize: 13, color: palette.slate500, lineHeight: 21 },
+  serviceScroll: { gap: spacing.sm },
   serviceChip: {
     flexDirection: "row", alignItems: "center", gap: 5,
-    backgroundColor: "#EFF6FF", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6,
+    backgroundColor: palette.primary50, borderRadius: radius.sm, paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
   },
-  serviceChipText: { fontSize: 12, color: "#1A6FD8", fontWeight: "500" },
-  emptyDoctors: { fontSize: 13, color: "#94A3B8", padding: 12 },
+  serviceChipText: { fontSize: 12, color: palette.primary600, fontFamily: fontFamily(500) },
+  emptyDoctors: { fontSize: 13, color: palette.slate400, padding: spacing.md },
 
   doctorCard: {
-    flexDirection: "row", alignItems: "center", gap: 12,
-    backgroundColor: "#FFFFFF", borderRadius: 14, padding: 14, marginBottom: 10,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
+    flexDirection: "row", alignItems: "center", gap: spacing.md,
+    marginBottom: spacing.sm,
   },
   doctorAvatar: {
     width: 50, height: 50, borderRadius: 25,
-    backgroundColor: "#EFF6FF", justifyContent: "center", alignItems: "center",
+    backgroundColor: palette.primary50, justifyContent: "center", alignItems: "center",
   },
-  doctorAvatarText: { fontSize: 18, fontWeight: "700", color: "#1A6FD8" },
+  doctorAvatarText: { fontSize: 18, fontFamily: fontFamily(700), color: palette.primary600 },
   doctorInfo: { flex: 1 },
-  doctorNameRow: { flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 2 },
-  doctorName: { fontSize: 14, fontWeight: "600", color: "#1E293B" },
-  verifiedBadge: {},
-  doctorSpec: { fontSize: 12, color: "#64748B", marginBottom: 4 },
-  doctorSlot: { fontSize: 11, color: "#1A6FD8", fontWeight: "500" },
+  doctorNameRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs, marginBottom: 2 },
+  doctorName: { fontSize: 14, fontFamily: fontFamily(600), color: palette.slate900 },
+  doctorSpec: { fontSize: 12, color: palette.slate500, marginBottom: spacing.xs },
+  doctorSlot: { fontSize: 11, color: palette.primary600, fontFamily: fontFamily(500) },
 
   bottomBar: {
     position: "absolute", bottom: 0, left: 0, right: 0,
-    flexDirection: "row", gap: 12,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16, paddingTop: 14, paddingBottom: 32,
-    borderTopWidth: 1, borderTopColor: "#E2E8F0",
+    flexDirection: "row", gap: spacing.md,
+    backgroundColor: palette.surface,
+    paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: 32,
+    borderTopWidth: 1, borderTopColor: palette.border,
   },
-  joinBtn: {
-    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7,
-    borderWidth: 1.5, borderColor: "#1A6FD8", borderRadius: 12, paddingVertical: 14,
+  flexBtn: { flex: 1 },
+  joinBtnDisabled: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.xs,
+    borderWidth: 1.5, borderColor: palette.slate200, borderRadius: radius.md, paddingVertical: spacing.md,
   },
-  joinBtnDisabled: { borderColor: "#E2E8F0" },
-  joinBtnText: { fontSize: 14, fontWeight: "600", color: "#1A6FD8" },
-  bookBtn: {
-    flex: 1.3, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7,
-    backgroundColor: "#1A6FD8", borderRadius: 12, paddingVertical: 14,
-  },
-  bookBtnText: { fontSize: 14, fontWeight: "600", color: "#FFFFFF" },
+  joinBtnDisabledText: { fontSize: 14, fontFamily: fontFamily(600), color: palette.slate400 },
+  bookBtnFlex: { flexGrow: 1.3 },
 });

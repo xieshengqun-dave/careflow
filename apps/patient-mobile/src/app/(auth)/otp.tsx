@@ -7,6 +7,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Icon } from "@/components/Icon";
 import { verifyOTP } from "@/lib/auth";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { palette, radius, spacing } from "@/theme/careflow-tokens";
+import { fontFamily, textStyle } from "@/theme/typography";
 
 const OTP_LEN = 6;
 const RESEND_S = 60;
@@ -62,6 +66,7 @@ export default function OTPScreen() {
   const mins = Math.floor(countdown / 60);
   const secs = countdown % 60;
   const masked = phone ? phone.replace(/(\+60)(\d{2})(\d+)(\d{2})/, "$1 $2-***$4") : "";
+  const isComplete = otp.every((d) => d) && otp.join("").length === OTP_LEN;
 
   return (
     <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : "height"}>
@@ -69,9 +74,10 @@ export default function OTPScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} accessibilityLabel="Back">
-            <Icon name="arrow-back-outline" size={22} color="#1E293B" />
+            <Icon name="chevron-back" size={24} color={palette.slate900} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.helpBtn}>
+            <Icon name="help-circle-outline" size={16} color={palette.primary600} />
             <Text style={styles.helpText}>Help</Text>
           </TouchableOpacity>
         </View>
@@ -109,25 +115,28 @@ export default function OTPScreen() {
 
           {/* Security note */}
           <View style={styles.secureRow}>
-            <Icon name="shield-checkmark-outline" size={14} color="#16A34A" />
+            <Icon name="shield-checkmark-outline" size={14} color={palette.green600} />
             <Text style={styles.secureText}>
               Your OTP is secure and will expire in{" "}
               <Text style={styles.timer}>{pad(mins)}:{pad(secs)}</Text>
             </Text>
           </View>
 
-          {/* Illustration */}
+          {/* Illustration placeholder */}
           <View style={styles.illustration}>
-            <Text style={styles.illustrationEmoji}>📱</Text>
-            <View style={styles.illustrationBadge}>
-              <Icon name="shield-checkmark" size={20} color="#16A34A" />
+            <View style={styles.illustrationIconWrap}>
+              <Icon name="phone-portrait-outline" size={40} color={palette.slate400} />
+              <View style={styles.illustrationBadge}>
+                <Icon name="shield-checkmark" size={18} color={palette.green600} />
+              </View>
             </View>
+            <Text style={styles.illustrationLabel}>[ secure OTP illustration ]</Text>
           </View>
 
           {/* Resend */}
           <View style={styles.resendRow}>
             <View style={styles.resendIcon}>
-              <Icon name="chatbubble-outline" size={16} color="#64748B" />
+              <Icon name="chatbubble-outline" size={16} color={palette.slate500} />
             </View>
             <Text style={styles.resendLabel}>Didn't receive the code?</Text>
             {countdown > 0 ? (
@@ -140,13 +149,21 @@ export default function OTPScreen() {
           </View>
 
           {/* Security banner */}
-          <View style={styles.securityBanner}>
-            <Icon name="lock-closed-outline" size={16} color="#1A6FD8" />
+          <Card style={styles.securityBanner}>
+            <Icon name="lock-closed-outline" size={16} color={palette.primary600} />
             <View style={styles.securityBannerText}>
               <Text style={styles.securityTitle}>Your security is our priority</Text>
               <Text style={styles.securitySub}>We never share your information with anyone.</Text>
             </View>
-          </View>
+          </Card>
+
+          <Button
+            label={loading ? "Verifying…" : "Verify & Continue"}
+            onPress={() => void verify(otp.join(""))}
+            disabled={!isComplete}
+            loading={loading}
+            style={styles.verifyBtn}
+          />
         </ScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>
@@ -154,74 +171,78 @@ export default function OTPScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#FFFFFF" },
+  root: { flex: 1, backgroundColor: palette.surface },
   header: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
-    paddingHorizontal: 20, paddingVertical: 12,
+    paddingHorizontal: spacing.xl, paddingVertical: spacing.md,
   },
-  backBtn: { padding: 4 },
-  helpBtn: { padding: 4 },
-  helpText: { fontSize: 14, color: "#1A6FD8", fontWeight: "500" },
-  scroll: { paddingHorizontal: 24, paddingBottom: 40 },
+  backBtn: { padding: spacing.xs },
+  helpBtn: { flexDirection: "row", alignItems: "center", gap: spacing.xs, padding: spacing.xs },
+  helpText: { ...textStyle("body"), fontFamily: fontFamily(500), color: palette.primary600 },
+  scroll: { paddingHorizontal: spacing["2xl"], paddingBottom: spacing["2xl"] },
 
-  title: { fontSize: 26, fontWeight: "700", color: "#1E293B", marginBottom: 8, marginTop: 8 },
-  sub: { fontSize: 14, color: "#64748B", lineHeight: 22, marginBottom: 20 },
+  title: { fontSize: 26, fontFamily: fontFamily(800), color: palette.slate900, marginBottom: spacing.xs, marginTop: spacing.xs, letterSpacing: -0.3 },
+  sub: { ...textStyle("body"), color: palette.slate500, lineHeight: 22, marginBottom: spacing.xl },
 
-  phoneRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 28 },
-  phoneText: { fontSize: 15, fontWeight: "600", color: "#1E293B" },
-  changeText: { fontSize: 14, color: "#1A6FD8", fontWeight: "500" },
+  phoneRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing["2xl"] },
+  phoneText: { ...textStyle("body"), fontFamily: fontFamily(600), color: palette.slate900 },
+  changeText: { ...textStyle("body"), fontFamily: fontFamily(500), color: palette.primary600 },
 
-  boxes: { flexDirection: "row", gap: 10, marginBottom: 16, justifyContent: "center" },
+  boxes: { flexDirection: "row", gap: spacing.sm, marginBottom: spacing.lg, justifyContent: "center" },
   box: {
-    width: 46, height: 56, borderRadius: 12,
-    borderWidth: 1.5, borderColor: "#E2E8F0",
-    backgroundColor: "#F8FAFC",
-    fontSize: 24, fontWeight: "700", color: "#1E293B",
+    width: 46, height: 56, borderRadius: radius.md,
+    borderWidth: 1.5, borderColor: palette.slate200,
+    backgroundColor: palette.slate100,
+    fontSize: 24, fontFamily: fontFamily(700), color: palette.slate900,
   },
-  boxFilled: { borderColor: "#1A6FD8", backgroundColor: "#EFF6FF" },
+  boxFilled: { borderColor: palette.primary600, backgroundColor: palette.primary50 },
   boxLoading: { opacity: 0.5 },
 
   secureRow: {
-    flexDirection: "row", alignItems: "center", gap: 6,
-    justifyContent: "center", marginBottom: 28,
+    flexDirection: "row", alignItems: "center", gap: spacing.xs,
+    justifyContent: "center", marginBottom: spacing["2xl"],
   },
-  secureText: { fontSize: 12, color: "#64748B" },
-  timer: { fontWeight: "600", color: "#16A34A" },
+  secureText: { ...textStyle("caption"), fontFamily: fontFamily(400), color: palette.slate500 },
+  timer: { fontFamily: fontFamily(600), color: palette.green600 },
 
   illustration: {
-    alignItems: "center", justifyContent: "center",
-    marginBottom: 28, position: "relative",
+    alignItems: "center", justifyContent: "center", gap: spacing.sm,
+    marginBottom: spacing["2xl"],
+    backgroundColor: palette.slate100, borderRadius: radius.lg, paddingVertical: spacing["2xl"],
   },
-  illustrationEmoji: { fontSize: 72 },
+  illustrationIconWrap: { position: "relative", width: 56, height: 40, alignItems: "center" },
+  illustrationLabel: { ...textStyle("caption"), fontFamily: fontFamily(400), color: palette.slate400 },
   illustrationBadge: {
-    position: "absolute", bottom: 0, right: "30%",
+    position: "absolute", bottom: -8, right: 0,
     width: 32, height: 32, borderRadius: 16,
-    backgroundColor: "#DCFCE7",
+    backgroundColor: palette.green50,
     justifyContent: "center", alignItems: "center",
-    borderWidth: 2, borderColor: "#FFFFFF",
+    borderWidth: 2, borderColor: palette.surface,
   },
 
   resendRow: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    backgroundColor: "#F8FAFC", borderRadius: 12, padding: 14,
-    marginBottom: 16,
+    flexDirection: "row", alignItems: "center", gap: spacing.sm,
+    backgroundColor: palette.slate100, borderRadius: radius.md, padding: spacing.md,
+    marginBottom: spacing.lg,
   },
   resendIcon: {
-    width: 32, height: 32, borderRadius: 8,
-    backgroundColor: "#E2E8F0",
+    width: 32, height: 32, borderRadius: radius.sm,
+    backgroundColor: palette.slate200,
     justifyContent: "center", alignItems: "center",
   },
-  resendLabel: { flex: 1, fontSize: 12, color: "#64748B" },
-  resendLink: { fontSize: 13, color: "#1A6FD8", fontWeight: "600" },
-  countdownText: { fontSize: 12, color: "#94A3B8" },
-  countdownNum: { fontWeight: "600", color: "#64748B" },
+  resendLabel: { flex: 1, ...textStyle("caption"), fontFamily: fontFamily(400), color: palette.slate500 },
+  resendLink: { ...textStyle("label"), color: palette.primary600 },
+  countdownText: { ...textStyle("caption"), fontFamily: fontFamily(400), color: palette.slate400 },
+  countdownNum: { fontFamily: fontFamily(600), color: palette.slate500 },
 
   securityBanner: {
-    flexDirection: "row", alignItems: "center", gap: 12,
-    backgroundColor: "#EFF6FF", borderRadius: 12, padding: 14,
-    borderWidth: 1, borderColor: "#BFDBFE",
+    flexDirection: "row", alignItems: "center", gap: spacing.md,
+    backgroundColor: palette.primary50, borderWidth: 1, borderColor: "#BFDBFE",
+    marginBottom: spacing.lg,
   },
   securityBannerText: { flex: 1 },
-  securityTitle: { fontSize: 13, fontWeight: "600", color: "#1E293B" },
-  securitySub: { fontSize: 11, color: "#64748B", marginTop: 2 },
+  securityTitle: { ...textStyle("label"), color: palette.slate900 },
+  securitySub: { ...textStyle("caption"), fontFamily: fontFamily(400), color: palette.slate500, marginTop: 2 },
+
+  verifyBtn: { marginBottom: spacing.lg },
 });

@@ -13,8 +13,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
+import { Card } from "@/components/ui/Card";
+import { StatusPill, type StatusKey } from "@/components/ui/StatusPill";
 import { supabase } from "@/lib/supabase";
 import { cancelAppointment } from "@/lib/api/appointments";
+import { getMYTToday } from "@careflow/shared";
+import { palette, radius, spacing } from "@/theme/careflow-tokens";
+import { fontFamily, textStyle } from "@/theme/typography";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -33,7 +38,7 @@ interface FullAppointment {
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
-const DOCTOR_COLORS = ["#1A6FD8", "#0D9488", "#7C3AED", "#DC2626", "#D97706", "#059669"];
+const DOCTOR_COLORS = [palette.primary600, palette.green600, palette.purple600, "#DC2626", "#D97706", "#059669"];
 
 function doctorColor(name: string): string {
   let h = 0;
@@ -65,13 +70,36 @@ function formatDateShort(dateStr: string): string {
   return d.toLocaleDateString("en-MY", { weekday: "short", day: "numeric", month: "short" });
 }
 
-const STATUS_CONFIG: Record<string, { bg: string; text: string; label: string }> = {
-  CONFIRMED:  { bg: "#DCFCE7", text: "#16A34A", label: "Confirmed" },
-  CHECKED_IN: { bg: "#DBEAFE", text: "#1D4ED8", label: "Checked In" },
-  PENDING:    { bg: "#FEF9C3", text: "#CA8A04", label: "Pending" },
-  CANCELLED:  { bg: "#FEE2E2", text: "#DC2626", label: "Cancelled" },
-  COMPLETED:  { bg: "#F1F5F9", text: "#64748B", label: "Completed" },
-  NO_SHOW:    { bg: "#FEF2F2", text: "#EF4444", label: "No Show" },
+function slotDurationMinutes(startTime: string, endTime: string): number {
+  const [sh, sm] = startTime.split(":").map(Number);
+  const [eh, em] = endTime.split(":").map(Number);
+  return (eh! * 60 + em!) - (sh! * 60 + sm!);
+}
+
+function daysFromToday(dateStr: string): number {
+  const today = getMYTToday();
+  const [ty, tm, td] = today.split("-").map(Number);
+  const [dy, dm, dd] = dateStr.split("-").map(Number);
+  const a = new Date(ty!, tm! - 1, td!);
+  const b = new Date(dy!, dm! - 1, dd!);
+  return Math.round((b.getTime() - a.getTime()) / 86400000);
+}
+
+const STATUS_KEY: Record<string, StatusKey> = {
+  CONFIRMED: "confirmed",
+  CHECKED_IN: "checkedIn",
+  PENDING: "waitingNext",
+  CANCELLED: "cancelled",
+  COMPLETED: "completed",
+  NO_SHOW: "noShow",
+};
+const STATUS_LABEL: Record<string, string> = {
+  CONFIRMED: "Confirmed",
+  CHECKED_IN: "Checked In",
+  PENDING: "Pending",
+  CANCELLED: "Cancelled",
+  COMPLETED: "Completed",
+  NO_SHOW: "No Show",
 };
 
 type TabKey = "upcoming" | "completed" | "cancelled";
@@ -103,7 +131,7 @@ async function fetchAppointments(tab: TabKey): Promise<FullAppointment[]> {
       status,
       time_slots (
         start_time,
-        duration_minutes
+        end_time
       ),
       doctors (
         specialization,
@@ -125,7 +153,7 @@ async function fetchAppointments(tab: TabKey): Promise<FullAppointment[]> {
   return data.map((appt) => {
     const slot = appt.time_slots as unknown as {
       start_time: string;
-      duration_minutes: number | null;
+      end_time: string;
     } | null;
     const doc = appt.doctors as unknown as {
       specialization: string | null;
@@ -146,7 +174,7 @@ async function fetchAppointments(tab: TabKey): Promise<FullAppointment[]> {
       clinicName: clinic?.name ?? "",
       clinicAddress: clinic?.address ?? "",
       fee: null,
-      duration: slot?.duration_minutes ?? null,
+      duration: slot ? slotDurationMinutes(slot.start_time, slot.end_time) : null,
     };
   });
 }
@@ -156,23 +184,32 @@ async function fetchAppointments(tab: TabKey): Promise<FullAppointment[]> {
 function AppointmentCard({
   appt,
   tab,
+  accentColor,
   onCancel,
   onBookAgain,
   onReschedule,
 }: {
   appt: FullAppointment;
   tab: TabKey;
+  accentColor?: string;
   onCancel: (id: string) => void;
   onBookAgain: () => void;
   onReschedule: (id: string) => void;
 }) {
-  const statusCfg = STATUS_CONFIG[appt.status] ?? STATUS_CONFIG["PENDING"]!;
+  const statusKey = STATUS_KEY[appt.status] ?? "waitingNext";
+  const statusLabel = STATUS_LABEL[appt.status] ?? appt.status;
   const color = doctorColor(appt.doctorName);
   const ini = initials(appt.doctorName);
   const isGreyed = tab === "cancelled";
 
   return (
-    <View style={[styles.card, isGreyed && styles.cardGreyed]}>
+    <Card
+      style={[
+        styles.card,
+        isGreyed && styles.cardGreyed,
+        accentColor ? { borderLeftWidth: 3, borderLeftColor: accentColor } : null,
+      ]}
+    >
       {/* Top: avatar + info + status */}
       <View style={styles.cardHeader}>
         <View style={[styles.doctorAvatar, { backgroundColor: color }]}>
@@ -183,30 +220,19 @@ function AppointmentCard({
             <Text style={[styles.doctorName, isGreyed && styles.textGreyed]}>
               {appt.doctorName}
             </Text>
-            <Icon name="checkmark-circle" size={14} color={isGreyed ? "#CBD5E1" : "#1A6FD8"} />
+            <Icon name="checkmark-circle" size={14} color={isGreyed ? palette.slate200 : palette.primary600} />
           </View>
           <Text style={[styles.specialization, isGreyed && styles.textMuted]}>
             {appt.specialization ?? "General Practitioner"}
           </Text>
-          {appt.clinicAddress ? (
-            <View style={styles.clinicRow}>
-              <Icon name="location-outline" size={11} color={isGreyed ? "#CBD5E1" : "#1A6FD8"} />
-              <Text style={[styles.clinicText, isGreyed && styles.textMuted]} numberOfLines={1}>
-                {appt.clinicName}
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.clinicRow}>
-              <Icon name="business-outline" size={11} color={isGreyed ? "#CBD5E1" : "#1A6FD8"} />
-              <Text style={[styles.clinicText, isGreyed && styles.textMuted]} numberOfLines={1}>
-                {appt.clinicName}
-              </Text>
-            </View>
-          )}
+          <View style={styles.clinicRow}>
+            <Icon name="location-outline" size={11} color={isGreyed ? palette.slate200 : palette.primary600} />
+            <Text style={[styles.clinicText, isGreyed && styles.textMuted]} numberOfLines={1}>
+              {appt.clinicName}
+            </Text>
+          </View>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: statusCfg.bg }]}>
-          <Text style={[styles.statusText, { color: statusCfg.text }]}>{statusCfg.label}</Text>
-        </View>
+        <StatusPill status={statusKey} label={statusLabel} />
       </View>
 
       <View style={styles.divider} />
@@ -214,14 +240,14 @@ function AppointmentCard({
       {/* Date / time / fee / duration row */}
       <View style={styles.metaRow}>
         <View style={styles.metaItem}>
-          <Icon name="calendar-outline" size={13} color={isGreyed ? "#CBD5E1" : "#64748B"} />
+          <Icon name="calendar-outline" size={13} color={isGreyed ? palette.slate200 : palette.slate500} />
           <Text style={[styles.metaText, isGreyed && styles.textMuted]}>
             {formatDateShort(appt.date)}
           </Text>
         </View>
         <View style={styles.metaDot} />
         <View style={styles.metaItem}>
-          <Icon name="time-outline" size={13} color={isGreyed ? "#CBD5E1" : "#64748B"} />
+          <Icon name="time-outline" size={13} color={isGreyed ? palette.slate200 : palette.slate500} />
           <Text style={[styles.metaText, isGreyed && styles.textMuted]}>
             {formatTime(appt.startTime)}
           </Text>
@@ -237,7 +263,7 @@ function AppointmentCard({
         </View>
         {appt.duration != null && (
           <View style={styles.durationBlock}>
-            <Icon name="hourglass-outline" size={13} color={isGreyed ? "#CBD5E1" : "#64748B"} />
+            <Icon name="hourglass-outline" size={13} color={isGreyed ? palette.slate200 : palette.slate500} />
             <Text style={[styles.durationText, isGreyed && styles.textMuted]}>
               {appt.duration} mins
             </Text>
@@ -253,7 +279,7 @@ function AppointmentCard({
             onPress={() => onReschedule(appt.id)}
             activeOpacity={0.75}
           >
-            <Icon name="calendar-outline" size={14} color="#1A6FD8" />
+            <Icon name="calendar-outline" size={14} color={palette.primary600} />
             <Text style={styles.rescheduleBtnText}>Reschedule</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -261,7 +287,7 @@ function AppointmentCard({
             onPress={() => onCancel(appt.id)}
             activeOpacity={0.75}
           >
-            <Icon name="close-circle-outline" size={14} color="#DC2626" />
+            <Icon name="close-circle-outline" size={14} color={palette.red600} />
             <Text style={styles.cancelBtnText}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -273,11 +299,11 @@ function AppointmentCard({
           onPress={onBookAgain}
           activeOpacity={0.8}
         >
-          <Icon name="refresh-outline" size={14} color="#1A6FD8" />
+          <Icon name="refresh-outline" size={14} color={palette.primary600} />
           <Text style={styles.bookAgainText}>Book Again</Text>
         </TouchableOpacity>
       )}
-    </View>
+    </Card>
   );
 }
 
@@ -341,12 +367,34 @@ export default function AppointmentsScreen() {
     router.push("/(tabs)/index");
   }
 
-  // Banner count for upcoming
-  const upcomingCount = activeTab === "upcoming" ? appointments.length : 0;
+  // Banner count for upcoming — only appointments actually scheduled for today
+  const todayCount =
+    activeTab === "upcoming" ? appointments.filter((a) => a.date === getMYTToday()).length : 0;
+
+  // Group upcoming appointments into Today / Upcoming / Later, each with an accent color
+  const sections =
+    activeTab === "upcoming"
+      ? (() => {
+          const today: FullAppointment[] = [];
+          const upcoming: FullAppointment[] = [];
+          const later: FullAppointment[] = [];
+          for (const a of appointments) {
+            const diff = daysFromToday(a.date);
+            if (diff <= 0) today.push(a);
+            else if (diff <= 7) upcoming.push(a);
+            else later.push(a);
+          }
+          return [
+            { title: "Today", data: today, accent: palette.green500 },
+            { title: "Upcoming", data: upcoming, accent: palette.primary600 },
+            { title: "Later", data: later, accent: palette.purple600 },
+          ].filter((s) => s.data.length > 0);
+        })()
+      : [{ title: "", data: appointments, accent: undefined }];
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
+      <StatusBar barStyle="dark-content" backgroundColor={palette.appBg} />
 
       {/* Header */}
       <SafeAreaView style={styles.headerBg}>
@@ -373,11 +421,11 @@ export default function AppointmentsScreen() {
       </SafeAreaView>
 
       {/* Upcoming banner */}
-      {activeTab === "upcoming" && !loading && upcomingCount > 0 && (
+      {activeTab === "upcoming" && !loading && todayCount > 0 && (
         <View style={styles.banner}>
-          <Icon name="information-circle-outline" size={16} color="#1A6FD8" />
+          <Icon name="information-circle-outline" size={16} color={palette.primary600} />
           <Text style={styles.bannerText}>
-            You have {upcomingCount} appointment{upcomingCount !== 1 ? "s" : ""} today.
+            You have {todayCount} appointment{todayCount !== 1 ? "s" : ""} today.
           </Text>
           <TouchableOpacity>
             <Text style={styles.bannerAction}>View Today</Text>
@@ -387,7 +435,7 @@ export default function AppointmentsScreen() {
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator color="#1A6FD8" size="large" />
+          <ActivityIndicator color={palette.primary600} size="large" />
         </View>
       ) : (
         <ScrollView
@@ -403,14 +451,14 @@ export default function AppointmentsScreen() {
                 setRefreshing(true);
                 void load(activeTab);
               }}
-              tintColor="#1A6FD8"
+              tintColor={palette.primary600}
             />
           }
         >
           {appointments.length === 0 ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIcon}>
-                <Icon name="calendar-outline" size={36} color="#1A6FD8" />
+                <Icon name="calendar-outline" size={36} color={palette.primary600} />
               </View>
               <Text style={styles.emptyTitle}>
                 {activeTab === "upcoming"
@@ -427,20 +475,28 @@ export default function AppointmentsScreen() {
             </View>
           ) : (
             <>
-              {appointments.map((appt) => (
-                <AppointmentCard
-                  key={appt.id}
-                  appt={appt}
-                  tab={activeTab}
-                  onCancel={handleCancel}
-                  onBookAgain={handleBookAgain}
-                  onReschedule={handleReschedule}
-                />
+              {sections.map((section) => (
+                <View key={section.title || "all"}>
+                  {section.title ? (
+                    <Text style={styles.sectionLabel}>{section.title}</Text>
+                  ) : null}
+                  {section.data.map((appt) => (
+                    <AppointmentCard
+                      key={appt.id}
+                      appt={appt}
+                      tab={activeTab}
+                      accentColor={section.accent}
+                      onCancel={handleCancel}
+                      onBookAgain={handleBookAgain}
+                      onReschedule={handleReschedule}
+                    />
+                  ))}
+                </View>
               ))}
 
               {/* Footer hint */}
               <View style={styles.footerHint}>
-                <Icon name="information-circle-outline" size={14} color="#94A3B8" />
+                <Icon name="information-circle-outline" size={14} color={palette.slate400} />
                 <Text style={styles.footerHintText}>
                   Need to make a change?{"\n"}You can reschedule or cancel your appointment up to 2 hours before.
                 </Text>
@@ -459,50 +515,39 @@ export default function AppointmentsScreen() {
 // ─── Styles ─────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F7FA" },
-  headerBg:  { backgroundColor: "#FFFFFF" },
+  container: { flex: 1, backgroundColor: palette.appBg },
+  headerBg:  { backgroundColor: palette.surface },
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 4,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xs,
   },
-  headerTitle: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#1E293B",
-  },
+  headerTitle: { ...textStyle("h1"), color: palette.slate900 },
 
   // Tabs
   tabRow: {
     flexDirection: "row",
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.xl,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
-    marginTop: 6,
+    borderBottomColor: palette.border,
+    marginTop: spacing.xs,
   },
   tabItem: {
-    marginRight: 24,
-    paddingBottom: 10,
-    paddingTop: 6,
+    marginRight: spacing["2xl"],
+    paddingBottom: spacing.sm,
+    paddingTop: spacing.xs,
     alignItems: "center",
     position: "relative",
   },
-  tabLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#94A3B8",
-  },
-  tabLabelActive: {
-    color: "#1A6FD8",
-    fontWeight: "600",
-  },
+  tabLabel: { ...textStyle("body"), fontFamily: fontFamily(500), color: palette.slate400 },
+  tabLabelActive: { color: palette.primary600, fontFamily: fontFamily(600) },
   tabUnderline: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     height: 2,
-    backgroundColor: "#1A6FD8",
+    backgroundColor: palette.primary600,
     borderRadius: 1,
   },
 
@@ -510,32 +555,29 @@ const styles = StyleSheet.create({
   banner: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    backgroundColor: "#EFF6FF",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    gap: spacing.sm,
+    backgroundColor: palette.primary50,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: "#DBEAFE",
   },
-  bannerText: { flex: 1, fontSize: 12, color: "#1E40AF", fontWeight: "500" },
-  bannerAction: { fontSize: 12, color: "#1A6FD8", fontWeight: "600" },
+  bannerText: { flex: 1, fontSize: 12, color: "#1E40AF", fontFamily: fontFamily(500) },
+  bannerAction: { fontSize: 12, color: palette.primary600, fontFamily: fontFamily(600) },
 
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
-  list: { padding: 16, paddingBottom: 100 },
+  list: { padding: spacing.lg, paddingBottom: 100 },
   listEmpty: { flex: 1 },
+
+  sectionLabel: {
+    fontSize: 12, fontFamily: fontFamily(700), color: palette.slate400,
+    textTransform: "uppercase", letterSpacing: 0.5, marginBottom: spacing.sm, marginTop: spacing.xs,
+  },
 
   // Card
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 16,
-    marginBottom: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    elevation: 2,
+    marginBottom: spacing.md,
   },
   cardGreyed: {
     opacity: 0.65,
@@ -544,7 +586,7 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 10,
+    gap: spacing.sm,
   },
   doctorAvatar: {
     width: 50,
@@ -556,25 +598,25 @@ const styles = StyleSheet.create({
   },
   doctorAvatarText: {
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: fontFamily(700),
     color: "#FFFFFF",
   },
   cardHeaderInfo: { flex: 1 },
   doctorNameRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: spacing.xs,
     marginBottom: 2,
   },
   doctorName: {
     fontSize: 15,
-    fontWeight: "700",
-    color: "#1E293B",
+    fontFamily: fontFamily(700),
+    color: palette.slate900,
   },
   specialization: {
     fontSize: 12,
-    color: "#1A6FD8",
-    fontWeight: "500",
+    color: palette.primary600,
+    fontFamily: fontFamily(500),
     marginBottom: 3,
   },
   clinicRow: {
@@ -584,49 +626,37 @@ const styles = StyleSheet.create({
   },
   clinicText: {
     fontSize: 11,
-    color: "#64748B",
+    color: palette.slate500,
     flex: 1,
-  },
-
-  statusBadge: {
-    borderRadius: 8,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    alignSelf: "flex-start",
-    flexShrink: 0,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "600",
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#F1F5F9",
-    marginVertical: 12,
+    backgroundColor: palette.slate100,
+    marginVertical: spacing.md,
   },
 
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 10,
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
   metaItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: spacing.xs,
   },
   metaText: {
     fontSize: 12,
-    color: "#64748B",
-    fontWeight: "500",
+    color: palette.slate500,
+    fontFamily: fontFamily(500),
   },
   metaDot: {
     width: 3,
     height: 3,
     borderRadius: 1.5,
-    backgroundColor: "#CBD5E1",
+    backgroundColor: palette.slate200,
   },
 
   feeRow: {
@@ -638,37 +668,37 @@ const styles = StyleSheet.create({
   feeBlock: {},
   feeLabel: {
     fontSize: 10,
-    color: "#94A3B8",
-    fontWeight: "500",
+    color: palette.slate400,
+    fontFamily: fontFamily(500),
     textTransform: "uppercase",
     letterSpacing: 0.4,
     marginBottom: 2,
   },
   feeValue: {
     fontSize: 15,
-    fontWeight: "700",
-    color: "#1E293B",
+    fontFamily: fontFamily(700),
+    color: palette.slate900,
   },
   durationBlock: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    gap: spacing.xs,
+    backgroundColor: palette.slate100,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   durationText: {
     fontSize: 12,
-    color: "#64748B",
-    fontWeight: "500",
+    color: palette.slate500,
+    fontFamily: fontFamily(500),
   },
 
   // Action buttons
   actionRow: {
     flexDirection: "row",
-    gap: 10,
-    marginTop: 14,
+    gap: spacing.sm,
+    marginTop: spacing.md,
   },
   rescheduleBtn: {
     flex: 1,
@@ -677,14 +707,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 5,
     borderWidth: 1.5,
-    borderColor: "#1A6FD8",
-    borderRadius: 10,
-    paddingVertical: 10,
+    borderColor: palette.primary600,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
   },
   rescheduleBtnText: {
     fontSize: 13,
-    fontWeight: "600",
-    color: "#1A6FD8",
+    fontFamily: fontFamily(600),
+    color: palette.primary600,
   },
   cancelBtn: {
     flex: 1,
@@ -693,31 +723,31 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 5,
     borderWidth: 1.5,
-    borderColor: "#DC2626",
-    borderRadius: 10,
-    paddingVertical: 10,
+    borderColor: palette.red600,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
   },
   cancelBtnText: {
     fontSize: 13,
-    fontWeight: "600",
-    color: "#DC2626",
+    fontFamily: fontFamily(600),
+    color: palette.red600,
   },
 
   bookAgainBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
+    gap: spacing.xs,
     borderWidth: 1.5,
-    borderColor: "#1A6FD8",
-    borderRadius: 10,
-    paddingVertical: 10,
-    marginTop: 14,
+    borderColor: palette.primary600,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.md,
   },
   bookAgainText: {
     fontSize: 13,
-    fontWeight: "600",
-    color: "#1A6FD8",
+    fontFamily: fontFamily(600),
+    color: palette.primary600,
   },
 
   // Empty state
@@ -726,27 +756,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingTop: 60,
-    paddingHorizontal: 32,
+    paddingHorizontal: spacing["3xl"],
   },
   emptyIcon: {
     width: 72,
     height: 72,
-    borderRadius: 24,
-    backgroundColor: "#EFF6FF",
+    borderRadius: radius.xl,
+    backgroundColor: palette.primary50,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   emptyTitle: {
     fontSize: 16,
-    fontWeight: "700",
-    color: "#1E293B",
-    marginBottom: 8,
+    fontFamily: fontFamily(700),
+    color: palette.slate900,
+    marginBottom: spacing.sm,
     textAlign: "center",
   },
   emptySub: {
     fontSize: 13,
-    color: "#94A3B8",
+    color: palette.slate400,
     textAlign: "center",
     lineHeight: 20,
   },
@@ -755,27 +785,27 @@ const styles = StyleSheet.create({
   footerHint: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 8,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
-    padding: 14,
-    marginTop: 6,
+    gap: spacing.sm,
+    backgroundColor: palette.surface,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    marginTop: spacing.xs,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: palette.slate200,
   },
   footerHintText: {
     flex: 1,
     fontSize: 12,
-    color: "#64748B",
+    color: palette.slate500,
     lineHeight: 18,
   },
   footerHintLink: {
     fontSize: 12,
-    fontWeight: "600",
-    color: "#1A6FD8",
+    fontFamily: fontFamily(600),
+    color: palette.primary600,
   },
 
   // Greyed text
-  textGreyed: { color: "#94A3B8" },
-  textMuted:  { color: "#CBD5E1" },
+  textGreyed: { color: palette.slate400 },
+  textMuted:  { color: palette.slate200 },
 });

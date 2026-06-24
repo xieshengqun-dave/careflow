@@ -1,6 +1,8 @@
 import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs } from "expo-router";
 import { Icon } from "@/components/Icon";
+import { palette } from "@/theme/careflow-tokens";
+import { fontFamily } from "@/theme/typography";
 
 function CheckInButton({ onPress }: { onPress?: () => void }) {
   return (
@@ -24,8 +26,8 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#1A6FD8",
-        tabBarInactiveTintColor: "#94A3B8",
+        tabBarActiveTintColor: palette.primary600,
+        tabBarInactiveTintColor: palette.slate400,
         tabBarStyle: styles.tabBar,
         tabBarLabelStyle: styles.tabLabel,
       }}
@@ -75,16 +77,16 @@ const styles = StyleSheet.create({
     height: 65,
     paddingBottom: 8,
     paddingTop: 4,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.surface,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
+    borderTopColor: palette.border,
     elevation: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
   },
-  tabLabel: { fontSize: 10, fontWeight: "500", marginTop: 1 },
+  tabLabel: { fontSize: 10, fontFamily: fontFamily(500), marginTop: 1 },
   checkInWrap: {
     flex: 1,
     alignItems: "center",
@@ -92,18 +94,20 @@ const styles = StyleSheet.create({
     paddingBottom: 6,
   },
   checkInCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "#1A6FD8",
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: palette.primary700,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: -18,
-    shadowColor: "#1A6FD8",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.45,
-    shadowRadius: 10,
+    marginTop: -22,
+    borderWidth: 4,
+    borderColor: palette.surface,
+    shadowColor: palette.primary700,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 18,
     elevation: 8,
   },
-  checkInLabel: { fontSize: 10, color: "#94A3B8", marginTop: 3, fontWeight: "500" },
+  checkInLabel: { fontSize: 10, color: palette.slate400, marginTop: 3, fontFamily: fontFamily(500) },
 });

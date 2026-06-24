@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#eef1f6;}
+::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:#d4dbe6;border-radius:4px;}
+</style>
+</helmet>
+<div style="display:flex;width:100%;min-height:100vh;background:#F6F8FB;">
+
+  <aside style="width:244px;flex:none;background:#fff;border-right:1px solid #EEF2F6;display:flex;flex-direction:column;padding:20px 14px;position:sticky;top:0;height:100vh;">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px 4px;"><div style="width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#2563EB,#22C55E);display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5 6 5c2 0 3.2 1.2 4 2.3C10.8 6.2 12 5 14 5c3.5 0 5 4 3.5 7-2.5 4.5-5.5 9-5.5 9z"/></svg></div><span style="font-size:18px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Care<span style="color:#16A34A;">Flow</span></span></div>
+    <div style="font-size:11px;color:#94A3B8;font-weight:600;padding:0 8px 16px;border-bottom:1px solid #F1F5F9;margin-bottom:12px;">KPJ Damansara Specialist Clinic</div>
+    <nav style="display:flex;flex-direction:column;gap:3px;">
+      <button onClick="{{ goDashboard }}" style="display:flex;align-items:center;gap:11px;border:none;background:{{ navDashB }};border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;color:{{ navDashC }};text-align:left;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="{{ navDashC }}" stroke-width="2"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="{{ navDashC }}" stroke-width="2"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="{{ navDashC }}" stroke-width="2"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="{{ navDashC }}" stroke-width="2"/></svg>Dashboard</button>
+      <button onClick="{{ goAppointments }}" style="display:flex;align-items:center;gap:11px;border:none;background:{{ navApptB }};border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;color:{{ navApptC }};text-align:left;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="{{ navApptC }}" stroke-width="2"/><path d="M8 2v4M16 2v4M3 10h18" stroke="{{ navApptC }}" stroke-width="2"/></svg>Appointments</button>
+      <button onClick="{{ goQueue }}" style="display:flex;align-items:center;gap:11px;border:none;background:{{ navQueueB }};border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;color:{{ navQueueC }};text-align:left;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M17 20v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="{{ navQueueC }}" stroke-width="2"/><circle cx="9" cy="7" r="3.2" stroke="{{ navQueueC }}" stroke-width="2"/><path d="M22 20v-2a4 4 0 00-3-3.8" stroke="{{ navQueueC }}" stroke-width="2"/></svg>Queue Management</button>
+      <button style="display:flex;align-items:center;gap:11px;border:none;background:none;border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:#64748B;text-align:left;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#94A3B8" stroke-width="2"/><path d="M5 20a7 7 0 0114 0" stroke="#94A3B8" stroke-width="2"/></svg>Patients</button>
+      <button style="display:flex;align-items:center;gap:11px;border:none;background:none;border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:#64748B;text-align:left;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" stroke="#94A3B8" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="#94A3B8" stroke-width="2"/><path d="M16 3.1a4 4 0 010 7.8" stroke="#94A3B8" stroke-width="2"/></svg>Doctors</button>
+      <button onClick="{{ goSchedule }}" style="display:flex;align-items:center;gap:11px;border:none;background:{{ navCalB }};border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;color:{{ navCalC }};text-align:left;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="{{ navCalC }}" stroke-width="2"/><path d="M8 2v4M16 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01" stroke="{{ navCalC }}" stroke-width="2" stroke-linecap="round"/></svg>Schedule</button>
+      <button style="display:flex;align-items:center;gap:11px;border:none;background:none;border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:#64748B;text-align:left;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="#94A3B8" stroke-width="2"/><path d="M2 10h20" stroke="#94A3B8" stroke-width="2"/></svg>Payments</button>
+      <button style="display:flex;align-items:center;gap:11px;border:none;background:none;border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:#64748B;text-align:left;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18" stroke="#94A3B8" stroke-width="2"/><path d="M7 15l4-4 3 3 5-6" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Reports &amp; Analytics</button>
+      <button style="display:flex;align-items:center;gap:11px;border:none;background:none;border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;color:#64748B;text-align:left;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#94A3B8" stroke-width="2"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.6 1.6 0 00-1-1.5 1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H3a2 2 0 010-4h.1a1.6 1.6 0 001.5-1 1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H10a1.6 1.6 0 001-1.5V3a2 2 0 014 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V10a1.6 1.6 0 001.5 1H21a2 2 0 010 4h-.1a1.6 1.6 0 00-1.5 1z" stroke="#94A3B8" stroke-width="2"/></svg>Settings</button>
+    </nav>
+    <div style="margin-top:auto;background:linear-gradient(135deg,#EEF3FE,#E9F7EF);border-radius:14px;padding:14px;"><div style="font-size:13px;font-weight:800;color:#0F172A;">CareFlow App</div><div style="font-size:11px;color:#64748B;line-height:1.4;margin:3px 0 9px;">Manage your clinic on the go.</div><button style="border:none;background:#1D4ED8;color:#fff;font-family:inherit;font-size:12px;font-weight:700;padding:7px 13px;border-radius:9px;cursor:pointer;">Learn More</button></div>
+  </aside>
+
+  <main style="flex:1;min-width:0;overflow-x:hidden;">
+
+    <sc-if value="{{ pageDashboard }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:26px 30px 40px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;">
+          <div><h1 style="margin:0;font-size:28px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Dashboard</h1><p style="margin:5px 0 0;font-size:14px;color:#64748B;">Good morning, KPJ Damansara Specialist Clinic 👋</p></div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:9px 13px;font-size:13px;font-weight:700;color:#334155;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#64748B" stroke-width="2"/><path d="M8 2v4M16 2v4M3 10h18" stroke="#64748B" stroke-width="2"/></svg>20 May 2025, Tue ▾</div>
+            <div style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:9px 13px;font-size:13px;font-weight:700;color:#334155;">9:41 AM <span style="width:7px;height:7px;border-radius:50%;background:#22C55E;"></span>Live</div>
+            <div style="position:relative;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9" stroke="#334155" stroke-width="2" stroke-linejoin="round"/><path d="M10.3 21a1.94 1.94 0 003.4 0" stroke="#334155" stroke-width="2"/></svg><span style="position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;border-radius:8px;background:#EF4444;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;">12</span></div>
+            <div style="display:flex;align-items:center;gap:9px;"><div style="width:38px;height:38px;border-radius:50%;background:repeating-linear-gradient(45deg,#EEF2F6,#EEF2F6 5px,#E5EAF1 5px,#E5EAF1 10px);"></div><div><div style="font-size:13px;font-weight:800;color:#0F172A;">Dr. Alice Tan</div><div style="font-size:11px;color:#94A3B8;">Admin</div></div></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:20px;">
+          <button style="display:flex;align-items:center;gap:7px;border:1px solid #E2E8F0;background:#fff;border-radius:11px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;color:#334155;cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="#334155" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Export Report</button>
+          <button style="display:flex;align-items:center;gap:7px;border:none;background:#1D4ED8;border-radius:11px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 8px 16px -8px rgba(29,78,216,.6);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>New Appointment</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px;">
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:42px;height:42px;border-radius:12px;background:#E9F0FE;display:flex;align-items:center;justify-content:center;margin-bottom:11px;"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#2563EB" stroke-width="2"/><path d="M8 2v4M16 2v4M3 10h18" stroke="#2563EB" stroke-width="2"/></svg></div><div style="font-size:13px;color:#64748B;font-weight:600;">Today's Appointments</div><div style="font-size:28px;font-weight:800;color:#0F172A;margin:2px 0;">36</div><div style="font-size:12px;color:#16A34A;font-weight:700;">↑ 12% vs yesterday</div></div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:42px;height:42px;border-radius:12px;background:#E6F8EE;display:flex;align-items:center;justify-content:center;margin-bottom:11px;"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M17 20v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="#16A34A" stroke-width="2"/><circle cx="9" cy="7" r="3" stroke="#16A34A" stroke-width="2"/><path d="M22 20v-2a4 4 0 00-3-3.8" stroke="#16A34A" stroke-width="2"/></svg></div><div style="font-size:13px;color:#64748B;font-weight:600;">Walk-in Queue</div><div style="font-size:28px;font-weight:800;color:#0F172A;margin:2px 0;">7</div><div style="font-size:12px;color:#94A3B8;font-weight:600;">Est. wait 45–60 mins</div></div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:42px;height:42px;border-radius:12px;background:#F3EEFE;display:flex;align-items:center;justify-content:center;margin-bottom:11px;"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M17 20v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="#7C3AED" stroke-width="2"/><circle cx="9" cy="7" r="3" stroke="#7C3AED" stroke-width="2"/><path d="M22 20v-2a4 4 0 00-3-3.8" stroke="#7C3AED" stroke-width="2"/></svg></div><div style="font-size:13px;color:#64748B;font-weight:600;">Patients Today</div><div style="font-size:28px;font-weight:800;color:#0F172A;margin:2px 0;">43</div><div style="font-size:12px;color:#16A34A;font-weight:700;">↑ 8% vs yesterday</div></div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:42px;height:42px;border-radius:12px;background:#FEF3E2;display:flex;align-items:center;justify-content:center;margin-bottom:11px;"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/></svg></div><div style="font-size:13px;color:#64748B;font-weight:600;">Revenue Today</div><div style="font-size:28px;font-weight:800;color:#0F172A;margin:2px 0;">RM 2,680</div><div style="font-size:12px;color:#16A34A;font-weight:700;">↑ 15% vs yesterday</div></div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:42px;height:42px;border-radius:12px;background:#E9F0FE;display:flex;align-items:center;justify-content:center;margin-bottom:11px;"><svg width="21" height="21" viewBox="0 0 24 24" fill="#FBBF24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div><div style="font-size:13px;color:#64748B;font-weight:600;">Review Rating</div><div style="font-size:28px;font-weight:800;color:#0F172A;margin:2px 0;">4.9</div><div style="font-size:12px;color:#94A3B8;font-weight:600;">(320 reviews)</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;"><h3 style="margin:0;font-size:17px;font-weight:800;color:#0F172A;">Live Queue Overview</h3><span style="font-size:13px;font-weight:700;color:#2563EB;cursor:pointer;">View All Queue</span></div>
+            <div style="display:flex;align-items:center;gap:20px;">
+              <div style="position:relative;width:120px;height:120px;flex:none;"><div style="width:120px;height:120px;border-radius:50%;background:conic-gradient(#22C55E 0 28%,#F59E0B 28% 92%,#EF4444 92% 100%);"></div><div style="position:absolute;inset:16px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;"><span style="font-size:28px;font-weight:800;color:#0F172A;">7</span><span style="font-size:11px;color:#94A3B8;">in queue</span></div></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:9px;font-size:13px;"><span style="width:22px;height:22px;border-radius:7px;background:#E6F8EE;color:#16A34A;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;">2</span><span style="color:#475569;font-weight:600;">With Doctor</span></div>
+                <div style="display:flex;align-items:center;gap:9px;font-size:13px;"><span style="width:22px;height:22px;border-radius:7px;background:#FEF3E2;color:#F59E0B;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;">7</span><span style="color:#475569;font-weight:600;">Waiting</span></div>
+                <div style="display:flex;align-items:center;gap:9px;font-size:13px;"><span style="width:22px;height:22px;border-radius:7px;background:#FEF2F2;color:#EF4444;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;">1</span><span style="color:#475569;font-weight:600;">Called - Not Arrived</span></div>
+                <div style="display:flex;align-items:center;gap:9px;font-size:13px;"><span style="width:22px;height:22px;border-radius:7px;background:#F1F5F9;color:#94A3B8;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;">0</span><span style="color:#475569;font-weight:600;">Completed</span></div>
+              </div>
+              <div style="flex:none;background:#F1F8F4;border-radius:13px;padding:14px;text-align:center;"><div style="font-size:11px;color:#64748B;">Est. Waiting Time</div><div style="font-size:20px;font-weight:800;color:#16A34A;margin:2px 0;">45–60 mins</div><button onClick="{{ goQueue }}" style="border:1px solid #DCF0E3;background:#fff;border-radius:9px;padding:7px 12px;font-family:inherit;font-size:12px;font-weight:700;color:#16A34A;cursor:pointer;margin-top:6px;">Manage Queue</button></div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><h3 style="margin:0;font-size:17px;font-weight:800;color:#0F172A;">Today's Appointments</h3><span onClick="{{ goAppointments }}" style="font-size:13px;font-weight:700;color:#2563EB;cursor:pointer;">View Calendar</span></div>
+            <div style="display:flex;flex-direction:column;">
+              <div style="display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:13px;font-weight:700;color:#2563EB;width:64px;flex:none;">9:20 AM</span><div style="width:32px;height:32px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div style="flex:1;"><div style="font-size:14px;font-weight:700;color:#0F172A;">Ahmad Bin Rahman</div><div style="font-size:12px;color:#94A3B8;">Consultation</div></div><span style="font-size:12px;font-weight:700;color:#16A34A;background:#E6F8EE;padding:4px 10px;border-radius:8px;">In Queue</span></div>
+              <div style="display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:13px;font-weight:700;color:#2563EB;width:64px;flex:none;">10:00 AM</span><div style="width:32px;height:32px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div style="flex:1;"><div style="font-size:14px;font-weight:700;color:#0F172A;">Siti Nur Aisyah</div><div style="font-size:12px;color:#94A3B8;">Follow-up</div></div><span style="font-size:12px;font-weight:700;color:#2563EB;background:#EFF4FF;padding:4px 10px;border-radius:8px;">Checked In</span></div>
+              <div style="display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:13px;font-weight:700;color:#2563EB;width:64px;flex:none;">10:20 AM</span><div style="width:32px;height:32px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div style="flex:1;"><div style="font-size:14px;font-weight:700;color:#0F172A;">Jason Wong</div><div style="font-size:12px;color:#94A3B8;">Consultation</div></div><span style="font-size:12px;font-weight:700;color:#2563EB;border:1px solid #BFD4FB;padding:4px 10px;border-radius:8px;">Confirmed</span></div>
+              <div style="display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:13px;font-weight:700;color:#2563EB;width:64px;flex:none;">10:40 AM</span><div style="width:32px;height:32px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div style="flex:1;"><div style="font-size:14px;font-weight:700;color:#0F172A;">Lim Mei Ling</div><div style="font-size:12px;color:#94A3B8;">Health Screening</div></div><span style="font-size:12px;font-weight:700;color:#64748B;background:#F1F5F9;padding:4px 10px;border-radius:8px;">Upcoming</span></div>
+              <div style="display:flex;align-items:center;gap:13px;padding:11px 0;"><span style="font-size:13px;font-weight:700;color:#2563EB;width:64px;flex:none;">11:00 AM</span><div style="width:32px;height:32px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div style="flex:1;"><div style="font-size:14px;font-weight:700;color:#0F172A;">David Tan</div><div style="font-size:12px;color:#94A3B8;">Consultation</div></div><span style="font-size:12px;font-weight:700;color:#64748B;background:#F1F5F9;padding:4px 10px;border-radius:8px;">Upcoming</span></div>
+            </div>
+            <button onClick="{{ goAppointments }}" style="width:100%;border:none;background:none;color:#2563EB;font-family:inherit;font-size:13px;font-weight:700;padding:11px 0 0;cursor:pointer;border-top:1px solid #F1F5F9;margin-top:8px;">+ New Appointment</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;">
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:18px;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;"><h3 style="margin:0;font-size:16px;font-weight:800;color:#0F172A;">Doctor Schedule Today</h3><span onClick="{{ goSchedule }}" style="font-size:12px;font-weight:700;color:#2563EB;cursor:pointer;">View All</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 0;"><div style="width:34px;height:34px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Dr. Lim Wei Sheng</div><div style="font-size:11px;color:#94A3B8;">Family Medicine</div></div><span style="font-size:11px;font-weight:700;color:#16A34A;background:#E6F8EE;padding:3px 8px;border-radius:7px;">Consulting</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #F1F5F9;"><div style="width:34px;height:34px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Dr. Tan Jian Hong</div><div style="font-size:11px;color:#94A3B8;">Family Medicine</div></div><span style="font-size:11px;font-weight:700;color:#16A34A;background:#E6F8EE;padding:3px 8px;border-radius:7px;">Consulting</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #F1F5F9;"><div style="width:34px;height:34px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Dr. Nurul Aishah</div><div style="font-size:11px;color:#94A3B8;">Paediatrician</div></div><span style="font-size:11px;font-weight:700;color:#F59E0B;background:#FEF3E2;padding:3px 8px;border-radius:7px;">On Break</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #F1F5F9;"><div style="width:34px;height:34px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Dr. Lee Chee Kiat</div><div style="font-size:11px;color:#94A3B8;">Orthopaedic</div></div><span style="font-size:11px;font-weight:700;color:#94A3B8;background:#F1F5F9;padding:3px 8px;border-radius:7px;">Offline</span></div>
+          </div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:18px;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+            <h3 style="margin:0 0 14px;font-size:16px;font-weight:800;color:#0F172A;">Today's Overview</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div><div style="font-size:12px;color:#64748B;font-weight:600;">Appointments</div><div style="font-size:20px;font-weight:800;color:#0F172A;">36 <span style="font-size:11px;color:#16A34A;">↑12%</span></div><svg width="100%" height="22" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline points="0,16 15,12 30,14 45,8 60,11 75,5 100,7" fill="none" stroke="#2563EB" stroke-width="2"/></svg></div>
+              <div><div style="font-size:12px;color:#64748B;font-weight:600;">Patients</div><div style="font-size:20px;font-weight:800;color:#0F172A;">43 <span style="font-size:11px;color:#16A34A;">↑8%</span></div><svg width="100%" height="22" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline points="0,14 15,15 30,10 45,12 60,7 75,9 100,5" fill="none" stroke="#16A34A" stroke-width="2"/></svg></div>
+              <div><div style="font-size:12px;color:#64748B;font-weight:600;">Walk-ins</div><div style="font-size:20px;font-weight:800;color:#0F172A;">18 <span style="font-size:11px;color:#16A34A;">↑20%</span></div><svg width="100%" height="22" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline points="0,17 15,14 30,15 45,10 60,12 75,8 100,6" fill="none" stroke="#16A34A" stroke-width="2"/></svg></div>
+              <div><div style="font-size:12px;color:#64748B;font-weight:600;">Revenue</div><div style="font-size:20px;font-weight:800;color:#0F172A;">RM 2,680 <span style="font-size:11px;color:#16A34A;">↑15%</span></div><svg width="100%" height="22" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline points="0,15 15,11 30,13 45,9 60,6 75,8 100,4" fill="none" stroke="#F59E0B" stroke-width="2"/></svg></div>
+              <div><div style="font-size:12px;color:#64748B;font-weight:600;">Queue Served</div><div style="font-size:20px;font-weight:800;color:#0F172A;">12 <span style="font-size:11px;color:#16A34A;">↑9%</span></div><svg width="100%" height="22" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline points="0,13 15,14 30,9 45,11 60,8 75,10 100,6" fill="none" stroke="#7C3AED" stroke-width="2"/></svg></div>
+              <div><div style="font-size:12px;color:#64748B;font-weight:600;">No-Show Rate</div><div style="font-size:20px;font-weight:800;color:#0F172A;">2.3% <span style="font-size:11px;color:#EF4444;">↓1.1%</span></div><svg width="100%" height="22" viewBox="0 0 100 22" preserveAspectRatio="none"><polyline points="0,8 15,10 30,9 45,13 60,12 75,15 100,16" fill="none" stroke="#EF4444" stroke-width="2"/></svg></div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:18px;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;"><h3 style="margin:0;font-size:16px;font-weight:800;color:#0F172A;">Recent Activity</h3><span style="font-size:12px;font-weight:700;color:#2563EB;cursor:pointer;">View All</span></div>
+            <div style="display:flex;gap:11px;padding:9px 0;"><div style="width:30px;height:30px;border-radius:50%;background:#E6F8EE;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Patient #5 has been called</div><div style="font-size:11px;color:#94A3B8;">Ahmad Bin Rahman · 9:36 AM</div></div></div>
+            <div style="display:flex;gap:11px;padding:9px 0;border-top:1px solid #F1F5F9;"><div style="width:30px;height:30px;border-radius:50%;background:#EEF3FE;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#2563EB" stroke-width="2"/><path d="M8 2v4M16 2v4M3 10h18" stroke="#2563EB" stroke-width="2"/></svg></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">New appointment booked</div><div style="font-size:11px;color:#94A3B8;">Siti Nur Aisyah · 9:30 AM</div></div></div>
+            <div style="display:flex;gap:11px;padding:9px 0;border-top:1px solid #F1F5F9;"><div style="width:30px;height:30px;border-radius:50%;background:#F3EEFE;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#7C3AED" stroke-width="2"/><path d="M5 20a7 7 0 0114 0" stroke="#7C3AED" stroke-width="2"/></svg></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">New patient registered</div><div style="font-size:11px;color:#94A3B8;">Jason Wong · 9:15 AM</div></div></div>
+            <div style="display:flex;gap:11px;padding:9px 0;border-top:1px solid #F1F5F9;"><div style="width:30px;height:30px;border-radius:50%;background:#FEF3E2;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="#F59E0B" stroke-width="2"/><path d="M2 10h20" stroke="#F59E0B" stroke-width="2"/></svg></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Payment received</div><div style="font-size:11px;color:#94A3B8;">RM 50.00 · Siti Nur Aisyah · 9:12 AM</div></div></div>
+            <div style="display:flex;gap:11px;padding:9px 0;border-top:1px solid #F1F5F9;"><div style="width:30px;height:30px;border-radius:50%;background:#FEF2F2;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#EF4444" stroke-width="2"/><path d="M15 9l-6 6M9 9l6 6" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/></svg></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Appointment cancelled</div><div style="font-size:11px;color:#94A3B8;">David Tan · 8:45 AM</div></div></div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ pageAppointments }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:26px 30px 40px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;">
+          <div><h1 style="margin:0;font-size:28px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Appointments</h1><p style="margin:5px 0 0;font-size:14px;color:#64748B;">Manage and track all clinic appointments</p></div>
+          <div style="display:flex;align-items:center;gap:12px;"><div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:9px 13px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#94A3B8" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:13px;color:#94A3B8;">Search patient...</span></div><div style="width:38px;height:38px;border-radius:50%;background:repeating-linear-gradient(45deg,#EEF2F6,#EEF2F6 5px,#E5EAF1 5px,#E5EAF1 10px);"></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:9px 14px;font-size:13px;font-weight:700;color:#334155;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#64748B" stroke-width="2"/><path d="M8 2v4M16 2v4M3 10h18" stroke="#64748B" stroke-width="2"/></svg>22 June 2024 ▾</div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:9px 14px;font-size:13px;font-weight:700;color:#334155;">All Doctors ▾</div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:9px 14px;font-size:13px;font-weight:700;color:#334155;">All Status ▾</div>
+          <button style="margin-left:auto;display:flex;align-items:center;gap:7px;border:none;background:#1D4ED8;border-radius:11px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 8px 16px -8px rgba(29,78,216,.6);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>New Appointment</button>
+        </div>
+        <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+          <div style="display:grid;grid-template-columns:90px 1.4fr 1.6fr 1.2fr 1fr 80px;padding:14px 20px;background:#F8FAFC;border-bottom:1px solid #EEF2F6;font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.03em;"><span>Time</span><span>Patient</span><span>Doctor</span><span>Type</span><span>Status</span><span>Actions</span></div>
+          <sc-for list="{{ appts }}" as="a" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:90px 1.4fr 1.6fr 1.2fr 1fr 80px;align-items:center;padding:13px 20px;border-bottom:1px solid #F1F5F9;">
+              <span style="font-size:13px;font-weight:700;color:#0F172A;">{{ a.time }}</span>
+              <div style="display:flex;align-items:center;gap:10px;"><div style="width:32px;height:32px;border-radius:50%;background:#EEF2F6;flex:none;"></div><span style="font-size:13px;font-weight:700;color:#0F172A;">{{ a.name }}</span></div>
+              <span style="font-size:13px;color:#475569;font-weight:600;">{{ a.doctor }}</span>
+              <span style="font-size:13px;color:#64748B;">{{ a.type }}</span>
+              <span style="justify-self:start;font-size:12px;font-weight:700;color:{{ a.stC }};background:{{ a.stBg }};padding:4px 11px;border-radius:8px;">{{ a.status }}</span>
+              <span style="color:#94A3B8;font-weight:800;">···</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ pageQueue }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:26px 30px 40px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;">
+          <div><h1 style="margin:0;font-size:28px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Queue Management</h1><p style="margin:5px 0 0;font-size:14px;color:#64748B;">Real-time queue overview and patient management</p></div>
+          <div style="display:flex;align-items:center;gap:14px;"><button style="display:flex;align-items:center;gap:7px;border:1px solid #E2E8F0;background:#fff;border-radius:11px;padding:9px 15px;font-family:inherit;font-size:13px;font-weight:700;color:#334155;cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="#334155" stroke-width="2" stroke-linecap="round"/><path d="M3.5 9a9 9 0 0114.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0020.5 15" stroke="#334155" stroke-width="2" stroke-linecap="round"/></svg>Refresh</button><span style="font-size:13px;color:#64748B;">Last updated: 9:41 AM <span style="color:#22C55E;">●</span></span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;">
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;display:flex;align-items:center;gap:13px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:44px;height:44px;border-radius:12px;background:#E6F8EE;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M17 20v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="#16A34A" stroke-width="2"/><circle cx="9" cy="7" r="3" stroke="#16A34A" stroke-width="2"/></svg></div><div><div style="font-size:12px;color:#64748B;font-weight:600;">Total in Queue</div><div style="font-size:24px;font-weight:800;color:#0F172A;">7 <span style="font-size:12px;color:#94A3B8;font-weight:600;">patients</span></div></div></div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;display:flex;align-items:center;gap:13px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:44px;height:44px;border-radius:12px;background:#FEF3E2;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#F59E0B" stroke-width="2"/><path d="M12 7v5l3 2" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/></svg></div><div><div style="font-size:12px;color:#64748B;font-weight:600;">Avg. Waiting Time</div><div style="font-size:24px;font-weight:800;color:#0F172A;">48 <span style="font-size:12px;color:#94A3B8;font-weight:600;">mins</span></div></div></div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;display:flex;align-items:center;gap:13px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:44px;height:44px;border-radius:12px;background:#F3EEFE;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#7C3AED" stroke-width="2"/><path d="M5 20a7 7 0 0114 0" stroke="#7C3AED" stroke-width="2"/></svg></div><div><div style="font-size:12px;color:#64748B;font-weight:600;">Next to See</div><div style="font-size:24px;font-weight:800;color:#0F172A;">#3</div></div></div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;display:flex;align-items:center;gap:13px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:44px;height:44px;border-radius:12px;background:#EEF3FE;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#2563EB" stroke-width="2"/><path d="M8 2v4M16 2v4M3 10h18" stroke="#2563EB" stroke-width="2"/></svg></div><div><div style="font-size:12px;color:#64748B;font-weight:600;">Queue Closed</div><div style="font-size:24px;font-weight:800;color:#0F172A;">9:00 PM</div></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:18px;">
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+            <div style="padding:16px 20px;font-size:16px;font-weight:800;color:#0F172A;border-bottom:1px solid #EEF2F6;">Current Queue (7)</div>
+            <div style="display:grid;grid-template-columns:44px 1.8fr 1fr 1.2fr 1fr 50px;padding:11px 20px;background:#F8FAFC;border-bottom:1px solid #EEF2F6;font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.03em;"><span>#</span><span>Patient</span><span>Queue Time</span><span>Type</span><span>Status</span><span></span></div>
+            <sc-for list="{{ queue }}" as="q" hint-placeholder-count="7">
+              <div style="display:grid;grid-template-columns:44px 1.8fr 1fr 1.2fr 1fr 50px;align-items:center;padding:12px 20px;border-bottom:1px solid #F1F5F9;background:{{ q.row }};">
+                <span style="width:26px;height:26px;border-radius:50%;background:{{ q.ndot }};color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;">{{ q.n }}</span>
+                <div style="display:flex;align-items:center;gap:10px;"><div style="width:34px;height:34px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div><div style="font-size:13px;font-weight:700;color:#0F172A;">{{ q.name }}</div><div style="font-size:11px;color:#94A3B8;">ID: {{ q.id }}</div></div></div>
+                <div><div style="font-size:13px;font-weight:700;color:#0F172A;">{{ q.time }}</div><div style="font-size:11px;color:#94A3B8;">{{ q.dur }}</div></div>
+                <span style="justify-self:start;font-size:11px;font-weight:700;color:{{ q.typeC }};background:{{ q.typeBg }};padding:4px 10px;border-radius:7px;">{{ q.type }}</span>
+                <span style="justify-self:start;font-size:11px;font-weight:700;color:{{ q.stC }};background:{{ q.stBg }};padding:4px 10px;border-radius:7px;">{{ q.status }}</span>
+                <span style="color:#94A3B8;font-weight:800;text-align:center;">⋮</span>
+              </div>
+            </sc-for>
+            <div style="padding:12px 20px;font-size:12px;color:#94A3B8;display:flex;align-items:center;gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#94A3B8" stroke-width="2"/><path d="M12 16v-4M12 8h.01" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/></svg>Queue status will update automatically in real-time.</div>
+          </div>
+          <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;"><span style="font-size:13px;font-weight:800;color:#475569;background:#F1F5F9;padding:4px 11px;border-radius:8px;">#1</span><span style="font-size:12px;font-weight:700;color:#16A34A;background:#E6F8EE;padding:4px 11px;border-radius:8px;">With Doctor</span></div>
+            <div style="display:flex;align-items:center;gap:13px;margin-bottom:18px;"><div style="width:54px;height:54px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div><div style="font-size:17px;font-weight:800;color:#0F172A;">Ahmad Bin Rahman</div><div style="font-size:12px;color:#94A3B8;">ID: 890515-10-1234</div><div style="font-size:12px;color:#94A3B8;">012-345 6789</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:11px;padding-bottom:18px;border-bottom:1px solid #F1F5F9;">
+              <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px;color:#64748B;">⏱ Queue Time</span><span style="font-size:13px;font-weight:700;color:#0F172A;">8:20 AM (1h 21m)</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px;color:#64748B;">🗂 Type</span><span style="font-size:13px;font-weight:700;color:#0F172A;">Consultation</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px;color:#64748B;">👤 Doctor</span><span style="font-size:13px;font-weight:700;color:#0F172A;">Dr. Lim Wei Sheng</span></div>
+            </div>
+            <div style="font-size:13px;font-weight:800;color:#0F172A;margin:16px 0 12px;">Quick Actions</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px;">
+              <button style="border:1px solid #DCF0E3;background:#F1F8F4;border-radius:11px;padding:11px;font-family:inherit;font-size:12px;font-weight:700;color:#16A34A;cursor:pointer;">📞 Call Next Patient</button>
+              <button style="border:1px solid #BFD4FB;background:#EFF4FF;border-radius:11px;padding:11px;font-family:inherit;font-size:12px;font-weight:700;color:#2563EB;cursor:pointer;">✓ Mark as Arrived</button>
+              <button style="border:1px solid #FCEFC7;background:#FFFBEB;border-radius:11px;padding:11px;font-family:inherit;font-size:12px;font-weight:700;color:#B45309;cursor:pointer;">↑ Move to Top</button>
+              <button style="border:1px solid #FBE0E0;background:#fff;border-radius:11px;padding:11px;font-family:inherit;font-size:12px;font-weight:700;color:#DC2626;cursor:pointer;">Remove from Queue</button>
+            </div>
+            <div style="background:#EFF4FF;border-radius:11px;padding:12px;display:flex;align-items:center;gap:9px;font-size:12px;color:#2563EB;font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#2563EB" stroke-width="2" stroke-linecap="round"/></svg>You can drag and drop patients to reorder the queue.</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ pageSchedule }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:26px 30px 40px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;">
+          <div><h1 style="margin:0;font-size:28px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Schedule</h1><p style="margin:5px 0 0;font-size:14px;color:#64748B;">Dr. Lim Wei Sheng · 16 – 22 June 2024</p></div>
+          <div style="display:flex;align-items:center;gap:12px;"><div style="background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:9px 14px;font-size:13px;font-weight:700;color:#334155;">Dr. Lim Wei Sheng ▾</div><div style="display:flex;background:#fff;border:1px solid #EEF2F6;border-radius:11px;overflow:hidden;"><span style="padding:9px 14px;font-size:13px;font-weight:700;color:#64748B;">Day</span><span style="padding:9px 14px;font-size:13px;font-weight:700;color:#fff;background:#1D4ED8;">Week</span><span style="padding:9px 14px;font-size:13px;font-weight:700;color:#64748B;">Month</span></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:18px;margin-bottom:14px;font-size:12px;font-weight:600;">
+          <span style="display:flex;align-items:center;gap:6px;color:#16A34A;"><span style="width:11px;height:11px;border-radius:3px;background:#DDF3E4;border:1px solid #BBF0CB;"></span>Available</span>
+          <span style="display:flex;align-items:center;gap:6px;color:#DC2626;"><span style="width:11px;height:11px;border-radius:3px;background:#FBE0E0;border:1px solid #F5C2C2;"></span>Booked (Appointment)</span>
+          <span style="display:flex;align-items:center;gap:6px;color:#64748B;"><span style="width:11px;height:11px;border-radius:3px;background:#EEF2F6;border:1px solid #D8DEE9;"></span>Break</span>
+          <span style="display:flex;align-items:center;gap:6px;color:#2563EB;"><span style="width:11px;height:11px;border-radius:3px;background:#2563EB;"></span>Selected</span>
+        </div>
+        <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+          <div style="display:grid;grid-template-columns:64px repeat(7,1fr);border-bottom:1px solid #EEF2F6;background:#F8FAFC;">
+            <div></div>
+            <div style="padding:12px 0;text-align:center;font-size:12px;font-weight:700;color:#64748B;">Sun 16</div>
+            <div style="padding:12px 0;text-align:center;font-size:12px;font-weight:700;color:#64748B;">Mon 17</div>
+            <div style="padding:12px 0;text-align:center;font-size:12px;font-weight:700;color:#64748B;">Tue 18</div>
+            <div style="padding:12px 0;text-align:center;font-size:12px;font-weight:700;color:#64748B;">Wed 19</div>
+            <div style="padding:12px 0;text-align:center;font-size:12px;font-weight:700;color:#64748B;">Thu 20</div>
+            <div style="padding:12px 0;text-align:center;font-size:12px;font-weight:700;color:#64748B;">Fri 21</div>
+            <div style="padding:12px 0;text-align:center;font-size:12px;font-weight:700;color:#64748B;">Sat 22</div>
+          </div>
+          <sc-for list="{{ scheduleRows }}" as="r" hint-placeholder-count="9">
+            <div style="display:grid;grid-template-columns:64px repeat(7,1fr);border-bottom:1px solid #F1F5F9;min-height:46px;">
+              <div style="padding:10px 8px;font-size:11px;font-weight:700;color:#94A3B8;text-align:right;border-right:1px solid #F1F5F9;">{{ r.t }}</div>
+              <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="7"><div style="border-right:1px solid #F1F5F9;padding:4px;"><div style="height:100%;min-height:36px;border-radius:7px;background:{{ c.bg }};border:1px solid {{ c.border }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:{{ c.tc }};text-align:center;line-height:1.2;padding:2px;">{{ c.label }}</div></div></sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+  </main>
+</div>
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#E9F7EF"/><rect x="30" y="30" width="40" height="10" rx="3" fill="#2563EB"/><rect x="30" y="46" width="18" height="24" rx="3" fill="#22C55E"/><rect x="52" y="46" width="18" height="24" rx="3" fill="#94CBF5"/></svg></template></x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { page:'dashboard' };
+  go(p){ this.setState({ page:p }); }
+  renderVals(){
+    const p=this.state.page;
+    const onB='#EAF1FE', onC='#1D4ED8', offB='none', offC='#64748B';
+    const queue=[
+      {n:'1',name:'Ahmad Bin Rahman',id:'890515-10-1234',time:'8:20 AM',dur:'1h 21m',type:'Consultation',typeBg:'#EFF4FF',typeC:'#2563EB',status:'With Doctor',stBg:'#E6F8EE',stC:'#16A34A',row:'#F1FAF4',ndot:'#16A34A'},
+      {n:'2',name:'Siti Nur Aisyah',id:'940622-14-5678',time:'8:45 AM',dur:'56m',type:'Follow-up',typeBg:'#F3EEFE',typeC:'#7C3AED',status:'Called In',stBg:'#EFF4FF',stC:'#2563EB',row:'#fff',ndot:'#16A34A'},
+      {n:'3',name:'Jason Wong',id:'910331-07-4321',time:'9:00 AM',dur:'41m',type:'Consultation',typeBg:'#EFF4FF',typeC:'#2563EB',status:'Waiting Next',stBg:'#FEF3E2',stC:'#B45309',row:'#fff',ndot:'#2563EB'},
+      {n:'4',name:'Lim Mei Ling',id:'880707-08-1111',time:'9:10 AM',dur:'31m',type:'Health Screening',typeBg:'#EAF7EF',typeC:'#16A34A',status:'Waiting',stBg:'#F1F5F9',stC:'#64748B',row:'#fff',ndot:'#94A3B8'},
+      {n:'5',name:'David Tan',id:'760919-10-2222',time:'9:20 AM',dur:'21m',type:'Consultation',typeBg:'#EFF4FF',typeC:'#2563EB',status:'Waiting',stBg:'#F1F5F9',stC:'#64748B',row:'#fff',ndot:'#94A3B8'},
+      {n:'6',name:'Nurul Huda',id:'950205-03-3333',time:'9:30 AM',dur:'11m',type:'Follow-up',typeBg:'#F3EEFE',typeC:'#7C3AED',status:'Waiting',stBg:'#F1F5F9',stC:'#64748B',row:'#fff',ndot:'#94A3B8'},
+      {n:'7',name:'Muhammad Iqbal',id:'930812-10-4444',time:'9:35 AM',dur:'6m',type:'Consultation',typeBg:'#EFF4FF',typeC:'#2563EB',status:'Waiting',stBg:'#F1F5F9',stC:'#64748B',row:'#fff',ndot:'#94A3B8'}
+    ];
+    const appts=[
+      {time:'8:00 AM',name:'Ahmad Bakri',doctor:'Dr. Lim Wei Sheng',type:'Appointment',status:'Completed',stBg:'#E6F8EE',stC:'#16A34A'},
+      {time:'8:20 AM',name:'Siti Aishah',doctor:'Dr. Lim Wei Sheng',type:'Appointment',status:'Completed',stBg:'#E6F8EE',stC:'#16A34A'},
+      {time:'8:40 AM',name:'Raj Kumar',doctor:'Dr. Lim Wei Sheng',type:'Appointment',status:'No Show',stBg:'#FEF2F2',stC:'#DC2626'},
+      {time:'9:00 AM',name:'Nurul Huda',doctor:'Dr. Lim Wei Sheng',type:'Appointment',status:'Completed',stBg:'#E6F8EE',stC:'#16A34A'},
+      {time:'9:20 AM',name:'Michael Tan',doctor:'Dr. Lim Wei Sheng',type:'Appointment',status:'Completed',stBg:'#E6F8EE',stC:'#16A34A'},
+      {time:'9:40 AM',name:'Farah Izzati',doctor:'Dr. Lim Wei Sheng',type:'Appointment',status:'Confirmed',stBg:'#EFF4FF',stC:'#2563EB'},
+      {time:'10:20 AM',name:'Jason Wong',doctor:'Dr. Lim Wei Sheng',type:'Appointment',status:'Scheduled',stBg:'#F1F5F9',stC:'#64748B'},
+      {time:'10:40 AM',name:'Lim Mei Ling',doctor:'Dr. Lim Wei Sheng',type:'Appointment',status:'Scheduled',stBg:'#F1F5F9',stC:'#64748B'}
+    ];
+    const AV={bg:'#F1FAF4',border:'#DDF3E4',tc:'#16A34A',label:'Available'};
+    const BK=(n)=>({bg:'#FEF3F3',border:'#FBE0E0',tc:'#DC2626',label:n});
+    const BR={bg:'#F4F6FA',border:'#E5EAF1',tc:'#94A3B8',label:'Break'};
+    const EM={bg:'#fff',border:'#F1F5F9',tc:'#fff',label:''};
+    const times=['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
+    const grid=[
+      [AV,AV,AV,EM,AV,BR,AV],
+      [BK('Booked'),AV,BK('Booked'),AV,AV,AV,AV],
+      [AV,BK('Vaccine'),AV,BK('Booked'),AV,BK('Booked'),AV],
+      [AV,AV,BK('Consult'),AV,BK('Booked'),AV,EM],
+      [BR,BR,BR,BR,BR,BR,BR],
+      [AV,BK('Booked'),AV,AV,BK('Consult'),AV,AV],
+      [BK('Booked'),AV,AV,BK('Booked'),AV,AV,EM],
+      [AV,AV,BK('Booked'),AV,AV,BK('Booked'),AV],
+      [AV,BR,AV,AV,BK('Booked'),AV,BR],
+      [AV,AV,AV,BK('Booked'),AV,EM,EM]
+    ];
+    const scheduleRows=times.map((t,i)=>({t,cells:grid[i]}));
+    return {
+      scheduleRows,
+      pageDashboard:p==='dashboard', pageAppointments:p==='appointments', pageQueue:p==='queue', pageSchedule:p==='schedule',
+      navDashB:p==='dashboard'?onB:offB, navDashC:p==='dashboard'?onC:offC,
+      navApptB:p==='appointments'?onB:offB, navApptC:p==='appointments'?onC:offC,
+      navQueueB:p==='queue'?onB:offB, navQueueC:p==='queue'?onC:offC,
+      navCalB:p==='schedule'?onB:offB, navCalC:p==='schedule'?onC:offC,
+      goDashboard:()=>this.go('dashboard'), goAppointments:()=>this.go('appointments'), goQueue:()=>this.go('queue'), goSchedule:()=>this.go('schedule'),
+      queue, appts
+    };
+  }
+}
+</script>
+</body>
+</html>

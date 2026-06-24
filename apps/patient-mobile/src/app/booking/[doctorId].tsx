@@ -11,19 +11,22 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
+import { Card } from "@/components/ui/Card";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/store/authStore";
 import { getDoctorSlotsForDate, type GeneratedSlot } from "@/lib/api/slots";
 import { bookAppointment } from "@/lib/api/appointments";
+import { palette, radius, spacing, status as statusTokens } from "@/theme/careflow-tokens";
+import { fontFamily, textStyle } from "@/theme/typography";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-const AVATAR_COLORS = ["#1A6FD8", "#0D9488", "#7C3AED", "#DB2777", "#EA580C", "#65A30D"];
+const AVATAR_COLORS = [palette.primary600, palette.green600, palette.purple600, "#DB2777", "#EA580C", "#65A30D"];
 
 function avatarColor(name: string) {
   let h = 0;
   for (const c of name) h = (h * 31 + c.charCodeAt(0)) | 0;
-  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length] ?? "#1A6FD8";
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length] ?? palette.primary600;
 }
 
 function getInitials(name: string) {
@@ -110,10 +113,10 @@ function SlotGroup({
         const unavailable = isBooked || isBreak;
 
         let badge: { bg: string; text: string; label: string };
-        if (isBreak) badge = { bg: "#F8FAFC", text: "#94A3B8", label: "Break" };
-        else if (isBooked) badge = { bg: "#FEF2F2", text: "#EF4444", label: "Booked" };
-        else if (isSelected) badge = { bg: "#DBEAFE", text: "#1A6FD8", label: "Selected" };
-        else badge = { bg: "#F0FDF4", text: "#16A34A", label: "Available" };
+        if (isBreak) badge = { bg: palette.slate100, text: palette.slate400, label: "Break" };
+        else if (isBooked) badge = { bg: statusTokens.cancelled.bg, text: statusTokens.cancelled.fg, label: "Booked" };
+        else if (isSelected) badge = { bg: statusTokens.confirmed.bg, text: statusTokens.confirmed.fg, label: "Selected" };
+        else badge = { bg: statusTokens.open.bg, text: statusTokens.open.fg, label: "Available" };
 
         return (
           <TouchableOpacity
@@ -143,7 +146,7 @@ function SlotGroup({
               <Icon
                 name="chevron-forward-outline"
                 size={14}
-                color={isSelected ? "#1A6FD8" : "#CBD5E1"}
+                color={isSelected ? palette.primary600 : palette.slate200}
               />
             )}
           </TouchableOpacity>
@@ -290,7 +293,7 @@ export default function DoctorBookingScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1A6FD8" />
+        <ActivityIndicator size="large" color={palette.primary600} />
       </View>
     );
   }
@@ -325,18 +328,18 @@ export default function DoctorBookingScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()}>
-          <Icon name="arrow-back-outline" size={20} color="#1E293B" />
+          <Icon name="chevron-back" size={20} color={palette.slate900} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Doctor Schedule</Text>
         <TouchableOpacity style={styles.headerBtn}>
-          <Icon name="share-outline" size={20} color="#1E293B" />
+          <Icon name="share-outline" size={20} color={palette.slate900} />
         </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
 
         {/* Doctor info card */}
-        <View style={styles.doctorCard}>
+        <Card style={styles.doctorCard}>
           <View style={styles.doctorCardTop}>
             {/* Avatar */}
             <View style={[styles.doctorAvatar, { backgroundColor: color }]}>
@@ -347,17 +350,17 @@ export default function DoctorBookingScreen() {
             <View style={styles.doctorDetails}>
               <View style={styles.doctorNameRow}>
                 <Text style={styles.doctorName} numberOfLines={1}>{doctor.fullName}</Text>
-                <Icon name="checkmark-circle" size={16} color="#1A6FD8" />
+                <Icon name="checkmark-circle" size={16} color={palette.primary600} />
               </View>
               <Text style={styles.doctorSpec}>{doctor.specialization ?? "General Practice"}</Text>
               <View style={styles.ratingRow}>
-                <Icon name="star" size={12} color="#F59E0B" />
+                <Icon name="star" size={12} color={palette.star} />
                 <Text style={styles.ratingNum}>4.8</Text>
                 <Text style={styles.ratingCount}>(320 reviews)</Text>
               </View>
               <Text style={styles.expText}>10+ years experience</Text>
               <View style={styles.clinicRow}>
-                <Icon name="location-outline" size={12} color="#64748B" />
+                <Icon name="location-outline" size={12} color={palette.slate500} />
                 <Text style={styles.clinicText} numberOfLines={1}>{doctor.clinicName}</Text>
               </View>
             </View>
@@ -375,29 +378,29 @@ export default function DoctorBookingScreen() {
           {/* Stats row */}
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
-              <Icon name="people-outline" size={16} color="#1A6FD8" />
+              <Icon name="people-outline" size={16} color={palette.primary600} />
               <Text style={styles.statValue}>{doctor.waitingCount} patients</Text>
               <Text style={styles.statLabel}>Current Queue</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Icon name="time-outline" size={16} color="#1A6FD8" />
+              <Icon name="time-outline" size={16} color={palette.primary600} />
               <Text style={styles.statValue}>
                 {estWaitMins > 0 ? `~${estWaitMins} mins` : "Available now"}
               </Text>
-              <Text style={styles.statLabel}>Estimated Wait in Wait</Text>
+              <Text style={styles.statLabel}>Estimated Wait</Text>
             </View>
           </View>
-        </View>
+        </Card>
 
         {/* Date picker section */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Select Date</Text>
             <View style={styles.monthPill}>
-              <Icon name="calendar-outline" size={12} color="#1A6FD8" />
+              <Icon name="calendar-outline" size={12} color={palette.primary600} />
               <Text style={styles.monthPillText}>{monthYearLabel}</Text>
-              <Icon name="chevron-down-outline" size={12} color="#1A6FD8" />
+              <Icon name="chevron-down-outline" size={12} color={palette.primary600} />
             </View>
           </View>
 
@@ -433,10 +436,10 @@ export default function DoctorBookingScreen() {
           <View style={styles.legendRow}>
             {(
               [
-                { label: "Available", color: "#22C55E" },
-                { label: "Booked", color: "#EF4444" },
-                { label: "Break", color: "#94A3B8" },
-                { label: "Selected", color: "#1A6FD8" },
+                { label: "Available", color: palette.green500 },
+                { label: "Booked", color: palette.red500 },
+                { label: "Break", color: palette.slate400 },
+                { label: "Selected", color: palette.primary600 },
               ] as const
             ).map((item) => (
               <View key={item.label} style={styles.legendItem}>
@@ -452,10 +455,10 @@ export default function DoctorBookingScreen() {
           <Text style={styles.slotDateLabel}>{fullDateLabel}</Text>
 
           {slotsLoading ? (
-            <ActivityIndicator color="#1A6FD8" style={styles.slotsLoader} />
+            <ActivityIndicator color={palette.primary600} style={styles.slotsLoader} />
           ) : slots.length === 0 ? (
             <View style={styles.noSlots}>
-              <Icon name="calendar-outline" size={32} color="#CBD5E1" />
+              <Icon name="calendar-outline" size={32} color={palette.slate200} />
               <Text style={styles.noSlotsText}>No slots available for this date.</Text>
             </View>
           ) : (
@@ -499,14 +502,14 @@ export default function DoctorBookingScreen() {
           onPress={handleJoinQueue}
           activeOpacity={0.85}
         >
-          <Icon name="people-outline" size={16} color="#1A6FD8" />
+          <Icon name="people-outline" size={16} color={palette.primary600} />
           <View>
             <Text style={styles.joinQueueTitle}>Join Queue Now</Text>
             <Text style={styles.joinQueueSub}>
               Est. wait: {estWaitMins > 0 ? `${estWaitMins} mins` : "–"}
             </Text>
           </View>
-          <Icon name="chevron-forward-outline" size={14} color="#1A6FD8" />
+          <Icon name="chevron-forward-outline" size={14} color={palette.primary600} />
         </TouchableOpacity>
 
         {/* Book Appointment (filled) */}
@@ -540,9 +543,9 @@ export default function DoctorBookingScreen() {
 // ─── styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F7FA" },
+  container: { flex: 1, backgroundColor: palette.appBg },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  errorText: { fontSize: 15, color: "#64748B" },
+  errorText: { ...textStyle("body"), color: palette.slate500 },
   scroll: { paddingBottom: 20 },
   bottomSpacer: { height: 120 },
 
@@ -551,36 +554,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
     paddingTop: 52,
-    paddingBottom: 12,
-    backgroundColor: "#FFFFFF",
+    paddingBottom: spacing.md,
+    backgroundColor: palette.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: palette.border,
   },
   headerBtn: {
     width: 36,
     height: 36,
-    borderRadius: 10,
-    backgroundColor: "#F8FAFC",
+    borderRadius: radius.sm,
+    backgroundColor: palette.slate100,
     justifyContent: "center",
     alignItems: "center",
   },
-  headerTitle: { fontSize: 16, fontWeight: "700", color: "#1E293B" },
+  headerTitle: { ...textStyle("h3"), color: palette.slate900 },
 
   // Doctor card
   doctorCard: {
-    backgroundColor: "#FFFFFF",
-    margin: 16,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    margin: spacing.lg,
   },
-  doctorCardTop: { flexDirection: "row", gap: 10, alignItems: "flex-start" },
+  doctorCardTop: { flexDirection: "row", gap: spacing.sm, alignItems: "flex-start" },
   doctorAvatar: {
     width: 64,
     height: 64,
@@ -589,126 +584,126 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexShrink: 0,
   },
-  doctorAvatarText: { fontSize: 22, fontWeight: "800", color: "#FFFFFF" },
+  doctorAvatarText: { fontSize: 22, fontFamily: fontFamily(800), color: "#FFFFFF" },
   doctorDetails: { flex: 1, gap: 3 },
-  doctorNameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  doctorNameRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
   doctorName: {
     fontSize: 14,
-    fontWeight: "700",
-    color: "#1E293B",
+    fontFamily: fontFamily(700),
+    color: palette.slate900,
     flexShrink: 1,
   },
-  doctorSpec: { fontSize: 12, color: "#64748B" },
-  ratingRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  ratingNum: { fontSize: 12, fontWeight: "700", color: "#1E293B" },
-  ratingCount: { fontSize: 11, color: "#94A3B8" },
-  expText: { fontSize: 11, color: "#64748B" },
+  doctorSpec: { fontSize: 12, color: palette.slate500 },
+  ratingRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+  ratingNum: { fontSize: 12, fontFamily: fontFamily(700), color: palette.slate900 },
+  ratingCount: { fontSize: 11, color: palette.slate400 },
+  expText: { fontSize: 11, color: palette.slate500 },
   clinicRow: { flexDirection: "row", alignItems: "center", gap: 3 },
-  clinicText: { fontSize: 11, color: "#64748B", flex: 1 },
+  clinicText: { fontSize: 11, color: palette.slate500, flex: 1 },
   feeBox: { alignItems: "flex-end", flexShrink: 0 },
-  feeLabel: { fontSize: 10, color: "#94A3B8", textAlign: "right" },
-  feeAmount: { fontSize: 16, fontWeight: "800", color: "#1A6FD8" },
-  feePerVisit: { fontSize: 10, color: "#94A3B8" },
+  feeLabel: { fontSize: 10, color: palette.slate400, textAlign: "right" },
+  feeAmount: { fontSize: 16, fontFamily: fontFamily(800), color: palette.primary600 },
+  feePerVisit: { fontSize: 10, color: palette.slate400 },
 
   statsRow: {
     flexDirection: "row",
-    marginTop: 14,
-    paddingTop: 14,
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: "#F1F5F9",
+    borderTopColor: palette.border,
   },
   statItem: { flex: 1, alignItems: "center", gap: 3 },
-  statDivider: { width: 1, height: 36, backgroundColor: "#E2E8F0" },
-  statValue: { fontSize: 12, fontWeight: "700", color: "#1E293B" },
-  statLabel: { fontSize: 10, color: "#94A3B8" },
+  statDivider: { width: 1, height: 36, backgroundColor: palette.slate200 },
+  statValue: { fontSize: 12, fontFamily: fontFamily(700), color: palette.slate900 },
+  statLabel: { fontSize: 10, color: palette.slate400 },
 
   // Sections
-  section: { paddingHorizontal: 16, marginBottom: 8 },
+  section: { paddingHorizontal: spacing.lg, marginBottom: spacing.sm },
   sectionHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
-  sectionTitle: { fontSize: 15, fontWeight: "700", color: "#1E293B" },
+  sectionTitle: { ...textStyle("h3"), fontSize: 15, color: palette.slate900 },
   monthPill: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    backgroundColor: "#EFF6FF",
-    paddingHorizontal: 10,
+    gap: spacing.xs,
+    backgroundColor: palette.primary50,
+    paddingHorizontal: spacing.md,
     paddingVertical: 5,
-    borderRadius: 8,
+    borderRadius: radius.sm,
   },
-  monthPillText: { fontSize: 11, color: "#1A6FD8", fontWeight: "600" },
+  monthPillText: { fontSize: 11, color: palette.primary600, fontFamily: fontFamily(600) },
 
   // Date strip
-  dateScroll: { gap: 8, paddingRight: 4 },
+  dateScroll: { gap: spacing.sm, paddingRight: spacing.xs },
   dateChip: {
     width: 54,
-    paddingVertical: 10,
-    borderRadius: 12,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: palette.surface,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: palette.slate200,
     gap: 2,
   },
-  dateChipActive: { backgroundColor: "#1A6FD8", borderColor: "#1A6FD8" },
-  dateChipDay: { fontSize: 11, color: "#94A3B8", fontWeight: "500" },
-  dateChipNum: { fontSize: 18, fontWeight: "800", color: "#1E293B" },
-  dateChipMonth: { fontSize: 10, color: "#94A3B8" },
+  dateChipActive: { backgroundColor: palette.primary700, borderColor: palette.primary700 },
+  dateChipDay: { fontSize: 11, color: palette.slate400, fontFamily: fontFamily(500) },
+  dateChipNum: { fontSize: 18, fontFamily: fontFamily(800), color: palette.slate900 },
+  dateChipMonth: { fontSize: 10, color: palette.slate400 },
   dateChipActiveText: { color: "#FFFFFF" },
 
   // Legend
-  legendRow: { flexDirection: "row", gap: 14, marginTop: 10, flexWrap: "wrap" },
+  legendRow: { flexDirection: "row", gap: spacing.md, marginTop: spacing.sm, flexWrap: "wrap" },
   legendItem: { flexDirection: "row", alignItems: "center", gap: 5 },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
-  legendText: { fontSize: 11, color: "#64748B" },
+  legendText: { fontSize: 11, color: palette.slate500 },
 
   // Slot list
   slotDateLabel: {
     fontSize: 13,
-    fontWeight: "600",
-    color: "#64748B",
-    marginBottom: 12,
+    fontFamily: fontFamily(600),
+    color: palette.slate500,
+    marginBottom: spacing.md,
   },
-  slotsLoader: { marginVertical: 24 },
-  noSlots: { alignItems: "center", paddingVertical: 32, gap: 8 },
-  noSlotsText: { fontSize: 13, color: "#94A3B8" },
+  slotsLoader: { marginVertical: spacing["2xl"] },
+  noSlots: { alignItems: "center", paddingVertical: spacing["2xl"], gap: spacing.sm },
+  noSlotsText: { fontSize: 13, color: palette.slate400 },
 
-  slotGroup: { marginBottom: 16 },
+  slotGroup: { marginBottom: spacing.lg },
   slotGroupTitle: {
     fontSize: 11,
-    fontWeight: "700",
-    color: "#94A3B8",
+    fontFamily: fontFamily(700),
+    color: palette.slate400,
     textTransform: "uppercase",
     letterSpacing: 0.5,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   slotRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 8,
+    backgroundColor: palette.surface,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.sm,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: palette.slate200,
   },
-  slotRowSelected: { borderColor: "#1A6FD8", backgroundColor: "#EFF6FF" },
-  slotRowUnavailable: { backgroundColor: "#F8FAFC", opacity: 0.7 },
-  slotTime: { fontSize: 14, fontWeight: "600", color: "#1E293B", flex: 1 },
-  slotTimeSelected: { color: "#1A6FD8" },
-  slotTimeGray: { color: "#94A3B8" },
+  slotRowSelected: { borderColor: palette.primary600, backgroundColor: palette.primary50 },
+  slotRowUnavailable: { backgroundColor: palette.slate100, opacity: 0.7 },
+  slotTime: { fontSize: 14, fontFamily: fontFamily(600), color: palette.slate900, flex: 1 },
+  slotTimeSelected: { color: palette.primary600 },
+  slotTimeGray: { color: palette.slate400 },
   slotBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    marginRight: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.sm,
+    marginRight: spacing.sm,
   },
-  slotBadgeText: { fontSize: 11, fontWeight: "600" },
+  slotBadgeText: { fontSize: 11, fontFamily: fontFamily(600) },
 
   // Bottom bar
   bottomBar: {
@@ -717,39 +712,39 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     flexDirection: "row",
-    gap: 10,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingTop: 12,
+    gap: spacing.sm,
+    backgroundColor: palette.surface,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
     paddingBottom: 32,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
+    borderTopColor: palette.border,
   },
   joinQueueBtn: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: spacing.sm,
     borderWidth: 1.5,
-    borderColor: "#1A6FD8",
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
+    borderColor: palette.primary600,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
   },
-  joinQueueTitle: { fontSize: 12, fontWeight: "700", color: "#1A6FD8" },
-  joinQueueSub: { fontSize: 10, color: "#64748B", marginTop: 1 },
+  joinQueueTitle: { fontSize: 12, fontFamily: fontFamily(700), color: palette.primary600 },
+  joinQueueSub: { fontSize: 10, color: palette.slate500, marginTop: 1 },
   bookBtn: {
     flex: 1.3,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#1A6FD8",
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    gap: spacing.sm,
+    backgroundColor: palette.primary700,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
   },
   bookBtnDisabled: { opacity: 0.6 },
-  bookBtnTitle: { fontSize: 12, fontWeight: "700", color: "#FFFFFF" },
+  bookBtnTitle: { fontSize: 12, fontFamily: fontFamily(700), color: "#FFFFFF" },
   bookBtnSub: { fontSize: 10, color: "rgba(255,255,255,0.8)", marginTop: 1 },
 });

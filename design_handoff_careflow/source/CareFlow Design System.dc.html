@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#eef1f6;}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+</style>
+</helmet>
+<div style="min-width:100%;min-height:100vh;background:#eef1f6;padding:40px;box-sizing:border-box;">
+  <div style="max-width:1080px;margin:0 auto;">
+    <div style="display:flex;align-items:center;gap:13px;margin-bottom:8px;">
+      <div style="width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#2563EB,#22C55E);display:flex;align-items:center;justify-content:center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5 6 5c2 0 3.2 1.2 4 2.3C10.8 6.2 12 5 14 5c3.5 0 5 4 3.5 7-2.5 4.5-5.5 9-5.5 9z"/></svg></div>
+      <div><h1 style="margin:0;font-size:30px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">CareFlow Design System</h1><p style="margin:3px 0 0;font-size:14px;color:#64748B;">Token reference for the patient app &amp; clinic dashboard · for React Native / Expo handoff</p></div>
+    </div>
+
+    <div style="background:#fff;border-radius:18px;padding:26px;margin-top:24px;box-shadow:0 1px 3px rgba(15,23,42,.05);">
+      <div style="font-size:12px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;">Brand &amp; Primary</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+        <div><div style="height:74px;border-radius:13px;background:#2563EB;"></div><div style="font-size:13px;font-weight:700;color:#0F172A;margin-top:8px;">Primary 600</div><div class="mono" style="font-size:12px;color:#94A3B8;">#2563EB</div></div>
+        <div><div style="height:74px;border-radius:13px;background:#1D4ED8;"></div><div style="font-size:13px;font-weight:700;color:#0F172A;margin-top:8px;">Primary 700 · buttons</div><div class="mono" style="font-size:12px;color:#94A3B8;">#1D4ED8</div></div>
+        <div><div style="height:74px;border-radius:13px;background:#16A34A;"></div><div style="font-size:13px;font-weight:700;color:#0F172A;margin-top:8px;">Green 600 · queue</div><div class="mono" style="font-size:12px;color:#94A3B8;">#16A34A</div></div>
+        <div><div style="height:74px;border-radius:13px;background:linear-gradient(135deg,#2563EB,#22C55E);"></div><div style="font-size:13px;font-weight:700;color:#0F172A;margin-top:8px;">Brand gradient</div><div class="mono" style="font-size:12px;color:#94A3B8;">#2563EB → #22C55E</div></div>
+      </div>
+    </div>
+
+    <div style="background:#fff;border-radius:18px;padding:26px;margin-top:18px;box-shadow:0 1px 3px rgba(15,23,42,.05);">
+      <div style="font-size:12px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;">Semantic &amp; Status</div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;">
+        <div><div style="height:58px;border-radius:11px;background:#22C55E;"></div><div style="font-size:12px;font-weight:700;color:#0F172A;margin-top:7px;">Success</div><div class="mono" style="font-size:11px;color:#94A3B8;">#22C55E</div></div>
+        <div><div style="height:58px;border-radius:11px;background:#F59E0B;"></div><div style="font-size:12px;font-weight:700;color:#0F172A;margin-top:7px;">Warning</div><div class="mono" style="font-size:11px;color:#94A3B8;">#F59E0B</div></div>
+        <div><div style="height:58px;border-radius:11px;background:#EF4444;"></div><div style="font-size:12px;font-weight:700;color:#0F172A;margin-top:7px;">Danger</div><div class="mono" style="font-size:11px;color:#94A3B8;">#EF4444</div></div>
+        <div><div style="height:58px;border-radius:11px;background:#7C3AED;"></div><div style="font-size:12px;font-weight:700;color:#0F172A;margin-top:7px;">Accent</div><div class="mono" style="font-size:11px;color:#94A3B8;">#7C3AED</div></div>
+        <div><div style="height:58px;border-radius:11px;background:#FBBF24;"></div><div style="font-size:12px;font-weight:700;color:#0F172A;margin-top:7px;">Star</div><div class="mono" style="font-size:11px;color:#94A3B8;">#FBBF24</div></div>
+        <div><div style="height:58px;border-radius:11px;background:#1E40AF;"></div><div style="font-size:12px;font-weight:700;color:#0F172A;margin-top:7px;">Hero end</div><div class="mono" style="font-size:11px;color:#94A3B8;">#1E40AF</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-top:16px;">
+        <div><div style="height:42px;border-radius:11px;background:#EFF4FF;border:1px solid #EEF2F6;"></div><div class="mono" style="font-size:11px;color:#94A3B8;margin-top:6px;">#EFF4FF</div></div>
+        <div><div style="height:42px;border-radius:11px;background:#E6F8EE;border:1px solid #EEF2F6;"></div><div class="mono" style="font-size:11px;color:#94A3B8;margin-top:6px;">#E6F8EE</div></div>
+        <div><div style="height:42px;border-radius:11px;background:#FEF3E2;border:1px solid #EEF2F6;"></div><div class="mono" style="font-size:11px;color:#94A3B8;margin-top:6px;">#FEF3E2</div></div>
+        <div><div style="height:42px;border-radius:11px;background:#FEF2F2;border:1px solid #EEF2F6;"></div><div class="mono" style="font-size:11px;color:#94A3B8;margin-top:6px;">#FEF2F2</div></div>
+        <div><div style="height:42px;border-radius:11px;background:#F3EEFE;border:1px solid #EEF2F6;"></div><div class="mono" style="font-size:11px;color:#94A3B8;margin-top:6px;">#F3EEFE</div></div>
+        <div><div style="height:42px;border-radius:11px;background:#FFFBEB;border:1px solid #EEF2F6;"></div><div class="mono" style="font-size:11px;color:#94A3B8;margin-top:6px;">#FFFBEB</div></div>
+      </div>
+    </div>
+
+    <div style="background:#fff;border-radius:18px;padding:26px;margin-top:18px;box-shadow:0 1px 3px rgba(15,23,42,.05);">
+      <div style="font-size:12px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;">Neutrals / Slate</div>
+      <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:10px;">
+        <div><div style="height:50px;border-radius:10px;background:#0F172A;"></div><div class="mono" style="font-size:10px;color:#94A3B8;margin-top:6px;">900 #0F172A</div></div>
+        <div><div style="height:50px;border-radius:10px;background:#334155;"></div><div class="mono" style="font-size:10px;color:#94A3B8;margin-top:6px;">700 #334155</div></div>
+        <div><div style="height:50px;border-radius:10px;background:#475569;"></div><div class="mono" style="font-size:10px;color:#94A3B8;margin-top:6px;">600 #475569</div></div>
+        <div><div style="height:50px;border-radius:10px;background:#64748B;"></div><div class="mono" style="font-size:10px;color:#94A3B8;margin-top:6px;">500 #64748B</div></div>
+        <div><div style="height:50px;border-radius:10px;background:#94A3B8;"></div><div class="mono" style="font-size:10px;color:#94A3B8;margin-top:6px;">400 #94A3B8</div></div>
+        <div><div style="height:50px;border-radius:10px;background:#E2E8F0;"></div><div class="mono" style="font-size:10px;color:#94A3B8;margin-top:6px;">200 #E2E8F0</div></div>
+        <div><div style="height:50px;border-radius:10px;background:#EEF2F6;"></div><div class="mono" style="font-size:10px;color:#94A3B8;margin-top:6px;">border #EEF2F6</div></div>
+        <div><div style="height:50px;border-radius:10px;background:#F6F8FB;border:1px solid #EEF2F6;"></div><div class="mono" style="font-size:10px;color:#94A3B8;margin-top:6px;">app #F6F8FB</div></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:18px;margin-top:18px;">
+      <div style="background:#fff;border-radius:18px;padding:26px;box-shadow:0 1px 3px rgba(15,23,42,.05);">
+        <div style="font-size:12px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;">Typography · Plus Jakarta Sans</div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:30px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Display</span><span class="mono" style="font-size:12px;color:#94A3B8;">30 / 800</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:24px;font-weight:800;color:#0F172A;letter-spacing:-.01em;">Heading 1</span><span class="mono" style="font-size:12px;color:#94A3B8;">24 / 800</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:19px;font-weight:800;color:#0F172A;">Heading 2</span><span class="mono" style="font-size:12px;color:#94A3B8;">19 / 800</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:16px;font-weight:800;color:#0F172A;">Heading 3</span><span class="mono" style="font-size:12px;color:#94A3B8;">16 / 800</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:14px;font-weight:500;color:#334155;">Body — regular text</span><span class="mono" style="font-size:12px;color:#94A3B8;">14 / 500</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:13px;font-weight:600;color:#64748B;">Small / label</span><span class="mono" style="font-size:12px;color:#94A3B8;">13 / 600</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:9px 0;"><span style="font-size:11px;font-weight:600;color:#94A3B8;">Caption / micro</span><span class="mono" style="font-size:12px;color:#94A3B8;">11 / 600</span></div>
+      </div>
+      <div style="background:#fff;border-radius:18px;padding:26px;box-shadow:0 1px 3px rgba(15,23,42,.05);">
+        <div style="font-size:12px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;">Radius &amp; Elevation</div>
+        <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:20px;">
+          <div style="text-align:center;"><div style="width:54px;height:54px;background:#EFF4FF;border:1.5px solid #BFD4FB;border-radius:8px;"></div><div class="mono" style="font-size:11px;color:#94A3B8;margin-top:6px;">8</div></div>
+          <div style="text-align:center;"><div style="width:54px;height:54px;background:#EFF4FF;border:1.5px solid #BFD4FB;border-radius:12px;"></div><div class="mono" style="font-size:11px;color:#94A3B8;margin-top:6px;">12</div></div>
+          <div style="text-align:center;"><div style="width:54px;height:54px;background:#EFF4FF;border:1.5px solid #BFD4FB;border-radius:16px;"></div><div class="mono" style="font-size:11px;color:#94A3B8;margin-top:6px;">16</div></div>
+          <div style="text-align:center;"><div style="width:54px;height:54px;background:#EFF4FF;border:1.5px solid #BFD4FB;border-radius:20px;"></div><div class="mono" style="font-size:11px;color:#94A3B8;margin-top:6px;">20</div></div>
+          <div style="text-align:center;"><div style="width:54px;height:54px;background:#EFF4FF;border:1.5px solid #BFD4FB;border-radius:50%;"></div><div class="mono" style="font-size:11px;color:#94A3B8;margin-top:6px;">full</div></div>
+        </div>
+        <div style="display:flex;gap:16px;">
+          <div style="text-align:center;"><div style="width:74px;height:54px;background:#fff;border-radius:13px;box-shadow:0 1px 3px rgba(15,23,42,.06);"></div><div class="mono" style="font-size:10px;color:#94A3B8;margin-top:8px;">card</div></div>
+          <div style="text-align:center;"><div style="width:74px;height:54px;background:#fff;border-radius:13px;box-shadow:0 8px 18px -8px rgba(29,78,216,.6);"></div><div class="mono" style="font-size:10px;color:#94A3B8;margin-top:8px;">float</div></div>
+          <div style="text-align:center;"><div style="width:74px;height:54px;background:#fff;border-radius:13px;box-shadow:0 16px 40px -16px rgba(15,23,42,.25);"></div><div class="mono" style="font-size:10px;color:#94A3B8;margin-top:8px;">modal</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#fff;border-radius:18px;padding:26px;margin-top:18px;box-shadow:0 1px 3px rgba(15,23,42,.05);">
+      <div style="font-size:12px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;">Components</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:20px;">
+        <button style="border:none;background:#1D4ED8;color:#fff;font-family:inherit;font-size:14px;font-weight:700;padding:12px 22px;border-radius:13px;cursor:pointer;box-shadow:0 8px 18px -8px rgba(29,78,216,.6);">Primary</button>
+        <button style="border:1.5px solid #2563EB;background:#fff;color:#2563EB;font-family:inherit;font-size:14px;font-weight:700;padding:12px 22px;border-radius:13px;cursor:pointer;">Secondary</button>
+        <button style="border:none;background:#E6F8EE;color:#15803D;font-family:inherit;font-size:14px;font-weight:700;padding:12px 22px;border-radius:13px;cursor:pointer;">Success / Queue</button>
+        <button style="border:1.5px solid #FBE0E0;background:#fff;color:#DC2626;font-family:inherit;font-size:14px;font-weight:700;padding:12px 22px;border-radius:13px;cursor:pointer;">Destructive</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:20px;">
+        <span style="font-size:12px;font-weight:700;color:#16A34A;background:#E6F8EE;padding:5px 11px;border-radius:8px;">Open</span>
+        <span style="font-size:12px;font-weight:700;color:#2563EB;background:#EFF4FF;padding:5px 11px;border-radius:8px;">Confirmed</span>
+        <span style="font-size:12px;font-weight:700;color:#B45309;background:#FEF3E2;padding:5px 11px;border-radius:8px;">Waiting Next</span>
+        <span style="font-size:12px;font-weight:700;color:#64748B;background:#F1F5F9;padding:5px 11px;border-radius:8px;">Upcoming</span>
+        <span style="font-size:12px;font-weight:700;color:#DC2626;background:#FEF2F2;padding:5px 11px;border-radius:8px;">No Show</span>
+        <span style="font-size:12px;font-weight:700;color:#7C3AED;background:#F3EEFE;padding:5px 11px;border-radius:8px;">Follow-up</span>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #E2E8F0;border-radius:13px;height:50px;padding:0 14px;width:280px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#94A3B8" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:14px;color:#94A3B8;">Input field</span></div>
+        <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:14px 18px;box-shadow:0 1px 3px rgba(15,23,42,.05);display:flex;align-items:center;gap:11px;"><div style="width:38px;height:38px;border-radius:11px;background:#EFF4FF;"></div><div><div style="font-size:14px;font-weight:700;color:#0F172A;">Card surface</div><div style="font-size:12px;color:#94A3B8;">16px radius · subtle shadow</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#F3EEFE"/><circle cx="40" cy="42" r="12" fill="#2563EB"/><circle cx="60" cy="42" r="12" fill="#22C55E"/><rect x="30" y="62" width="40" height="8" rx="4" fill="#7C3AED"/></svg></template></x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1160,&quot;height&quot;:900}}"></script>
+</body>
+</html>

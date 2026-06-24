@@ -11,9 +11,13 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabase";
 import { joinQueue } from "@/lib/api/queues";
 import { getMYTToday } from "@careflow/shared";
+import { palette, radius, spacing } from "@/theme/careflow-tokens";
+import { fontFamily, textStyle } from "@/theme/typography";
 
 // ─── types ───────────────────────────────────────────────────────────────────
 
@@ -30,11 +34,11 @@ interface ActiveQueue {
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-const AVATAR_COLORS = ["#1A6FD8", "#0D9488", "#7C3AED", "#DB2777", "#EA580C", "#65A30D"];
+const AVATAR_COLORS = [palette.primary600, palette.green600, palette.purple600, "#DB2777", "#EA580C", "#65A30D"];
 function avatarColor(name: string) {
   let h = 0;
   for (const c of name) h = (h * 31 + c.charCodeAt(0)) | 0;
-  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length] ?? "#1A6FD8";
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length] ?? palette.primary600;
 }
 
 function getInitials(name: string) {
@@ -129,14 +133,14 @@ export default function JoinQueueScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1A6FD8" />
+        <ActivityIndicator size="large" color={palette.primary600} />
       </View>
     );
   }
 
   const estWaitMin = queue ? queue.waitingCount * queue.consultationDuration : 0;
   const estWaitMax = estWaitMin + (queue?.consultationDuration ?? 0);
-  const color = queue ? avatarColor(queue.doctorName) : "#1A6FD8";
+  const color = queue ? avatarColor(queue.doctorName) : palette.primary600;
 
   return (
     <View style={styles.container}>
@@ -145,11 +149,12 @@ export default function JoinQueueScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()}>
-          <Icon name="arrow-back-outline" size={20} color="#1E293B" />
+          <Icon name="chevron-back" size={20} color={palette.slate900} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Join Queue</Text>
-        <TouchableOpacity style={styles.headerBtn}>
-          <Icon name="information-circle-outline" size={20} color="#1A6FD8" />
+        <TouchableOpacity style={styles.howItWorksBtn}>
+          <Icon name="help-circle-outline" size={16} color={palette.primary600} />
+          <Text style={styles.howItWorksText}>How it works</Text>
         </TouchableOpacity>
       </View>
 
@@ -160,7 +165,7 @@ export default function JoinQueueScreen() {
         {!queue ? (
           /* No active queue */
           <View style={styles.noQueueCard}>
-            <Icon name="calendar-outline" size={40} color="#CBD5E1" />
+            <Icon name="calendar-outline" size={40} color={palette.slate200} />
             <Text style={styles.noQueueTitle}>No Active Queue</Text>
             <Text style={styles.noQueueText}>
               There is no active queue for this clinic right now. Please check back later or book an appointment instead.
@@ -169,7 +174,7 @@ export default function JoinQueueScreen() {
         ) : (
           <>
             {/* Doctor card */}
-            <View style={styles.doctorCard}>
+            <Card style={styles.doctorCard}>
               <View style={styles.doctorCardLeft}>
                 <View style={[styles.doctorAvatar, { backgroundColor: color }]}>
                   <Text style={styles.doctorAvatarText}>{getInitials(queue.doctorName)}</Text>
@@ -177,16 +182,16 @@ export default function JoinQueueScreen() {
                 <View style={styles.doctorInfo}>
                   <View style={styles.doctorNameRow}>
                     <Text style={styles.doctorName}>{queue.doctorName}</Text>
-                    <Icon name="checkmark-circle" size={14} color="#1A6FD8" />
+                    <Icon name="checkmark-circle" size={14} color={palette.primary600} />
                   </View>
                   <Text style={styles.doctorSpec}>{queue.specialization ?? "General Practice"}</Text>
                   <View style={styles.ratingRow}>
-                    <Icon name="star" size={12} color="#F59E0B" />
+                    <Icon name="star" size={12} color={palette.star} />
                     <Text style={styles.ratingNum}>4.8</Text>
                     <Text style={styles.ratingCount}>(320 reviews)</Text>
                   </View>
                   <View style={styles.clinicRow}>
-                    <Icon name="location-outline" size={12} color="#64748B" />
+                    <Icon name="location-outline" size={12} color={palette.slate500} />
                     <Text style={styles.clinicName}>{queue.clinicName}</Text>
                   </View>
                   {queue.clinicAddress ? (
@@ -195,69 +200,61 @@ export default function JoinQueueScreen() {
                 </View>
               </View>
               <View style={styles.feeBox}>
-                <Text style={styles.feeLabel}>Consultation Fee</Text>
+                <Text style={styles.feeLabel}>Fee</Text>
                 <Text style={styles.feeAmount}>—</Text>
-                <Text style={styles.feePerVisit}>Per Visit</Text>
               </View>
-            </View>
+            </Card>
 
             {/* Queue stats card */}
-            <View style={styles.statsCard}>
+            <Card style={styles.statsCard}>
               <Text style={styles.statsCardTitle}>Current Queue</Text>
               <View style={styles.waitingRow}>
                 <Text style={styles.waitingNum}>{queue.waitingCount}</Text>
-                <Text style={styles.waitingLabel}> patients ahead of you</Text>
+                <Text style={styles.waitingLabel}>patients ahead</Text>
               </View>
               <Text style={styles.lastUpdated}>Last updated: {new Date().toLocaleTimeString("en-MY", { hour: "2-digit", minute: "2-digit" })}</Text>
 
               <View style={styles.statsDivider} />
 
+              <Text style={styles.estimateLabel}>Estimated Waiting Time</Text>
               <View style={styles.estimateRow}>
-                <Icon name="time-outline" size={20} color="#1A6FD8" />
-                <View>
-                  <Text style={styles.estimateWait}>
-                    {estWaitMin} – {estWaitMax} mins
-                  </Text>
-                  <Text style={styles.estimateLabel}>Estimated Waiting Time</Text>
-                  <Text style={styles.estimateNote}>
-                    This may vary depending on consultation time.
-                  </Text>
-                </View>
+                <Icon name="time-outline" size={20} color={palette.green600} />
+                <Text style={styles.estimateWait}>
+                  {estWaitMin} – {estWaitMax} mins
+                </Text>
               </View>
-            </View>
+              <Text style={styles.estimateNote}>
+                This may vary depending on consultation time.
+              </Text>
+            </Card>
 
             {/* You'll be notified banner */}
-            <View style={styles.notifyBanner}>
-              <Icon name="notifications-outline" size={20} color="#1A6FD8" />
-              <Text style={styles.notifyText}>
-                You'll be notified when it's your turn
-              </Text>
-            </View>
-
-            {/* Notification steps */}
-            <View style={styles.notifySteps}>
-              {[
-                { icon: "phone-portrait-outline", text: "We'll notify you\nwhen you're next" },
-                { icon: "phone-portrait-outline", text: "Please keep your\nphone nearby" },
-                { icon: "walk-outline", text: "Arrive at the clinic\nwhen called" },
-              ].map((step, i) => (
-                <View key={i} style={styles.notifyStep}>
-                  <View style={styles.notifyStepIcon}>
-                    <Icon name={step.icon} size={20} color="#1A6FD8" />
+            <Card style={styles.notifyBanner}>
+              <Text style={styles.notifyTitle}>You'll be notified when it's your turn</Text>
+              <View style={styles.notifySteps}>
+                {[
+                  { icon: "notifications-outline" as const, text: "We'll notify you\nwhen you're next" },
+                  { icon: "call-outline" as const, text: "Please keep your\nphone nearby" },
+                  { icon: "walk-outline" as const, text: "Arrive at the clinic\nwhen called" },
+                ].map((step, i) => (
+                  <View key={i} style={styles.notifyStep}>
+                    <View style={styles.notifyStepIcon}>
+                      <Icon name={step.icon} size={18} color={palette.green600} />
+                    </View>
+                    <Text style={styles.notifyStepText}>{step.text}</Text>
                   </View>
-                  <Text style={styles.notifyStepText}>{step.text}</Text>
-                </View>
-              ))}
-            </View>
+                ))}
+              </View>
+            </Card>
 
             {/* Queue validity notice */}
             <View style={styles.validityCard}>
               <View style={styles.validityHeader}>
-                <Icon name="shield-checkmark-outline" size={16} color="#16A34A" />
+                <Icon name="shield-checkmark-outline" size={16} color={palette.green600} />
                 <Text style={styles.validityTitle}>Your queue is valid for today only</Text>
               </View>
               <Text style={styles.validityText}>
-                If you leave the queue, it is now free and available. If you leave the queue, you'll need to join again.
+                Please be nearby and available. If you leave the queue, you'll need to join again.
               </Text>
             </View>
 
@@ -265,34 +262,14 @@ export default function JoinQueueScreen() {
             <Text style={styles.whyTitle}>Why Join Queue?</Text>
             <View style={styles.whyRow}>
               {[
-                { icon: "calendar-clear-outline", text: "See a doctor\nwithout booking" },
-                { icon: "bar-chart-outline", text: "Real-time updates\non wait time" },
-                { icon: "exit-outline", text: "No commitment,\nleave queue anytime" },
+                { icon: "person-outline" as const, text: "See a doctor\nsooner without booking" },
+                { icon: "time-outline" as const, text: "Real-time updates\non wait time" },
+                { icon: "exit-outline" as const, text: "No commitment,\nleave queue anytime" },
               ].map((item, i) => (
                 <View key={i} style={styles.whyItem}>
-                  <View style={styles.whyIcon}>
-                    <Icon name={item.icon} size={20} color="#1A6FD8" />
-                  </View>
+                  <Icon name={item.icon} size={20} color={palette.green600} />
                   <Text style={styles.whyText}>{item.text}</Text>
                 </View>
-              ))}
-            </View>
-
-            {/* Before you join checklist */}
-            <Text style={styles.beforeTitle}>Before you join</Text>
-            <View style={styles.beforeList}>
-              {[
-                { icon: "card-outline", text: "Please bring your identification card and any relevant medical reports." },
-                { icon: "people-outline", text: "Walk-ins are for non-emergency cases only." },
-                { icon: "time-outline", text: "Queue closes at 9:00 PM today." },
-              ].map((item, i) => (
-                <TouchableOpacity key={i} style={styles.beforeItem} activeOpacity={0.7}>
-                  <View style={styles.beforeItemIcon}>
-                    <Icon name={item.icon} size={18} color="#1A6FD8" />
-                  </View>
-                  <Text style={styles.beforeItemText}>{item.text}</Text>
-                  <Icon name="chevron-forward-outline" size={14} color="#CBD5E1" />
-                </TouchableOpacity>
               ))}
             </View>
           </>
@@ -304,35 +281,20 @@ export default function JoinQueueScreen() {
       {/* Bottom bar */}
       <View style={styles.bottomBar}>
         {queue ? (
-          <TouchableOpacity
-            style={[styles.joinBtn, joining && styles.joinBtnDisabled]}
+          <Button
+            label={joining ? "" : "Join Queue Now"}
             onPress={handleJoinQueue}
-            disabled={joining}
-            activeOpacity={0.85}
-          >
-            {joining ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <>
-                <Icon name="people-outline" size={18} color="#FFFFFF" />
-                <View>
-                  <Text style={styles.joinBtnTitle}>Join Queue Now</Text>
-                  <Text style={styles.joinBtnSub}>
-                    #{queue.waitingCount + 1} added to the queue
-                  </Text>
-                </View>
-              </>
-            )}
-          </TouchableOpacity>
+            loading={joining}
+            icon="people-outline"
+            iconPosition="left"
+          />
         ) : (
-          <TouchableOpacity
-            style={styles.bookApptBtn}
+          <Button
+            label="Book Appointment Instead"
             onPress={() => router.back()}
-            activeOpacity={0.85}
-          >
-            <Icon name="calendar-outline" size={18} color="#FFFFFF" />
-            <Text style={styles.bookApptBtnText}>Book Appointment Instead</Text>
-          </TouchableOpacity>
+            icon="calendar-outline"
+            iconPosition="left"
+          />
         )}
       </View>
     </View>
@@ -342,7 +304,7 @@ export default function JoinQueueScreen() {
 // ─── styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F7FA" },
+  container: { flex: 1, backgroundColor: palette.appBg },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   scroll: { paddingBottom: 20 },
   bottomSpacer: { height: 110 },
@@ -352,51 +314,45 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
     paddingTop: 52,
-    paddingBottom: 12,
-    backgroundColor: "#FFFFFF",
+    paddingBottom: spacing.md,
+    backgroundColor: palette.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: palette.border,
   },
   headerBtn: {
     width: 36,
     height: 36,
-    borderRadius: 10,
-    backgroundColor: "#F8FAFC",
+    borderRadius: radius.sm,
+    backgroundColor: palette.slate100,
     justifyContent: "center",
     alignItems: "center",
   },
-  headerTitle: { fontSize: 16, fontWeight: "700", color: "#1E293B" },
+  headerTitle: { ...textStyle("h3"), color: palette.slate900 },
+  howItWorksBtn: { flexDirection: "row", alignItems: "center", gap: 4 },
+  howItWorksText: { fontSize: 13, fontFamily: fontFamily(600), color: palette.primary600 },
 
   // No queue
   noQueueCard: {
     alignItems: "center",
-    padding: 40,
-    gap: 12,
-    backgroundColor: "#FFFFFF",
-    margin: 16,
-    borderRadius: 16,
+    padding: spacing["3xl"],
+    gap: spacing.md,
+    backgroundColor: palette.surface,
+    margin: spacing.lg,
+    borderRadius: radius.lg,
   },
-  noQueueTitle: { fontSize: 18, fontWeight: "700", color: "#1E293B" },
-  noQueueText: { fontSize: 13, color: "#64748B", textAlign: "center", lineHeight: 20 },
+  noQueueTitle: { fontSize: 18, fontFamily: fontFamily(700), color: palette.slate900 },
+  noQueueText: { fontSize: 13, color: palette.slate500, textAlign: "center", lineHeight: 20 },
 
   // Doctor card
   doctorCard: {
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 16,
-    padding: 16,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
     flexDirection: "row",
     alignItems: "flex-start",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
   },
-  doctorCardLeft: { flex: 1, flexDirection: "row", gap: 12 },
+  doctorCardLeft: { flex: 1, flexDirection: "row", gap: spacing.md },
   doctorAvatar: {
     width: 56,
     height: 56,
@@ -405,171 +361,104 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexShrink: 0,
   },
-  doctorAvatarText: { fontSize: 20, fontWeight: "800", color: "#FFFFFF" },
+  doctorAvatarText: { fontSize: 20, fontFamily: fontFamily(800), color: "#FFFFFF" },
   doctorInfo: { flex: 1, gap: 3 },
-  doctorNameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  doctorName: { fontSize: 14, fontWeight: "700", color: "#1E293B" },
-  doctorSpec: { fontSize: 12, color: "#64748B" },
-  ratingRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  ratingNum: { fontSize: 12, fontWeight: "700", color: "#1E293B" },
-  ratingCount: { fontSize: 11, color: "#94A3B8" },
+  doctorNameRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+  doctorName: { fontSize: 14, fontFamily: fontFamily(700), color: palette.slate900 },
+  doctorSpec: { fontSize: 12, color: palette.slate500 },
+  ratingRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+  ratingNum: { fontSize: 12, fontFamily: fontFamily(700), color: palette.slate900 },
+  ratingCount: { fontSize: 11, color: palette.slate400 },
   clinicRow: { flexDirection: "row", alignItems: "center", gap: 3 },
-  clinicName: { fontSize: 11, color: "#64748B" },
-  clinicAddr: { fontSize: 10, color: "#94A3B8" },
+  clinicName: { fontSize: 11, color: palette.slate500 },
+  clinicAddr: { fontSize: 10, color: palette.slate400 },
   feeBox: { alignItems: "flex-end", flexShrink: 0, gap: 2 },
-  feeLabel: { fontSize: 10, color: "#94A3B8" },
-  feeAmount: { fontSize: 16, fontWeight: "800", color: "#1A6FD8" },
-  feePerVisit: { fontSize: 10, color: "#94A3B8" },
+  feeLabel: { fontSize: 10, color: palette.slate400 },
+  feeAmount: { fontSize: 16, fontFamily: fontFamily(800), color: palette.primary600 },
 
   // Stats card
   statsCard: {
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 16,
-    marginTop: 12,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
   },
-  statsCardTitle: { fontSize: 13, fontWeight: "700", color: "#1E293B", marginBottom: 8 },
-  waitingRow: { flexDirection: "row", alignItems: "baseline", gap: 0 },
-  waitingNum: { fontSize: 36, fontWeight: "800", color: "#1A6FD8" },
-  waitingLabel: { fontSize: 14, color: "#64748B" },
-  lastUpdated: { fontSize: 11, color: "#94A3B8", marginTop: 2 },
-  statsDivider: { height: 1, backgroundColor: "#F1F5F9", marginVertical: 14 },
-  estimateRow: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
-  estimateWait: { fontSize: 20, fontWeight: "800", color: "#1E293B" },
-  estimateLabel: { fontSize: 12, fontWeight: "600", color: "#64748B" },
-  estimateNote: { fontSize: 11, color: "#94A3B8", marginTop: 2, lineHeight: 16 },
+  statsCardTitle: { fontSize: 13, fontFamily: fontFamily(700), color: palette.slate900, marginBottom: spacing.sm },
+  waitingRow: { flexDirection: "row", alignItems: "baseline", gap: spacing.sm },
+  waitingNum: { fontSize: 36, fontFamily: fontFamily(800), color: palette.primary600 },
+  waitingLabel: { fontSize: 14, color: palette.slate500 },
+  lastUpdated: { fontSize: 11, color: palette.slate400, marginTop: 2 },
+  statsDivider: { height: 1, backgroundColor: palette.slate100, marginVertical: spacing.md },
+  estimateLabel: { fontSize: 12, fontFamily: fontFamily(600), color: palette.slate500, marginBottom: spacing.xs },
+  estimateRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  estimateWait: { fontSize: 22, fontFamily: fontFamily(800), color: palette.slate900 },
+  estimateNote: { fontSize: 11, color: palette.slate400, marginTop: spacing.xs, lineHeight: 16 },
 
   // Notify banner
   notifyBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: "#EFF6FF",
-    marginHorizontal: 16,
-    marginTop: 12,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    backgroundColor: palette.surface,
   },
-  notifyText: { fontSize: 14, fontWeight: "600", color: "#1A6FD8", flex: 1 },
+  notifyTitle: { fontSize: 14, fontFamily: fontFamily(700), color: palette.slate900, textAlign: "center", marginBottom: spacing.md },
 
   // Notify steps
   notifySteps: {
     flexDirection: "row",
-    marginHorizontal: 16,
-    marginTop: 12,
-    gap: 8,
+    gap: spacing.sm,
   },
   notifyStep: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 12,
     alignItems: "center",
-    gap: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 3,
-    elevation: 1,
+    gap: spacing.sm,
   },
   notifyStepIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#EFF6FF",
+    backgroundColor: palette.green50,
     justifyContent: "center",
     alignItems: "center",
   },
-  notifyStepText: { fontSize: 11, color: "#64748B", textAlign: "center", lineHeight: 16 },
+  notifyStepText: { fontSize: 11, color: palette.slate500, textAlign: "center", lineHeight: 16 },
 
   // Validity card
   validityCard: {
-    backgroundColor: "#F0FDF4",
+    backgroundColor: palette.green50,
     borderWidth: 1,
     borderColor: "#86EFAC",
-    marginHorizontal: 16,
-    marginTop: 12,
-    borderRadius: 12,
-    padding: 14,
-    gap: 6,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    gap: spacing.xs,
   },
-  validityHeader: { flexDirection: "row", alignItems: "center", gap: 6 },
-  validityTitle: { fontSize: 13, fontWeight: "700", color: "#16A34A" },
-  validityText: { fontSize: 12, color: "#15803D", lineHeight: 18 },
+  validityHeader: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+  validityTitle: { fontSize: 13, fontFamily: fontFamily(700), color: palette.green600 },
+  validityText: { fontSize: 12, color: palette.green700, lineHeight: 18 },
 
   // Why Join
   whyTitle: {
     fontSize: 15,
-    fontWeight: "700",
-    color: "#1E293B",
-    marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 10,
+    fontFamily: fontFamily(700),
+    color: palette.slate900,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
   },
-  whyRow: { flexDirection: "row", marginHorizontal: 16, gap: 8 },
+  whyRow: { flexDirection: "row", marginHorizontal: spacing.lg, gap: spacing.sm },
   whyItem: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: palette.surface,
+    borderRadius: radius.md,
+    padding: spacing.md,
     alignItems: "center",
-    gap: 8,
+    gap: spacing.sm,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 3,
     elevation: 1,
   },
-  whyIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#EFF6FF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  whyText: { fontSize: 11, color: "#64748B", textAlign: "center", lineHeight: 16 },
-
-  // Before you join
-  beforeTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#1E293B",
-    marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 10,
-  },
-  beforeList: { marginHorizontal: 16, gap: 8 },
-  beforeItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  beforeItemIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#EFF6FF",
-    justifyContent: "center",
-    alignItems: "center",
-    flexShrink: 0,
-  },
-  beforeItemText: { fontSize: 13, color: "#64748B", flex: 1, lineHeight: 19 },
+  whyText: { fontSize: 11, color: palette.slate500, textAlign: "center", lineHeight: 16 },
 
   // Bottom bar
   bottomBar: {
@@ -577,33 +466,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingTop: 14,
+    backgroundColor: palette.surface,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
     paddingBottom: 36,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
+    borderTopColor: palette.border,
   },
-  joinBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-    backgroundColor: "#1A6FD8",
-    borderRadius: 14,
-    paddingVertical: 16,
-  },
-  joinBtnDisabled: { opacity: 0.6 },
-  joinBtnTitle: { fontSize: 16, fontWeight: "700", color: "#FFFFFF" },
-  joinBtnSub: { fontSize: 11, color: "rgba(255,255,255,0.8)", marginTop: 1 },
-  bookApptBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#1A6FD8",
-    borderRadius: 14,
-    paddingVertical: 16,
-  },
-  bookApptBtnText: { fontSize: 16, fontWeight: "700", color: "#FFFFFF" },
 });

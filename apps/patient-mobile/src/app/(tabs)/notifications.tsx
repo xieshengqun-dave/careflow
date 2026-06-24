@@ -12,7 +12,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon, type IoniconName } from "@/components/Icon";
+import { Card } from "@/components/ui/Card";
 import { getDerivedNotifications, type AppNotification } from "@/lib/api/notifications";
+import { palette, radius, spacing } from "@/theme/careflow-tokens";
+import { fontFamily, textStyle } from "@/theme/typography";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -31,9 +34,9 @@ const TYPE_CONFIG: Record<
   AppNotification["type"],
   { icon: IoniconName; color: string; bg: string }
 > = {
-  APPOINTMENT: { icon: "calendar-outline",  color: "#1A6FD8", bg: "#EFF6FF" },
-  QUEUE:       { icon: "people-outline",    color: "#0D9488", bg: "#CCFBF1" },
-  SYSTEM:      { icon: "notifications-outline", color: "#64748B", bg: "#F1F5F9" },
+  APPOINTMENT: { icon: "calendar-outline",  color: palette.primary600, bg: palette.primary50 },
+  QUEUE:       { icon: "people-outline",    color: palette.green600, bg: palette.green50 },
+  SYSTEM:      { icon: "notifications-outline", color: palette.slate500, bg: palette.slate100 },
 };
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
@@ -154,7 +157,7 @@ function NotifItem({
       {/* Right side: unread dot + chevron */}
       <View style={styles.notifRight}>
         {!notif.read && <View style={styles.unreadDot} />}
-        <Icon name="chevron-forward-outline" size={14} color="#CBD5E1" />
+        <Icon name="chevron-forward-outline" size={14} color={palette.slate200} />
       </View>
     </TouchableOpacity>
   );
@@ -196,7 +199,7 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
+      <StatusBar barStyle="dark-content" backgroundColor={palette.appBg} />
 
       {/* Header */}
       <SafeAreaView style={styles.headerBg} edges={["top"]}>
@@ -257,7 +260,7 @@ export default function NotificationsScreen() {
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator color="#1A6FD8" size="large" />
+          <ActivityIndicator color={palette.primary600} size="large" />
         </View>
       ) : (
         <ScrollView
@@ -270,14 +273,14 @@ export default function NotificationsScreen() {
                 setRefreshing(true);
                 void load();
               }}
-              tintColor="#1A6FD8"
+              tintColor={palette.primary600}
             />
           }
         >
           {filtered.length === 0 ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIcon}>
-                <Icon name="notifications-off-outline" size={36} color="#1A6FD8" />
+                <Icon name="notifications-off-outline" size={36} color={palette.primary600} />
               </View>
               <Text style={styles.emptyTitle}>No notifications</Text>
               <Text style={styles.emptySub}>
@@ -293,7 +296,7 @@ export default function NotificationsScreen() {
               {sections.map((section) => (
                 <View key={section.title} style={styles.section}>
                   <Text style={styles.sectionLabel}>{section.title}</Text>
-                  <View style={styles.sectionCard}>
+                  <Card style={styles.sectionCard} padded={false}>
                     {section.data.map((notif, idx) => (
                       <NotifItem
                         key={notif.id}
@@ -301,14 +304,14 @@ export default function NotificationsScreen() {
                         isLast={idx === section.data.length - 1}
                       />
                     ))}
-                  </View>
+                  </Card>
                 </View>
               ))}
 
               {/* Stay Updated banner */}
-              <View style={styles.stayUpdatedBanner}>
+              <Card style={styles.stayUpdatedBanner}>
                 <View style={styles.stayUpdatedIcon}>
-                  <Icon name="notifications-outline" size={20} color="#1A6FD8" />
+                  <Icon name="notifications-outline" size={20} color={palette.primary600} />
                 </View>
                 <View style={styles.stayUpdatedText}>
                   <Text style={styles.stayUpdatedTitle}>Stay Updated</Text>
@@ -319,7 +322,7 @@ export default function NotificationsScreen() {
                 <TouchableOpacity style={styles.enableBtn}>
                   <Text style={styles.enableBtnText}>Enable</Text>
                 </TouchableOpacity>
-              </View>
+              </Card>
             </>
           )}
         </ScrollView>
@@ -331,131 +334,103 @@ export default function NotificationsScreen() {
 // ─── Styles ─────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F7FA" },
-  headerBg: { backgroundColor: "#FFFFFF" },
+  container: { flex: 1, backgroundColor: palette.appBg },
+  headerBg: { backgroundColor: palette.surface },
 
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 6,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xs,
   },
-  headerTitle: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#1E293B",
-  },
-  markAllText: {
-    fontSize: 13,
-    color: "#1A6FD8",
-    fontWeight: "500",
-  },
-  markAllDisabled: {
-    color: "#CBD5E1",
-  },
+  headerTitle: { ...textStyle("h1"), color: palette.slate900 },
+  markAllText: { fontSize: 13, color: palette.primary600, fontFamily: fontFamily(500) },
+  markAllDisabled: { color: palette.slate200 },
 
   // Filter tabs
   filterTabs: {
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
+    borderBottomColor: palette.border,
   },
   filterTabsContent: {
-    paddingHorizontal: 16,
-    gap: 4,
+    paddingHorizontal: spacing.lg,
+    gap: spacing.xs,
   },
   filterTabItem: {
-    paddingHorizontal: 8,
-    paddingTop: 6,
+    paddingHorizontal: spacing.sm,
+    paddingTop: spacing.xs,
     paddingBottom: 0,
     alignItems: "center",
     position: "relative",
-    marginRight: 4,
+    marginRight: spacing.xs,
   },
   filterTabInner: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    paddingBottom: 10,
+    paddingBottom: spacing.sm,
   },
-  filterTabLabel: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#94A3B8",
-  },
-  filterTabLabelActive: {
-    color: "#1A6FD8",
-    fontWeight: "600",
-  },
+  filterTabLabel: { fontSize: 13, fontFamily: fontFamily(500), color: palette.slate400 },
+  filterTabLabelActive: { color: palette.primary600, fontFamily: fontFamily(600) },
   filterTabBadge: {
-    backgroundColor: "#1A6FD8",
-    borderRadius: 8,
+    backgroundColor: palette.primary600,
+    borderRadius: radius.sm,
     minWidth: 16,
     height: 16,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing.xs,
   },
-  filterTabBadgeText: {
-    fontSize: 9,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
+  filterTabBadgeText: { fontSize: 9, fontFamily: fontFamily(700), color: "#FFFFFF" },
   filterTabUnderline: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     height: 2,
-    backgroundColor: "#1A6FD8",
+    backgroundColor: palette.primary600,
     borderRadius: 1,
   },
 
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
-  list: { paddingTop: 16, paddingBottom: 100 },
+  list: { paddingTop: spacing.lg, paddingBottom: 100 },
   listEmpty: { flex: 1 },
 
   // Section
-  section: { marginBottom: 8 },
+  section: { marginBottom: spacing.sm },
   sectionLabel: {
     fontSize: 12,
-    fontWeight: "600",
-    color: "#94A3B8",
+    fontFamily: fontFamily(600),
+    color: palette.slate400,
     textTransform: "uppercase",
     letterSpacing: 0.5,
-    paddingHorizontal: 20,
-    marginBottom: 8,
+    paddingHorizontal: spacing.xl,
+    marginBottom: spacing.sm,
   },
   sectionCard: {
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 16,
-    borderRadius: 16,
+    marginHorizontal: spacing.lg,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 1,
   },
 
   // Notification item
   notifItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    gap: 12,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    gap: spacing.md,
   },
   notifItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: "#F8FAFC",
+    borderBottomColor: palette.slate100,
   },
   notifIconCircle: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: radius.md,
     justifyContent: "center",
     alignItems: "center",
     flexShrink: 0,
@@ -465,30 +440,30 @@ const styles = StyleSheet.create({
   },
   notifTitle: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#1E293B",
+    fontFamily: fontFamily(600),
+    color: palette.slate900,
     marginBottom: 3,
   },
   notifBody: {
     fontSize: 12,
-    color: "#64748B",
+    color: palette.slate500,
     lineHeight: 18,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   notifTime: {
     fontSize: 11,
-    color: "#94A3B8",
+    color: palette.slate400,
   },
   notifRight: {
     alignItems: "center",
-    gap: 6,
+    gap: spacing.xs,
     flexShrink: 0,
   },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#1A6FD8",
+    backgroundColor: palette.primary600,
   },
 
   // Empty state
@@ -497,27 +472,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingTop: 60,
-    paddingHorizontal: 32,
+    paddingHorizontal: spacing["3xl"],
   },
   emptyIcon: {
     width: 72,
     height: 72,
-    borderRadius: 24,
-    backgroundColor: "#EFF6FF",
+    borderRadius: radius.xl,
+    backgroundColor: palette.primary50,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   emptyTitle: {
     fontSize: 16,
-    fontWeight: "700",
-    color: "#1E293B",
-    marginBottom: 8,
+    fontFamily: fontFamily(700),
+    color: palette.slate900,
+    marginBottom: spacing.sm,
     textAlign: "center",
   },
   emptySub: {
     fontSize: 13,
-    color: "#94A3B8",
+    color: palette.slate400,
     textAlign: "center",
     lineHeight: 20,
   },
@@ -526,51 +501,30 @@ const styles = StyleSheet.create({
   stayUpdatedBanner: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 16,
-    marginTop: 8,
-    borderRadius: 14,
-    padding: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    gap: spacing.sm,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.sm,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: palette.slate200,
   },
   stayUpdatedIcon: {
     width: 40,
     height: 40,
-    borderRadius: 12,
-    backgroundColor: "#EFF6FF",
+    borderRadius: radius.md,
+    backgroundColor: palette.primary50,
     justifyContent: "center",
     alignItems: "center",
     flexShrink: 0,
   },
   stayUpdatedText: { flex: 1 },
-  stayUpdatedTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#1E293B",
-    marginBottom: 2,
-  },
-  stayUpdatedSub: {
-    fontSize: 11,
-    color: "#64748B",
-    lineHeight: 16,
-  },
+  stayUpdatedTitle: { fontSize: 13, fontFamily: fontFamily(600), color: palette.slate900, marginBottom: 2 },
+  stayUpdatedSub: { fontSize: 11, color: palette.slate500, lineHeight: 16 },
   enableBtn: {
-    backgroundColor: "#1A6FD8",
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    backgroundColor: palette.primary700,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
     paddingVertical: 7,
     flexShrink: 0,
   },
-  enableBtnText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
+  enableBtnText: { fontSize: 12, fontFamily: fontFamily(600), color: "#FFFFFF" },
 });

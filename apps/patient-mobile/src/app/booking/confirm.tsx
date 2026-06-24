@@ -1,6 +1,10 @@
 import { ScrollView, View, Text, TouchableOpacity, StyleSheet, StatusBar } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { palette, radius, spacing } from "@/theme/careflow-tokens";
+import { fontFamily, textStyle } from "@/theme/typography";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -69,7 +73,7 @@ export default function BookingConfirmScreen() {
       {/* Back button */}
       <View style={styles.headerRow}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Icon name="arrow-back-outline" size={20} color="#1E293B" />
+          <Icon name="chevron-back" size={20} color={palette.slate900} />
         </TouchableOpacity>
       </View>
 
@@ -89,7 +93,7 @@ export default function BookingConfirmScreen() {
         </View>
 
         {/* Appointment details card */}
-        <View style={styles.detailsCard}>
+        <Card style={styles.detailsCard}>
 
           {/* Doctor row */}
           <View style={styles.doctorRow}>
@@ -101,11 +105,11 @@ export default function BookingConfirmScreen() {
             <View style={styles.doctorInfo}>
               <View style={styles.doctorNameRow}>
                 <Text style={styles.doctorName}>{doctorName ?? "Doctor"}</Text>
-                <Icon name="checkmark-circle" size={14} color="#1A6FD8" />
+                <Icon name="checkmark-circle" size={14} color={palette.primary600} />
               </View>
               <Text style={styles.doctorSpec}>{specialty ?? "General Practice"}</Text>
               <View style={styles.clinicRow}>
-                <Icon name="location-outline" size={12} color="#94A3B8" />
+                <Icon name="location-outline" size={12} color={palette.slate400} />
                 <Text style={styles.clinicName}>{clinicName ?? ""}</Text>
               </View>
               {clinicAddress ? (
@@ -118,8 +122,8 @@ export default function BookingConfirmScreen() {
 
           {/* Date */}
           <View style={styles.detailRow}>
-            <View style={[styles.detailIconBox, { backgroundColor: "#EFF6FF" }]}>
-              <Icon name="calendar-outline" size={16} color="#1A6FD8" />
+            <View style={[styles.detailIconBox, { backgroundColor: palette.primary50 }]}>
+              <Icon name="calendar-outline" size={16} color={palette.primary600} />
             </View>
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Date</Text>
@@ -129,8 +133,8 @@ export default function BookingConfirmScreen() {
 
           {/* Time */}
           <View style={styles.detailRow}>
-            <View style={[styles.detailIconBox, { backgroundColor: "#EFF6FF" }]}>
-              <Icon name="time-outline" size={16} color="#1A6FD8" />
+            <View style={[styles.detailIconBox, { backgroundColor: palette.primary50 }]}>
+              <Icon name="time-outline" size={16} color={palette.primary600} />
             </View>
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Time</Text>
@@ -140,8 +144,8 @@ export default function BookingConfirmScreen() {
 
           {/* Type */}
           <View style={styles.detailRow}>
-            <View style={[styles.detailIconBox, { backgroundColor: "#F0FDF4" }]}>
-              <Icon name="medkit-outline" size={16} color="#16A34A" />
+            <View style={[styles.detailIconBox, { backgroundColor: palette.green50 }]}>
+              <Icon name="medkit-outline" size={16} color={palette.green600} />
             </View>
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Type</Text>
@@ -152,8 +156,8 @@ export default function BookingConfirmScreen() {
           {/* Consultation fee */}
           {displayFee ? (
             <View style={styles.detailRow}>
-              <View style={[styles.detailIconBox, { backgroundColor: "#FFF7ED" }]}>
-                <Icon name="cash-outline" size={16} color="#EA580C" />
+              <View style={[styles.detailIconBox, { backgroundColor: palette.amber100 }]}>
+                <Icon name="cash-outline" size={16} color={palette.amber700} />
               </View>
               <View style={styles.detailContent}>
                 <Text style={styles.detailLabel}>Consultation Fee</Text>
@@ -179,12 +183,12 @@ export default function BookingConfirmScreen() {
               <Text style={styles.refValue}>{refNumber}</Text>
             </View>
           </View>
-        </View>
+        </Card>
 
         {/* What happens next */}
-        <View style={styles.nextSection}>
+        <Card style={styles.nextSection}>
           <View style={styles.nextHeader}>
-            <Icon name="information-circle-outline" size={18} color="#1A6FD8" />
+            <Icon name="information-circle-outline" size={18} color={palette.primary600} />
             <Text style={styles.nextTitle}>What happens next?</Text>
           </View>
           {[
@@ -197,7 +201,7 @@ export default function BookingConfirmScreen() {
               <Text style={styles.nextItemText}>{text}</Text>
             </View>
           ))}
-        </View>
+        </Card>
 
         {/* Add to Calendar */}
         <View style={styles.calendarSection}>
@@ -211,7 +215,7 @@ export default function BookingConfirmScreen() {
               ] as const
             ).map((cal) => (
               <TouchableOpacity key={cal.label} style={styles.calendarBtn} activeOpacity={0.7}>
-                <Icon name={cal.icon} size={18} color="#1A6FD8" />
+                <Icon name={cal.icon} size={18} color={palette.primary600} />
                 <Text style={styles.calendarBtnText}>{cal.label}</Text>
               </TouchableOpacity>
             ))}
@@ -223,14 +227,12 @@ export default function BookingConfirmScreen() {
 
       {/* Bottom actions */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity
-          style={styles.viewApptBtn}
+        <Button
+          label="View My Appointments"
+          icon="calendar-outline"
+          iconPosition="left"
           onPress={() => router.replace("/(tabs)/appointments")}
-          activeOpacity={0.85}
-        >
-          <Icon name="calendar-outline" size={16} color="#FFFFFF" />
-          <Text style={styles.viewApptBtnText}>View My Appointments</Text>
-        </TouchableOpacity>
+        />
         <TouchableOpacity
           style={styles.backHomeLink}
           onPress={() => router.replace("/(tabs)")}
@@ -246,36 +248,36 @@ export default function BookingConfirmScreen() {
 // ─── styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F7FA" },
+  container: { flex: 1, backgroundColor: palette.appBg },
   scroll: { paddingBottom: 20 },
   bottomSpacer: { height: 130 },
 
   headerRow: {
     paddingTop: 52,
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-    backgroundColor: "#FFFFFF",
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+    backgroundColor: palette.surface,
   },
   backBtn: {
     width: 36,
     height: 36,
-    borderRadius: 10,
-    backgroundColor: "#F8FAFC",
+    borderRadius: radius.sm,
+    backgroundColor: palette.slate100,
     justifyContent: "center",
     alignItems: "center",
   },
 
   // Hero
-  heroSection: { alignItems: "center", paddingVertical: 32, backgroundColor: "#FFFFFF" },
+  heroSection: { alignItems: "center", paddingVertical: spacing["3xl"], backgroundColor: palette.surface },
   checkCircle: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#22C55E",
+    backgroundColor: palette.green500,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20,
-    shadowColor: "#22C55E",
+    marginBottom: spacing.xl,
+    shadowColor: palette.green500,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -283,57 +285,49 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     fontSize: 20,
-    fontWeight: "800",
-    color: "#1E293B",
+    fontFamily: fontFamily(800),
+    color: palette.slate900,
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
-  heroSub: { fontSize: 13, color: "#64748B", textAlign: "center", paddingHorizontal: 32 },
+  heroSub: { fontSize: 13, color: palette.slate500, textAlign: "center", paddingHorizontal: spacing["2xl"] },
 
   // Details card
   detailsCard: {
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
   },
-  doctorRow: { flexDirection: "row", gap: 12, alignItems: "flex-start", marginBottom: 16 },
+  doctorRow: { flexDirection: "row", gap: spacing.md, alignItems: "flex-start", marginBottom: spacing.lg },
   doctorAvatar: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: "#EFF6FF",
+    backgroundColor: palette.primary50,
     justifyContent: "center",
     alignItems: "center",
     flexShrink: 0,
   },
-  doctorAvatarText: { fontSize: 20, fontWeight: "800", color: "#1A6FD8" },
+  doctorAvatarText: { fontSize: 20, fontFamily: fontFamily(800), color: palette.primary600 },
   doctorInfo: { flex: 1, gap: 3 },
-  doctorNameRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  doctorName: { fontSize: 15, fontWeight: "700", color: "#1E293B" },
-  doctorSpec: { fontSize: 12, color: "#64748B" },
+  doctorNameRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
+  doctorName: { fontSize: 15, fontFamily: fontFamily(700), color: palette.slate900 },
+  doctorSpec: { fontSize: 12, color: palette.slate500 },
   clinicRow: { flexDirection: "row", alignItems: "center", gap: 3 },
-  clinicName: { fontSize: 12, color: "#64748B" },
-  clinicAddr: { fontSize: 11, color: "#94A3B8", lineHeight: 16 },
+  clinicName: { fontSize: 12, color: palette.slate500 },
+  clinicAddr: { fontSize: 11, color: palette.slate400, lineHeight: 16 },
 
-  divider: { height: 1, backgroundColor: "#F1F5F9", marginVertical: 12 },
+  divider: { height: 1, backgroundColor: palette.slate100, marginVertical: spacing.md },
 
   detailRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 12,
-    marginBottom: 12,
+    gap: spacing.md,
+    marginBottom: spacing.md,
   },
   detailIconBox: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: radius.sm,
     justifyContent: "center",
     alignItems: "center",
     flexShrink: 0,
@@ -341,21 +335,21 @@ const styles = StyleSheet.create({
   detailContent: { flex: 1, justifyContent: "center" },
   detailLabel: {
     fontSize: 11,
-    color: "#94A3B8",
-    fontWeight: "600",
+    color: palette.slate400,
+    fontFamily: fontFamily(600),
     textTransform: "uppercase",
     letterSpacing: 0.3,
     marginBottom: 2,
   },
-  detailValue: { fontSize: 14, fontWeight: "600", color: "#1E293B" },
-  feeRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  detailValue: { fontSize: 14, fontFamily: fontFamily(600), color: palette.slate900 },
+  feeRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   paidBadge: {
-    backgroundColor: "#F0FDF4",
-    paddingHorizontal: 8,
+    backgroundColor: palette.green50,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: radius.sm,
   },
-  paidBadgeText: { fontSize: 10, fontWeight: "700", color: "#16A34A" },
+  paidBadgeText: { fontSize: 10, fontFamily: fontFamily(700), color: palette.green600 },
 
   statusRefRow: {
     flexDirection: "row",
@@ -363,72 +357,64 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   confirmedBadge: {
-    backgroundColor: "#F0FDF4",
+    backgroundColor: palette.green50,
     borderWidth: 1,
     borderColor: "#86EFAC",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.sm,
   },
   confirmedBadgeText: {
     fontSize: 12,
-    fontWeight: "800",
-    color: "#16A34A",
+    fontFamily: fontFamily(800),
+    color: palette.green600,
     letterSpacing: 0.5,
   },
   refBox: { alignItems: "flex-end" },
-  refLabel: { fontSize: 10, color: "#94A3B8", marginBottom: 2 },
-  refValue: { fontSize: 14, fontWeight: "700", color: "#1E293B" },
+  refLabel: { fontSize: 10, color: palette.slate400, marginBottom: 2 },
+  refValue: { fontSize: 14, fontFamily: fontFamily(700), color: palette.slate900 },
 
   // What happens next
   nextSection: {
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 16,
-    marginTop: 12,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
   },
-  nextHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
-  nextTitle: { fontSize: 14, fontWeight: "700", color: "#1E293B" },
-  nextItem: { flexDirection: "row", gap: 10, alignItems: "flex-start", marginBottom: 8 },
+  nextHeader: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.md },
+  nextTitle: { fontSize: 14, fontFamily: fontFamily(700), color: palette.slate900 },
+  nextItem: { flexDirection: "row", gap: spacing.sm, alignItems: "flex-start", marginBottom: spacing.sm },
   bulletDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#1A6FD8",
+    backgroundColor: palette.primary600,
     marginTop: 6,
     flexShrink: 0,
   },
-  nextItemText: { fontSize: 13, color: "#64748B", lineHeight: 20, flex: 1 },
+  nextItemText: { fontSize: 13, color: palette.slate500, lineHeight: 20, flex: 1 },
 
   // Calendar
   calendarSection: {
-    marginHorizontal: 16,
-    marginTop: 12,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
   },
   calendarSectionTitle: {
     fontSize: 14,
-    fontWeight: "700",
-    color: "#1E293B",
-    marginBottom: 10,
+    fontFamily: fontFamily(700),
+    color: palette.slate900,
+    marginBottom: spacing.sm,
   },
-  calendarBtns: { gap: 8 },
+  calendarBtns: { gap: spacing.sm },
   calendarBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    gap: spacing.md,
+    backgroundColor: palette.surface,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    padding: 14,
+    borderColor: palette.slate200,
+    padding: spacing.md,
   },
-  calendarBtnText: { fontSize: 14, fontWeight: "500", color: "#1E293B" },
+  calendarBtnText: { fontSize: 14, fontFamily: fontFamily(500), color: palette.slate900 },
 
   // Bottom bar
   bottomBar: {
@@ -436,24 +422,14 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingTop: 14,
+    backgroundColor: palette.surface,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
     paddingBottom: 36,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
-    gap: 10,
+    borderTopColor: palette.border,
+    gap: spacing.sm,
   },
-  viewApptBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#1A6FD8",
-    borderRadius: 14,
-    paddingVertical: 16,
-  },
-  viewApptBtnText: { fontSize: 15, fontWeight: "700", color: "#FFFFFF" },
-  backHomeLink: { alignItems: "center", paddingVertical: 4 },
-  backHomeLinkText: { fontSize: 14, color: "#1A6FD8", fontWeight: "500" },
+  backHomeLink: { alignItems: "center", paddingVertical: spacing.xs },
+  backHomeLinkText: { fontSize: 14, color: palette.primary600, fontFamily: fontFamily(500) },
 });
