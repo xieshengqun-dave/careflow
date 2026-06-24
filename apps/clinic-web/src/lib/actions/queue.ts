@@ -117,6 +117,20 @@ export async function skipEntry(entryId: string) {
   return { success: true };
 }
 
+export async function notifyQueueDelayed(queueId: string, doctorName: string) {
+  const { user, supabase } = await getAuthedSupabase();
+  if (!user || !supabase) return { error: "Unauthorized" };
+
+  const message = `Dr. ${doctorName} is running a little behind schedule. Thank you for your patience.`;
+  const { error } = await supabase.rpc("notify_queue_delayed", {
+    p_queue_id: queueId,
+    p_message: message,
+  });
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
 export async function moveToTop(entryId: string) {
   const { user, supabase } = await getAuthedSupabase();
   if (!user || !supabase) return { error: "Unauthorized" };

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { RefreshCw, Phone, CheckCircle2, ArrowUpToLine, XCircle } from "lucide-react";
+import { RefreshCw, Phone, CheckCircle2, ArrowUpToLine, XCircle, BellRing } from "lucide-react";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import {
   startConsultation,
   moveToTop,
   removeEntry,
+  notifyQueueDelayed,
 } from "@/lib/actions/queue";
 import type { CombinedQueueEntry, CombinedQueueSummary } from "@/lib/queries/queue";
 
@@ -230,6 +231,13 @@ export function QueueManagementView({ summary, clinicId, doctorOptions, lastUpda
                       <XCircle className="h-3.5 w-3.5 mr-1.5" /> Remove
                     </Button>
                   </div>
+                  <Button
+                    size="sm" variant="outline" disabled={isPending}
+                    onClick={() => runAction(() => notifyQueueDelayed(selected.queueId, selected.doctorName))}
+                    className="w-full text-slate-600 border-slate-200"
+                  >
+                    <BellRing className="h-3.5 w-3.5 mr-1.5" /> Notify Everyone Waiting: Doctor Delayed
+                  </Button>
                 </div>
               </>
             )}

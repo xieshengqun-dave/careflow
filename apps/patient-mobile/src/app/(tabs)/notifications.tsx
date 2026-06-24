@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon, type IoniconName } from "@/components/Icon";
 import { Card } from "@/components/ui/Card";
-import { getDerivedNotifications, type AppNotification } from "@/lib/api/notifications";
+import { getNotifications, markNotificationsRead, type AppNotification } from "@/lib/api/notifications";
 import { palette, radius, spacing } from "@/theme/careflow-tokens";
 import { fontFamily, textStyle } from "@/theme/typography";
 
@@ -118,14 +118,17 @@ function filterNotifications(
 function NotifItem({
   notif,
   isLast,
+  onRead,
 }: {
   notif: AppNotification;
   isLast: boolean;
+  onRead: (id: string) => void;
 }) {
   const router = useRouter();
   const cfg = TYPE_CONFIG[notif.type];
 
   function handlePress() {
+    onRead(notif.id);
     if (notif.actionRoute) {
       router.push(notif.actionRoute as never);
     }
@@ -173,7 +176,7 @@ export default function NotificationsScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
-    const data = await getDerivedNotifications();
+    const data = await getNotifications();
     setAllNotifs(data);
     setLoading(false);
     setRefreshing(false);
@@ -183,9 +186,15 @@ export default function NotificationsScreen() {
     void load();
   }, [load]);
 
+  function markOneRead(id: string) {
+    setReadIds((prev) => new Set(prev).add(id));
+    void markNotificationsRead([id]);
+  }
+
   function markAllRead() {
-    const ids = new Set(allNotifs.map((n) => n.id));
-    setReadIds(ids);
+    const ids = allNotifs.map((n) => n.id);
+    setReadIds(new Set(ids));
+    void markNotificationsRead(ids);
   }
 
   // Merge read state with fetched data
@@ -302,6 +311,7 @@ export default function NotificationsScreen() {
                         key={notif.id}
                         notif={notif}
                         isLast={idx === section.data.length - 1}
+                        onRead={markOneRead}
                       />
                     ))}
                   </Card>

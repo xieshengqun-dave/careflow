@@ -11,7 +11,7 @@ import { useAuthStore } from "@/store/authStore";
 import { getMyAppointments, type MyAppointment } from "@/lib/api/appointments";
 import { getMyActiveQueueEntries, type QueueEntryStatus } from "@/lib/api/queues";
 import { searchClinics, type ClinicWithDoctors } from "@/lib/api/clinics";
-import { getDerivedNotifications } from "@/lib/api/notifications";
+import { getNotifications } from "@/lib/api/notifications";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { gradients, palette, radius, shadow, spacing } from "@/theme/careflow-tokens";
@@ -105,7 +105,7 @@ export default function HomeScreen() {
       getMyAppointments(),
       getMyActiveQueueEntries(),
       searchClinics(),
-      getDerivedNotifications(),
+      getNotifications(),
     ]);
     setUpcomingAppt(appts[0] ?? null);
     setQueues(queueData);
