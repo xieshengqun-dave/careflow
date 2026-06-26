@@ -520,10 +520,10 @@ export default function DoctorBookingScreen() {
           activeOpacity={0.85}
         >
           {booking ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color={palette.surface} />
           ) : (
             <>
-              <Icon name="calendar-outline" size={16} color="#FFFFFF" />
+              <Icon name="calendar-outline" size={16} color={palette.surface} />
               <View>
                 <Text style={styles.bookBtnTitle}>Book Appointment</Text>
                 {selectedSlot ? (
@@ -584,7 +584,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexShrink: 0,
   },
-  doctorAvatarText: { fontSize: 22, fontFamily: fontFamily(800), color: "#FFFFFF" },
+  doctorAvatarText: { fontSize: 22, fontFamily: fontFamily(800), color: palette.surface },
   doctorDetails: { flex: 1, gap: 3 },
   doctorNameRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
   doctorName: {
@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
   dateChipDay: { fontSize: 11, color: palette.slate400, fontFamily: fontFamily(500) },
   dateChipNum: { fontSize: 18, fontFamily: fontFamily(800), color: palette.slate900 },
   dateChipMonth: { fontSize: 10, color: palette.slate400 },
-  dateChipActiveText: { color: "#FFFFFF" },
+  dateChipActiveText: { color: palette.surface },
 
   // Legend
   legendRow: { flexDirection: "row", gap: spacing.md, marginTop: spacing.sm, flexWrap: "wrap" },
@@ -745,6 +745,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   bookBtnDisabled: { opacity: 0.6 },
-  bookBtnTitle: { fontSize: 12, fontFamily: fontFamily(700), color: "#FFFFFF" },
+  bookBtnTitle: { fontSize: 12, fontFamily: fontFamily(700), color: palette.surface },
   bookBtnSub: { fontSize: 10, color: "rgba(255,255,255,0.8)", marginTop: 1 },
 });

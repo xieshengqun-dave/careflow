@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
 
   devBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.sm,
-    backgroundColor: palette.amber100, borderWidth: 1.5, borderColor: "#FDE68A", borderStyle: "dashed",
+    backgroundColor: palette.amber100, borderWidth: 1.5, borderColor: palette.amber500, borderStyle: "dashed",
     borderRadius: radius.md, paddingVertical: 13, marginBottom: spacing.lg,
   },
   devBtnDisabled: { opacity: 0.6 },

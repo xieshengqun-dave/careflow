@@ -84,7 +84,7 @@ export default function BookingConfirmScreen() {
         {/* Green checkmark hero */}
         <View style={styles.heroSection}>
           <View style={styles.checkCircle}>
-            <Icon name="checkmark" size={44} color="#FFFFFF" />
+            <Icon name="checkmark" size={44} color={palette.surface} />
           </View>
           <Text style={styles.heroTitle}>Your appointment is confirmed!</Text>
           <Text style={styles.heroSub}>
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   confirmedBadge: {
     backgroundColor: palette.green50,
     borderWidth: 1,
-    borderColor: "#86EFAC",
+    borderColor: palette.green500,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: radius.sm,

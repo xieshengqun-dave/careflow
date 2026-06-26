@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "@/store/authStore";
 import { updateProfile } from "@/lib/auth";
+import { palette } from "@/theme/careflow-tokens";
 
 export default function OnboardingScreen() {
   const { user, loadUser } = useAuthStore();
@@ -32,7 +33,7 @@ export default function OnboardingScreen() {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <StatusBar barStyle="light-content" backgroundColor="#0284c7" />
+      <StatusBar barStyle="light-content" backgroundColor={palette.primary700} />
       <View style={styles.hero}>
         <SafeAreaView edges={["top"]}>
           <Text style={styles.heroText}>👋</Text>
@@ -48,7 +49,7 @@ export default function OnboardingScreen() {
         <TextInput
           style={[styles.input, fullName.length > 0 && styles.inputActive]}
           placeholder="Your full name"
-          placeholderTextColor="#94a3b8"
+          placeholderTextColor={palette.slate400}
           value={fullName}
           onChangeText={setFullName}
           autoFocus
@@ -74,33 +75,33 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0284c7" },
+  container: { flex: 1, backgroundColor: palette.primary700 },
   hero: {
-    flex: 1, backgroundColor: "#0284c7",
+    flex: 1, backgroundColor: palette.primary700,
     paddingHorizontal: 24, paddingBottom: 40, paddingTop: 20,
     justifyContent: "flex-end",
   },
   heroText: { fontSize: 52, marginBottom: 12 },
-  heroTitle: { fontSize: 30, fontWeight: "800", color: "#ffffff", marginBottom: 6 },
-  heroSub: { fontSize: 16, color: "#bae6fd" },
+  heroTitle: { fontSize: 30, fontWeight: "800", color: palette.surface, marginBottom: 6 },
+  heroSub: { fontSize: 16, color: palette.primary100 },
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: palette.surface,
     borderTopLeftRadius: 28, borderTopRightRadius: 28,
     paddingHorizontal: 24, paddingTop: 32, paddingBottom: 48,
   },
-  heading: { fontSize: 22, fontWeight: "700", color: "#0f172a", marginBottom: 6 },
-  sub: { fontSize: 14, color: "#64748b", marginBottom: 28, lineHeight: 20 },
+  heading: { fontSize: 22, fontWeight: "700", color: palette.slate900, marginBottom: 6 },
+  sub: { fontSize: 14, color: palette.slate500, marginBottom: 28, lineHeight: 20 },
   input: {
-    borderWidth: 1.5, borderColor: "#e2e8f0", borderRadius: 12,
+    borderWidth: 1.5, borderColor: palette.slate200, borderRadius: 12,
     paddingHorizontal: 16, paddingVertical: 16,
-    fontSize: 17, color: "#0f172a", marginBottom: 20,
-    backgroundColor: "#f8fafc",
+    fontSize: 17, color: palette.slate900, marginBottom: 20,
+    backgroundColor: palette.appBg,
   },
-  inputActive: { borderColor: "#0284c7", backgroundColor: "#ffffff" },
+  inputActive: { borderColor: palette.primary700, backgroundColor: palette.surface },
   btn: {
-    backgroundColor: "#0284c7", borderRadius: 12,
+    backgroundColor: palette.primary700, borderRadius: 12,
     paddingVertical: 16, alignItems: "center",
   },
-  btnDisabled: { backgroundColor: "#bae6fd" },
-  btnText: { color: "#ffffff", fontSize: 16, fontWeight: "700" },
+  btnDisabled: { backgroundColor: palette.primary100 },
+  btnText: { color: palette.surface, fontSize: 16, fontWeight: "700" },
 });

@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
 
   securityBanner: {
     flexDirection: "row", alignItems: "center", gap: spacing.md,
-    backgroundColor: palette.primary50, borderWidth: 1, borderColor: "#BFDBFE",
+    backgroundColor: palette.primary50, borderWidth: 1, borderColor: palette.primary100,
     marginBottom: spacing.lg,
   },
   securityBannerText: { flex: 1 },

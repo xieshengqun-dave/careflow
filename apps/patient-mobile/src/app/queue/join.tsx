@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
   validityCard: {
     backgroundColor: palette.green50,
     borderWidth: 1,
-    borderColor: "#86EFAC",
+    borderColor: palette.green500,
     marginHorizontal: spacing.lg,
     marginTop: spacing.md,
     borderRadius: radius.md,

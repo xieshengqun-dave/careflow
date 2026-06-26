@@ -133,7 +133,7 @@ export default function ProfileScreen() {
             <Switch
               value={notifEnabled}
               onValueChange={setNotifEnabled}
-              trackColor={{ false: palette.slate200, true: "#BFDBFE" }}
+              trackColor={{ false: palette.slate200, true: palette.primary100 }}
               thumbColor={notifEnabled ? palette.primary600 : palette.slate400}
             />
           ),
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  avatarText: { fontSize: 28, fontFamily: fontFamily(700), color: "#FFFFFF" },
+  avatarText: { fontSize: 28, fontFamily: fontFamily(700), color: palette.surface },
   userName: { fontSize: 20, fontFamily: fontFamily(700), color: palette.slate900, marginBottom: spacing.xs },
   userPhone: { fontSize: 14, color: palette.slate500, marginBottom: spacing.md },
   editProfileBtn: {
@@ -355,8 +355,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: spacing.sm,
     borderWidth: 1.5,
-    borderColor: "#FECDD3",
-    backgroundColor: "#FFF1F2",
+    borderColor: palette.red500,
+    backgroundColor: palette.red50,
     borderRadius: radius.lg,
     paddingVertical: spacing.lg,
     marginTop: spacing.xs,

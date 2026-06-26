@@ -14,7 +14,7 @@ function CheckInButton({ onPress }: { onPress?: () => void }) {
       accessibilityRole="button"
     >
       <View style={styles.checkInCircle}>
-        <Icon name="scan-outline" size={24} color="#FFFFFF" />
+        <Icon name="scan-outline" size={24} color={palette.surface} />
       </View>
       <Text style={styles.checkInLabel}>Check-in</Text>
     </TouchableOpacity>
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: palette.border,
     elevation: 10,
-    shadowColor: "#000",
+    shadowColor: palette.slate900,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,

@@ -558,7 +558,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#DBEAFE",
+    backgroundColor: palette.primary100,
     justifyContent: "center",
     alignItems: "center",
     flexShrink: 0,
@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexShrink: 0,
   },
-  doctorAvatarText: { fontSize: 18, fontFamily: fontFamily(800), color: "#FFFFFF" },
+  doctorAvatarText: { fontSize: 18, fontFamily: fontFamily(800), color: palette.surface },
   doctorInfo: { flex: 1, gap: 3 },
   doctorNameRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
   doctorName: { fontSize: 14, fontFamily: fontFamily(700), color: palette.slate900 },
@@ -661,7 +661,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: palette.slate200,
   },
-  progressDotCurrent: { backgroundColor: "#FFFFFF" },
+  progressDotCurrent: { backgroundColor: palette.surface },
   progressLabel: {
     fontSize: 10,
     color: palette.slate400,
@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
   noteCard: {
     backgroundColor: palette.amber100,
     borderWidth: 1,
-    borderColor: "#FDE68A",
+    borderColor: palette.amber500,
     marginHorizontal: spacing.lg,
     marginTop: spacing.md,
     borderRadius: radius.md,
@@ -737,7 +737,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     flexShrink: 0,
   },
-  noteText: { fontSize: 12, color: "#78350F", lineHeight: 18, flex: 1 },
+  noteText: { fontSize: 12, color: palette.amber700, lineHeight: 18, flex: 1 },
 
   // Bottom bar
   bottomBar: {
@@ -763,8 +763,8 @@ const styles = StyleSheet.create({
 
   leaveBtn: {
     borderWidth: 1.5,
-    borderColor: "#FCA5A5",
-    backgroundColor: "#FFF1F2",
+    borderColor: palette.red500,
+    backgroundColor: palette.red50,
     borderRadius: radius.md,
     paddingVertical: spacing.md,
     alignItems: "center",
@@ -777,5 +777,5 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     alignItems: "center",
   },
-  doneBtnText: { fontSize: 15, fontFamily: fontFamily(700), color: "#FFFFFF" },
+  doneBtnText: { fontSize: 15, fontFamily: fontFamily(700), color: palette.surface },
 });

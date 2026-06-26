@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: spacing.xs,
   },
-  filterTabBadgeText: { fontSize: 9, fontFamily: fontFamily(700), color: "#FFFFFF" },
+  filterTabBadgeText: { fontSize: 9, fontFamily: fontFamily(700), color: palette.surface },
   filterTabUnderline: {
     position: "absolute",
     bottom: 0,
@@ -536,5 +536,5 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     flexShrink: 0,
   },
-  enableBtnText: { fontSize: 12, fontFamily: fontFamily(600), color: "#FFFFFF" },
+  enableBtnText: { fontSize: 12, fontFamily: fontFamily(600), color: palette.surface },
 });

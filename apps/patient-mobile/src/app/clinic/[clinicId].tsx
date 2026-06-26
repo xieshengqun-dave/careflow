@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     width: 72, height: 72, borderRadius: 36,
     backgroundColor: palette.surface, borderWidth: 3,
     justifyContent: "center", alignItems: "center",
-    shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
+    shadowColor: palette.slate900, shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.10, shadowRadius: 8, elevation: 4,
   },
   clinicAvatarText: { fontSize: 28, fontFamily: fontFamily(800) },

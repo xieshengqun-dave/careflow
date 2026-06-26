@@ -560,9 +560,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: "#DBEAFE",
+    borderBottomColor: palette.primary100,
   },
-  bannerText: { flex: 1, fontSize: 12, color: "#1E40AF", fontFamily: fontFamily(500) },
+  bannerText: { flex: 1, fontSize: 12, color: palette.primary800, fontFamily: fontFamily(500) },
   bannerAction: { fontSize: 12, color: palette.primary600, fontFamily: fontFamily(600) },
 
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
   doctorAvatarText: {
     fontSize: 18,
     fontFamily: fontFamily(700),
-    color: "#FFFFFF",
+    color: palette.surface,
   },
   cardHeaderInfo: { flex: 1 },
   doctorNameRow: {

@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   },
   filterChipActive: { backgroundColor: palette.primary700, borderColor: palette.primary700 },
   filterChipText: { ...textStyle("label"), color: palette.slate500 },
-  filterChipTextActive: { color: "#FFFFFF", fontFamily: fontFamily(700) },
+  filterChipTextActive: { color: palette.surface, fontFamily: fontFamily(700) },
 
   countRow: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs, paddingVertical: 3,
   },
   openDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: palette.green500 },
-  openText: { fontSize: 9, color: "#FFFFFF", fontFamily: fontFamily(600) },
+  openText: { fontSize: 9, color: palette.surface, fontFamily: fontFamily(600) },
   info: { flex: 1, padding: spacing.md },
   clinicName: { ...textStyle("body"), fontFamily: fontFamily(700), color: palette.slate900, marginBottom: spacing.xs },
   addrRow: { flexDirection: "row", alignItems: "center", gap: 3, marginBottom: spacing.sm },

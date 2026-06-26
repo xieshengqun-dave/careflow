@@ -36,6 +36,17 @@ export const palette = {
   red600: '#DC2626',
   star: '#FBBF24',
 
+  // Platform console tokens (admin/web console — not used in patient screens)
+  platformNavy: '#141B33',
+  platformNavyDeep: '#0E1426',
+  platformPanel: '#1A2342',
+  indigo600: '#4F46E5',
+  indigo500: '#6366F1',
+  indigo400: '#818CF8',
+  indigo100: '#EEF1FF',
+  navTextIdle: '#94A3C2',
+  navActiveBg: 'rgba(99,102,241,0.18)',
+
   // Neutrals / slate
   slate900: '#0F172A', // primary text
   slate700: '#334155',
