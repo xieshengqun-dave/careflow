@@ -29,7 +29,6 @@ function firstName(name: string | null) {
   return name.split(" ")[0] ?? name;
 }
 
-// Colored placeholder for clinic "photo"
 const CLINIC_COLORS = [palette.primary600, palette.green600, palette.purple600, "#DB2777", "#EA580C", "#65A30D"];
 function clinicColor(name: string) {
   let hash = 0;
@@ -49,7 +48,6 @@ function ClinicCard({ clinic }: { clinic: ClinicWithDoctors }) {
       activeOpacity={0.88}
     >
       <Card style={styles.clinicCard} padded={false}>
-        {/* Photo placeholder */}
         <View style={[styles.clinicPhoto, { backgroundColor: color }]}>
           <Text style={styles.clinicPhotoText}>{clinic.name.charAt(0)}</Text>
           <View style={styles.openBadge}>
@@ -118,11 +116,46 @@ export default function HomeScreen() {
 
   const activeQueue = queues[0] ?? null;
 
-  const QUICK_ACTIONS: { icon: IoniconName; label: string; tint: string; iconColor: string; onPress: () => void }[] = [
-    { icon: "calendar-outline", label: "Book\nAppointment", tint: palette.primary50, iconColor: palette.primary600, onPress: () => router.push("/clinic/search") },
-    { icon: "people-outline",   label: "Join\nQueue",        tint: palette.green50,   iconColor: palette.green600,   onPress: () => router.push("/clinic/search") },
-    { icon: "location-outline", label: "Track\nQueue",       tint: palette.purple50,  iconColor: palette.purple600,  onPress: () => router.push("/(tabs)/notifications") },
-    { icon: "business-outline", label: "Find\nClinics",      tint: palette.amber50,   iconColor: palette.amber700,   onPress: () => router.push("/clinic/search") },
+  const QUICK_ACTIONS: {
+    icon: IoniconName;
+    label: string;
+    tint: string;
+    iconColor: string;
+    labelColor: string;
+    onPress: () => void;
+  }[] = [
+    {
+      icon: "calendar-outline",
+      label: "Book Appointment",
+      tint: palette.primary100,
+      iconColor: palette.primary600,
+      labelColor: palette.primary800,
+      onPress: () => router.push("/clinic/search"),
+    },
+    {
+      icon: "people-outline",
+      label: "Join Queue",
+      tint: palette.green50,
+      iconColor: palette.green600,
+      labelColor: palette.green700,
+      onPress: () => router.push("/clinic/search"),
+    },
+    {
+      icon: "time-outline",
+      label: "Track Queue",
+      tint: palette.purple50,
+      iconColor: palette.purple600,
+      labelColor: palette.purple600,
+      onPress: () => router.push("/(tabs)/notifications"),
+    },
+    {
+      icon: "business-outline",
+      label: "Find Clinics",
+      tint: palette.amber50,
+      iconColor: palette.amber700,
+      labelColor: palette.amber700,
+      onPress: () => router.push("/clinic/search"),
+    },
   ];
 
   return (
@@ -155,7 +188,13 @@ export default function HomeScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(); }} tintColor={palette.primary600} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => { setRefreshing(true); void load(); }}
+            tintColor={palette.primary600}
+          />
+        }
       >
         {/* Search bar */}
         <TouchableOpacity
@@ -175,7 +214,12 @@ export default function HomeScreen() {
             activeOpacity={0.92}
             style={styles.queueCardWrap}
           >
-            <LinearGradient colors={gradients.hero} style={styles.queueCard} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+            <LinearGradient
+              colors={gradients.hero}
+              style={styles.queueCard}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
               <View style={styles.queueDecorCircleLg} />
               <View style={styles.queueDecorCircleSm} />
               <View style={styles.queueCardTop}>
@@ -190,7 +234,9 @@ export default function HomeScreen() {
                   <Text style={styles.queueDoctorInitial}>{activeQueue.doctorName.charAt(0)}</Text>
                 </View>
               </View>
-              <Text style={styles.queueNumber}>#{activeQueue.queueNumber.toString().padStart(3, "0")}</Text>
+              <Text style={styles.queueNumber}>
+                #{activeQueue.queueNumber.toString().padStart(3, "0")}
+              </Text>
               <View style={styles.queueCardBottom}>
                 <View style={styles.queueMeta}>
                   <Icon name="people-outline" size={13} color="rgba(255,255,255,0.8)" />
@@ -202,7 +248,7 @@ export default function HomeScreen() {
                 <View>
                   <Text style={styles.queueEstimateLabel}>Estimated waiting time</Text>
                   <View style={styles.queueEstimateValueRow}>
-                    <Icon name="time-outline" size={14} color="#FFFFFF" />
+                    <Icon name="time-outline" size={14} color={palette.surface} />
                     <Text style={styles.queueEstimateValue}>
                       {activeQueue.position * activeQueue.consultationDuration} mins
                     </Text>
@@ -213,30 +259,28 @@ export default function HomeScreen() {
                   onPress={() => router.push(`/queue/${activeQueue.entryId}`)}
                 >
                   <Text style={styles.queueDetailsBtnText}>View Queue Details</Text>
-                  <Icon name="arrow-forward" size={14} color={palette.primary600} />
+                  <Icon name="arrow-forward" size={14} color={palette.primary700} />
                 </TouchableOpacity>
               </View>
             </LinearGradient>
           </TouchableOpacity>
         )}
 
-        {/* Quick actions */}
+        {/* Quick actions — 4-column single row */}
         <Text style={styles.sectionTitle}>What would you like to do?</Text>
         <View style={styles.actionsGrid}>
           {QUICK_ACTIONS.map((a) => (
             <TouchableOpacity
               key={a.label}
-              style={styles.actionBox}
+              style={[styles.actionBox, { backgroundColor: a.tint }]}
               onPress={a.onPress}
               activeOpacity={0.8}
             >
-              <View style={[styles.actionIcon, { backgroundColor: a.tint }]}>
-                <Icon name={a.icon} size={22} color={a.iconColor} />
-              </View>
-              <View style={styles.actionLabelRow}>
-                <Text style={styles.actionLabel}>{a.label}</Text>
-                <Icon name="chevron-forward" size={12} color={palette.slate400} />
-              </View>
+              <Icon name={a.icon} size={24} color={a.iconColor} />
+              <Text style={[styles.actionLabel, { color: a.labelColor }]}>
+                {a.label}
+                <Text style={styles.actionArrow}> ›</Text>
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -252,14 +296,16 @@ export default function HomeScreen() {
           <ClinicCard key={clinic.id} clinic={clinic} />
         ))}
 
-        {/* Notification banner */}
+        {/* Notification opt-in banner */}
         <Card style={styles.notifBanner}>
           <View style={styles.notifBannerIcon}>
             <Icon name="notifications-outline" size={22} color={palette.primary600} />
           </View>
           <View style={styles.notifBannerText}>
             <Text style={styles.notifBannerTitle}>Get Notified, Stay Updated</Text>
-            <Text style={styles.notifBannerSub}>Turn on notifications to receive updates about your queue and appointments.</Text>
+            <Text style={styles.notifBannerSub}>
+              Turn on notifications to receive updates about your queue and appointments.
+            </Text>
           </View>
           <TouchableOpacity style={styles.enableBtn}>
             <Text style={styles.enableBtnText}>Enable</Text>
@@ -284,20 +330,29 @@ const styles = StyleSheet.create({
   },
   greet: { ...textStyle("caption"), fontFamily: fontFamily(400), color: palette.slate400 },
   name: { fontSize: 18, fontFamily: fontFamily(800), color: palette.slate900 },
-  bellBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: palette.slate100, justifyContent: "center", alignItems: "center", position: "relative" },
+  bellBtn: {
+    width: 40, height: 40, borderRadius: 20, backgroundColor: palette.slate100,
+    justifyContent: "center", alignItems: "center", position: "relative",
+  },
 
   scroll: { paddingBottom: 100 },
 
   searchBar: {
     flexDirection: "row", alignItems: "center", gap: spacing.sm,
-    backgroundColor: palette.surface, marginHorizontal: spacing.lg, marginTop: spacing.md, marginBottom: spacing.lg,
-    borderRadius: radius.lg, paddingHorizontal: spacing.lg, paddingVertical: spacing.md,
+    backgroundColor: palette.surface,
+    marginHorizontal: spacing.lg, marginTop: spacing.md, marginBottom: spacing.lg,
+    borderRadius: 15, paddingHorizontal: spacing.lg, paddingVertical: 14,
     ...shadow.card,
     borderWidth: 1, borderColor: palette.border,
   },
   searchText: { flex: 1, ...textStyle("body"), color: palette.slate400 },
 
-  queueCardWrap: { marginHorizontal: spacing.lg, marginBottom: spacing.xl },
+  // Hero queue card
+  queueCardWrap: {
+    marginHorizontal: spacing.lg, marginBottom: spacing.xl,
+    ...shadow.float,
+    borderRadius: radius.xl,
+  },
   queueCard: { borderRadius: radius.xl, padding: spacing.xl, overflow: "hidden" },
   queueDecorCircleLg: {
     position: "absolute", top: -40, right: -30, width: 140, height: 140, borderRadius: 70,
@@ -307,44 +362,72 @@ const styles = StyleSheet.create({
     position: "absolute", top: 50, right: 30, width: 60, height: 60, borderRadius: 30,
     backgroundColor: "rgba(255,255,255,0.08)",
   },
-  queueCardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: spacing.sm },
+  queueCardTop: {
+    flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start",
+    marginBottom: spacing.sm,
+  },
   queueLabelRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
   queueCardLabel: { ...textStyle("caption"), fontFamily: fontFamily(500), color: "rgba(255,255,255,0.85)" },
-  queueCardClinic: { ...textStyle("body"), fontFamily: fontFamily(600), color: "#FFFFFF", marginTop: 2 },
-  queueDoctorBadge: { width: 36, height: 36, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.25)", justifyContent: "center", alignItems: "center" },
-  queueDoctorInitial: { fontSize: 15, fontFamily: fontFamily(700), color: "#FFFFFF" },
-  queueNumber: { fontSize: 48, fontFamily: fontFamily(800), color: "#FFFFFF", lineHeight: 54, marginBottom: spacing.sm },
+  queueCardClinic: { ...textStyle("body"), fontFamily: fontFamily(600), color: palette.surface, marginTop: 2 },
+  queueDoctorBadge: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    justifyContent: "center", alignItems: "center",
+  },
+  queueDoctorInitial: { fontSize: 15, fontFamily: fontFamily(700), color: palette.surface },
+  queueNumber: {
+    fontSize: 48, fontFamily: fontFamily(800), color: palette.surface,
+    lineHeight: 54, marginBottom: spacing.sm,
+  },
   queueCardBottom: { flexDirection: "row", gap: spacing.lg, marginBottom: spacing.md },
   queueMeta: { flexDirection: "row", alignItems: "center", gap: 5 },
   queueMetaText: { ...textStyle("caption"), fontFamily: fontFamily(400), color: "rgba(255,255,255,0.9)" },
   queueDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.2)", marginBottom: spacing.md },
   queueEstimateRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  queueEstimateLabel: { ...textStyle("caption"), fontFamily: fontFamily(400), color: "rgba(255,255,255,0.8)", marginBottom: 4 },
+  queueEstimateLabel: {
+    ...textStyle("caption"), fontFamily: fontFamily(400), color: "rgba(255,255,255,0.8)", marginBottom: 4,
+  },
   queueEstimateValueRow: { flexDirection: "row", alignItems: "center", gap: 5 },
-  queueEstimateValue: { fontSize: 15, fontFamily: fontFamily(700), color: "#FFFFFF" },
+  queueEstimateValue: { fontSize: 18, fontFamily: fontFamily(800), color: palette.surface },
   queueDetailsBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.xs,
-    backgroundColor: "#FFFFFF", borderRadius: radius.sm, paddingVertical: 10, paddingHorizontal: spacing.md,
+    backgroundColor: palette.surface, borderRadius: radius.md,
+    paddingVertical: 11, paddingHorizontal: spacing.md,
   },
-  queueDetailsBtnText: { fontSize: 12, fontFamily: fontFamily(600), color: palette.primary600 },
+  queueDetailsBtnText: { fontSize: 13, fontFamily: fontFamily(700), color: palette.primary700 },
 
-  sectionTitle: { ...textStyle("h3"), color: palette.slate900, paddingHorizontal: spacing.lg, marginBottom: spacing.md, marginTop: spacing.xs },
-  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingRight: spacing.lg },
+  sectionTitle: {
+    ...textStyle("h3"), color: palette.slate900,
+    paddingHorizontal: spacing.lg, marginBottom: spacing.md, marginTop: spacing.xs,
+  },
+  sectionHeader: {
+    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+    paddingRight: spacing.lg,
+  },
   seeAll: { ...textStyle("label"), color: palette.primary600 },
 
-  actionsGrid: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: spacing.md, gap: spacing.sm, marginBottom: spacing["2xl"] },
+  // Quick actions — 4-column single row
+  actionsGrid: {
+    flexDirection: "row",
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
+    marginBottom: spacing["2xl"],
+  },
   actionBox: {
-    width: "47%", backgroundColor: palette.surface, borderRadius: radius.lg,
-    padding: spacing.lg, alignItems: "flex-start", gap: spacing.md,
-    shadowColor: "#0F172A", shadowOpacity: 0.04, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1,
+    flex: 1,
+    borderRadius: radius.lg,
+    paddingVertical: 14,
+    paddingHorizontal: 11,
+    gap: spacing.sm,
   },
-  actionIcon: {
-    width: 44, height: 44, borderRadius: radius.md,
-    justifyContent: "center", alignItems: "center",
+  actionLabel: {
+    fontSize: 12,
+    fontFamily: fontFamily(700),
+    lineHeight: 16,
   },
-  actionLabelRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%" },
-  actionLabel: { ...textStyle("label"), color: palette.slate900, lineHeight: 18 },
+  actionArrow: { opacity: 0.6 },
 
+  // Clinic cards
   clinicCardWrap: { marginHorizontal: spacing.lg, marginBottom: spacing.md },
   clinicCard: { flexDirection: "row", overflow: "hidden" },
   clinicPhoto: {
@@ -359,7 +442,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs, paddingVertical: 3,
   },
   openDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: palette.green500 },
-  openText: { fontSize: 9, color: "#FFFFFF", fontFamily: fontFamily(600) },
+  openText: { fontSize: 9, color: palette.surface, fontFamily: fontFamily(600) },
   clinicCardInfo: { flex: 1, padding: spacing.md },
   clinicCardName: { ...textStyle("body"), fontFamily: fontFamily(700), color: palette.slate900, marginBottom: spacing.xs },
   clinicAddressRow: { flexDirection: "row", alignItems: "center", gap: 3, marginBottom: spacing.sm },
@@ -373,16 +456,26 @@ const styles = StyleSheet.create({
   ratingCount: { fontSize: 11, color: palette.slate400 },
   distanceText: { fontSize: 11, color: palette.slate400 },
 
+  // Notification opt-in banner
   notifBanner: {
     flexDirection: "row", alignItems: "center", gap: spacing.md,
     marginHorizontal: spacing.lg, padding: spacing.md,
     borderWidth: 1, borderColor: palette.border,
     marginTop: spacing.xs,
   },
-  notifBannerIcon: { width: 44, height: 44, borderRadius: radius.md, backgroundColor: palette.primary50, justifyContent: "center", alignItems: "center" },
+  notifBannerIcon: {
+    width: 44, height: 44, borderRadius: radius.md,
+    backgroundColor: palette.primary50, justifyContent: "center", alignItems: "center",
+  },
   notifBannerText: { flex: 1 },
   notifBannerTitle: { ...textStyle("label"), color: palette.slate900 },
-  notifBannerSub: { ...textStyle("caption"), fontFamily: fontFamily(400), color: palette.slate500, marginTop: 2, lineHeight: 16 },
-  enableBtn: { backgroundColor: palette.primary700, borderRadius: radius.sm, paddingHorizontal: spacing.md, paddingVertical: 7 },
-  enableBtnText: { fontSize: 12, fontFamily: fontFamily(600), color: "#FFFFFF" },
+  notifBannerSub: {
+    ...textStyle("caption"), fontFamily: fontFamily(400),
+    color: palette.slate500, marginTop: 2, lineHeight: 16,
+  },
+  enableBtn: {
+    backgroundColor: palette.primary700, borderRadius: radius.sm,
+    paddingHorizontal: spacing.md, paddingVertical: 7,
+  },
+  enableBtnText: { fontSize: 12, fontFamily: fontFamily(600), color: palette.surface },
 });
