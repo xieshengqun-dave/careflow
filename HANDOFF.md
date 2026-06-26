@@ -17,7 +17,7 @@ Phases come from `CAREFLOW_FIX_PROMPT.md`. Work done in order — each phase com
 | **Phase 3** | Operational gaps (slot generation cron, wait estimates, skip recovery, audit log) | ✅ **Done** — commit `2f0b06e` |
 | **Phase 4** | Polish / data quality (no-show rate fix, PENDING enum, migration dedup, doc fix) | ✅ **Done** — commit `9dc793f` |
 | **Phase 5** | Multi-tenant platform (real OTP login, patients module, super_admin/platform console) | ❌ **Pending** |
-| **Phase 6** | Design fidelity (token audit, screen-by-screen rebuild against design_handoff_careflow/) | 🔄 **In Progress** — patient-mobile done; clinic-web Appointments + Schedule + Group B screens done; Queue + Dashboard pending |
+| **Phase 6** | Design fidelity (token audit, screen-by-screen rebuild against design_handoff_careflow/) | 🔄 **In Progress** — patient-mobile done; clinic-web Appointments + Schedule + Queue done; Dashboard pending further polish |
 
 ---
 
@@ -151,7 +151,7 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 | Patient — Home ⚠️ | `apps/patient-mobile/src/app/(tabs)/index.tsx` | ✅ Done (commit `7f0c6e7`) |
 | Appointments (web) ⚠️ | `apps/clinic-web/src/app/(dashboard)/appointments/page.tsx` + `AppointmentList.tsx` | ✅ Done (session 3, uncommitted) |
 | Schedule (web) ⚠️ | `apps/clinic-web/src/app/(dashboard)/schedules/page.tsx` + `components/schedules/*` | ✅ Done (session 3, uncommitted) |
-| Queue Management (web) ⚠️ | `apps/clinic-web/src/app/(dashboard)/queue/page.tsx` + `QueueManagementView.tsx` | ✅ Done (rebuilt in Phase 3 commit `2f0b06e`) |
+| Queue Management (web) | `apps/clinic-web/src/app/(dashboard)/queue/page.tsx` + `QueueManagementView.tsx` | ✅ Done (Phase 3 + Phase 6 polish session 4) |
 | Clinic Dashboard (web) | `apps/clinic-web/src/app/(dashboard)/dashboard/page.tsx` + `components/dashboard/*` | ✅ Done (rebuilt in earlier session) |
 | Patient — Splash/Login/OTP | `(auth)/login.tsx`, `(auth)/otp.tsx` |
 | Patient — Find Clinics | `apps/patient-mobile/src/app/clinic/search.tsx` |
@@ -232,6 +232,12 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 **Patient-mobile UI states**
 - `apps/patient-mobile/src/components/ui/Skeleton.tsx` — `Skeleton` base (pulse animation via `Animated`), `SkeletonAppointmentCard`, `SkeletonClinicCard`, `SkeletonHeroCard` presets.
 - Home screen (`(tabs)/index.tsx`) — added `loading` state; clinics section shows 3 `SkeletonClinicCard` placeholders while data loads, then falls back to "No clinics found nearby" when empty.
+
+**Queue Management design polish** (clinic-web)
+- `QueueManagementView.tsx`: stat cards rebuilt with icon + colored bg, `rounded-[18px]` card border, value + unit layout.
+- Queue table: `rounded-[18px]` wrapper, `bg-[#F8FAFC]` header row, uppercase tracking-wide headers, `rounded-md` status pills (was `rounded-full`), font-semibold patient name.
+- Detail panel: converted from Card component to styled div with header bar + empty state icon.
+- Removed unused Card/CardContent/CardHeader/CardTitle imports.
 
 **Clinic-web loading states**
 - `(dashboard)/queue/loading.tsx` — stat card + queue board skeleton (previously missing).

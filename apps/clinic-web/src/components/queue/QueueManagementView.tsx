@@ -2,10 +2,9 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { RefreshCw, Phone, CheckCircle2, ArrowUpToLine, XCircle, BellRing, SkipForward, RotateCcw, PauseCircle, PlayCircle } from "lucide-react";
+import { RefreshCw, Phone, CheckCircle2, ArrowUpToLine, XCircle, BellRing, SkipForward, RotateCcw, PauseCircle, PlayCircle, Users, Clock, Hash, Layers } from "lucide-react";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddWalkInDialog } from "./AddWalkInDialog";
 import {
   callNext,
@@ -95,102 +94,113 @@ export function QueueManagementView({ summary, clinicId, doctorOptions, lastUpda
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground">Total in Queue</p>
-          <p className="text-2xl font-bold mt-1">{summary.totalInQueue} <span className="text-sm font-normal text-muted-foreground">patients</span></p>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground">Avg. Waiting Time</p>
-          <p className="text-2xl font-bold mt-1">{summary.avgWaitMinutes !== null ? `${summary.avgWaitMinutes} mins` : "—"}</p>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground">Next to be Seen</p>
-          <p className="text-2xl font-bold mt-1">{summary.nextQueueNumber !== null ? `#${summary.nextQueueNumber}` : "—"}</p>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground">Queues Open</p>
-          <p className="text-2xl font-bold mt-1">{summary.queuesOpen}</p>
-        </CardContent></Card>
+        {[
+          { icon: Users,  label: "Total in Queue",    value: `${summary.totalInQueue}`, unit: "patients", color: "text-cf-primary-700", bg: "bg-cf-primary-50" },
+          { icon: Clock,  label: "Avg. Waiting Time", value: summary.avgWaitMinutes !== null ? `${summary.avgWaitMinutes}` : "—", unit: summary.avgWaitMinutes !== null ? "mins" : "", color: "text-cf-amber-700", bg: "bg-cf-amber-50" },
+          { icon: Hash,   label: "Next to Be Seen",   value: summary.nextQueueNumber !== null ? `#${summary.nextQueueNumber}` : "—", unit: "up next", color: "text-cf-green-600", bg: "bg-cf-green-50" },
+          { icon: Layers, label: "Queues Open",        value: `${summary.queuesOpen}`, unit: "active", color: "text-slate-600", bg: "bg-slate-100" },
+        ].map(({ icon: Icon, label, value, unit, color, bg }) => (
+          <div key={label} className="bg-white rounded-[18px] border p-5 flex items-start gap-4 shadow-sm">
+            <div className={`h-10 w-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
+              <Icon className={`h-5 w-5 ${color}`} />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-medium mb-0.5">{label}</p>
+              <p className="text-2xl font-bold text-slate-900 leading-none">
+                {value}
+                {unit && <span className="text-xs font-normal text-slate-400 ml-1">{unit}</span>}
+              </p>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
         {/* Current queue table */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Current Queue ({summary.entries.length})</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {summary.entries.length === 0 ? (
-              <p className="text-sm text-muted-foreground px-6 pb-6">No patients in queue right now.</p>
-            ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-xs text-muted-foreground border-y">
-                    <th className="px-4 py-2 font-medium w-10">#</th>
-                    <th className="px-4 py-2 font-medium">Patient</th>
-                    <th className="px-4 py-2 font-medium">Queue Time</th>
-                    <th className="px-4 py-2 font-medium">Type</th>
-                    <th className="px-4 py-2 font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {summary.entries.map((e, idx) => {
-                    const cfg = STATUS_CONFIG[e.status];
-                    const active = e.id === selected?.id;
-                    return (
-                      <tr
-                        key={e.id}
-                        onClick={() => setSelectedId(e.id)}
-                        className={`cursor-pointer border-b last:border-0 transition-colors ${active ? "bg-cf-primary-50/60" : "hover:bg-muted/50"}`}
-                      >
-                        <td className="px-4 py-3">
-                          <span className={`flex items-center justify-center h-6 w-6 rounded-full text-xs font-semibold text-white ${idx === 0 ? "bg-cf-green-500" : "bg-slate-300"}`}>
-                            {idx + 1}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <p className="font-medium text-slate-900">{e.patientName}</p>
-                          <p className="text-xs text-muted-foreground">{e.doctorName}{e.specialization ? ` · ${e.specialization}` : ""}</p>
-                        </td>
-                        <td className="px-4 py-3 text-slate-600">
-                          {timeLabel(e.joinedAt)}
-                          <span className="text-xs text-muted-foreground block">{elapsed(e.joinedAt)}</span>
-                        </td>
-                        <td className="px-4 py-3 text-slate-600">{e.type === "WALK_IN" ? "Walk-in" : "Appointment"}</td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${cfg.bg} ${cfg.text}`}>
-                            <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
-                            {cfg.label}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
-            <p className="text-xs text-muted-foreground px-4 py-3 border-t">
-              Queue status updates automatically in real-time.
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-[18px] border overflow-hidden shadow-sm">
+          <div className="px-5 py-4 border-b bg-slate-50/60 flex items-center justify-between">
+            <h2 className="font-semibold text-base text-slate-900">Current Queue</h2>
+            <span className="text-xs text-slate-400 font-medium">{summary.entries.length} patient{summary.entries.length !== 1 ? "s" : ""}</span>
+          </div>
+          {summary.entries.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-12 text-center">
+              <Users className="h-8 w-8 text-slate-200" />
+              <p className="text-sm text-slate-400">No patients in queue right now.</p>
+            </div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs text-slate-500 border-b bg-[#F8FAFC]">
+                  <th className="px-4 py-2.5 font-bold uppercase tracking-wide w-10">#</th>
+                  <th className="px-4 py-2.5 font-bold uppercase tracking-wide">Patient</th>
+                  <th className="px-4 py-2.5 font-bold uppercase tracking-wide">Joined</th>
+                  <th className="px-4 py-2.5 font-bold uppercase tracking-wide">Type</th>
+                  <th className="px-4 py-2.5 font-bold uppercase tracking-wide">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.entries.map((e, idx) => {
+                  const cfg = STATUS_CONFIG[e.status];
+                  const active = e.id === selected?.id;
+                  return (
+                    <tr
+                      key={e.id}
+                      onClick={() => setSelectedId(e.id)}
+                      className={`cursor-pointer border-b last:border-0 transition-colors ${active ? "bg-cf-primary-50/60" : "hover:bg-slate-50/60"}`}
+                    >
+                      <td className="px-4 py-3">
+                        <span className={`flex items-center justify-center h-6 w-6 rounded-full text-xs font-semibold text-white ${idx === 0 ? "bg-cf-green-500" : "bg-slate-200 !text-slate-500"}`}>
+                          {idx + 1}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="font-semibold text-slate-900">{e.patientName}</p>
+                        <p className="text-xs text-slate-400">{e.doctorName}{e.specialization ? ` · ${e.specialization}` : ""}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-slate-700">{timeLabel(e.joinedAt)}</p>
+                        <p className="text-xs text-slate-400">{elapsed(e.joinedAt)} waiting</p>
+                      </td>
+                      <td className="px-4 py-3 text-slate-500 text-xs">{e.type === "WALK_IN" ? "Walk-in" : "Appointment"}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1.5 rounded-md px-[11px] py-1 text-xs font-semibold ${cfg.bg} ${cfg.text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
+                          {cfg.label}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+          <p className="text-xs text-slate-400 px-5 py-3 border-t bg-slate-50/40">
+            Updates automatically in real-time.
+          </p>
+        </div>
 
         {/* Detail panel */}
-        <Card>
-          <CardContent className="p-4 space-y-4">
+        <div className="bg-white rounded-[18px] border shadow-sm overflow-hidden">
+          <div className="px-4 py-3.5 border-b bg-slate-50/60">
+            <h2 className="font-semibold text-sm text-slate-900">Patient Details</h2>
+          </div>
+          <div className="p-4 space-y-4">
             {!selected ? (
-              <p className="text-sm text-muted-foreground">Select a patient to see details.</p>
+              <div className="flex flex-col items-center gap-2 py-8 text-center">
+                <Users className="h-7 w-7 text-slate-200" />
+                <p className="text-xs text-slate-400">Select a patient from the queue</p>
+              </div>
             ) : (
               <>
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs text-muted-foreground">#{summary.entries.findIndex((e) => e.id === selected.id) + 1}</p>
-                    <p className="font-semibold text-slate-900">{selected.patientName}</p>
+                    <p className="text-[10px] text-slate-400 font-medium mb-0.5">Queue #{summary.entries.findIndex((e) => e.id === selected.id) + 1}</p>
+                    <p className="font-semibold text-slate-900 text-sm">{selected.patientName}</p>
                     {selected.patientPhone && (
-                      <p className="text-xs text-muted-foreground">{selected.patientPhone}</p>
+                      <p className="text-xs text-slate-400">{selected.patientPhone}</p>
                     )}
                   </div>
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_CONFIG[selected.status].bg} ${STATUS_CONFIG[selected.status].text}`}>
+                  <span className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold ${STATUS_CONFIG[selected.status].bg} ${STATUS_CONFIG[selected.status].text}`}>
                     <span className={`h-1.5 w-1.5 rounded-full ${STATUS_CONFIG[selected.status].dot}`} />
                     {STATUS_CONFIG[selected.status].label}
                   </span>
@@ -279,8 +289,8 @@ export function QueueManagementView({ summary, clinicId, doctorOptions, lastUpda
                 </div>
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
