@@ -57,9 +57,11 @@ export async function getDashboardMetrics(clinicId: string): Promise<DashboardMe
       .eq("queues.clinic_id", clinicId)
       .eq("queues.queue_date", today),
 
+    // Include slot start_time so we can restrict the denominator to appointments
+    // whose slot has already started (no-show rate is meaningless for future slots).
     supabase
       .from("appointments")
-      .select("status")
+      .select("status, time_slots(start_time)")
       .eq("clinic_id", clinicId)
       .eq("appointment_date", today),
   ]);
@@ -87,10 +89,26 @@ export async function getDashboardMetrics(clinicId: string): Promise<DashboardMe
   const avgWaitMinutes =
     waits.length > 0 ? Math.round(waits.reduce((a, b) => a + b, 0) / waits.length) : null;
 
-  const noShowAppts = noShowRes.data ?? [];
-  const noShowCount = noShowAppts.filter((a: { status: string }) => a.status === "NO_SHOW").length;
+  // Current time in MYT (UTC+8) as "HH:MM" for comparison with slot start_time.
+  const nowUtc = new Date();
+  const mytHours = (nowUtc.getUTCHours() + 8) % 24;
+  const currentMYTTime = `${String(mytHours).padStart(2, "0")}:${String(nowUtc.getUTCMinutes()).padStart(2, "0")}`;
+
+  // Only count appointments whose slot start_time has already passed — future
+  // appointments can't be no-shows yet, and including them understates the rate.
+  // supabase-js returns the joined time_slots as an array in its TS types.
+  const allNoShowAppts = (noShowRes.data ?? []) as unknown as Array<{
+    status: string;
+    time_slots: Array<{ start_time: string }> | null;
+  }>;
+  const pastAppts = allNoShowAppts.filter((a) => {
+    const slot = Array.isArray(a.time_slots) ? a.time_slots[0] : null;
+    const slotTime = slot?.start_time?.slice(0, 5);
+    return slotTime !== undefined && slotTime <= currentMYTTime;
+  });
+  const noShowCount = pastAppts.filter((a) => a.status === "NO_SHOW").length;
   const noShowRate =
-    noShowAppts.length > 0 ? Math.round((noShowCount / noShowAppts.length) * 1000) / 10 : 0;
+    pastAppts.length > 0 ? Math.round((noShowCount / pastAppts.length) * 1000) / 10 : 0;
 
   return {
     todayAppointments: appts.length,

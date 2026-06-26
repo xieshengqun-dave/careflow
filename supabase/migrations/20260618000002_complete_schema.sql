@@ -1,6 +1,21 @@
 -- =============================================================================
 -- CareFlow Complete Schema
 -- Migration: 20260618000002_complete_schema
+--
+-- Idempotency note (Phase 4.3):
+-- This migration duplicates content from 000000 + 000001 so that a developer
+-- starting from just this file can still set up the database. On a full
+-- `supabase db reset` (which applies all migrations in order), 000000 runs
+-- first and creates everything; this migration must therefore be idempotent.
+--
+-- Strategy:
+--   • Enums: DO / EXCEPTION WHEN duplicate_object THEN NULL blocks
+--   • Functions: CREATE OR REPLACE (already idempotent)
+--   • Tables: CREATE TABLE IF NOT EXISTS
+--   • Triggers: DROP TRIGGER IF EXISTS before CREATE TRIGGER
+--   • Indexes: CREATE INDEX IF NOT EXISTS
+--   • ALTER TABLE ENABLE RLS: idempotent, no guard needed
+--   • Policies: DROP POLICY IF EXISTS before CREATE POLICY
 -- =============================================================================
 
 -- Extensions
@@ -8,28 +23,48 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- =============================================================================
--- Enums
+-- Enums (wrapped in exception blocks to survive a prior 000000 run)
 -- =============================================================================
 
-CREATE TYPE gender_type AS ENUM ('MALE', 'FEMALE', 'OTHER');
-CREATE TYPE staff_role AS ENUM ('DOCTOR', 'RECEPTIONIST', 'ADMIN');
-CREATE TYPE slot_status AS ENUM ('AVAILABLE', 'BOOKED', 'BREAK', 'BLOCKED');
-CREATE TYPE appointment_status AS ENUM (
-  'PENDING', 'CONFIRMED', 'CHECKED_IN', 'COMPLETED', 'CANCELLED', 'NO_SHOW'
-);
-CREATE TYPE queue_entry_type AS ENUM ('APPOINTMENT', 'WALK_IN');
-CREATE TYPE queue_entry_status AS ENUM (
-  'WAITING', 'CALLED', 'IN_CONSULTATION', 'COMPLETED', 'SKIPPED', 'REMOVED'
-);
-CREATE TYPE notification_type AS ENUM (
-  'APPOINTMENT_CONFIRMED',
-  'APPOINTMENT_REMINDER',
-  'QUEUE_JOINED',
-  'QUEUE_POSITION_UPDATE',
-  'CALLED_TO_CONSULTATION',
-  'DOCTOR_DELAYED',
-  'APPOINTMENT_CANCELLED'
-);
+DO $$ BEGIN
+  CREATE TYPE gender_type AS ENUM ('MALE', 'FEMALE', 'OTHER');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE staff_role AS ENUM ('DOCTOR', 'RECEPTIONIST', 'ADMIN');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE slot_status AS ENUM ('AVAILABLE', 'BOOKED', 'BREAK', 'BLOCKED');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE appointment_status AS ENUM (
+    'PENDING', 'CONFIRMED', 'CHECKED_IN', 'COMPLETED', 'CANCELLED', 'NO_SHOW'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE queue_entry_type AS ENUM ('APPOINTMENT', 'WALK_IN');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE queue_entry_status AS ENUM (
+    'WAITING', 'CALLED', 'IN_CONSULTATION', 'COMPLETED', 'SKIPPED', 'REMOVED'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE notification_type AS ENUM (
+    'APPOINTMENT_CONFIRMED',
+    'APPOINTMENT_REMINDER',
+    'QUEUE_JOINED',
+    'QUEUE_POSITION_UPDATE',
+    'CALLED_TO_CONSULTATION',
+    'DOCTOR_DELAYED',
+    'APPOINTMENT_CANCELLED'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- =============================================================================
 -- Utility trigger: auto-update updated_at
@@ -44,11 +79,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- =============================================================================
--- Tables
+-- Tables (IF NOT EXISTS)
 -- =============================================================================
 
--- profiles (one row per registered user, extends auth.users)
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id                  UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name           TEXT NOT NULL,
   phone_number        VARCHAR(20) NOT NULL UNIQUE,
@@ -59,12 +93,12 @@ CREATE TABLE profiles (
   updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS trg_profiles_updated_at ON profiles;
 CREATE TRIGGER trg_profiles_updated_at
   BEFORE UPDATE ON profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- clinics
-CREATE TABLE clinics (
+CREATE TABLE IF NOT EXISTS clinics (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name            TEXT NOT NULL,
   description     TEXT,
@@ -82,12 +116,12 @@ CREATE TABLE clinics (
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS trg_clinics_updated_at ON clinics;
 CREATE TRIGGER trg_clinics_updated_at
   BEFORE UPDATE ON clinics
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- clinic_staff
-CREATE TABLE clinic_staff (
+CREATE TABLE IF NOT EXISTS clinic_staff (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   clinic_id  UUID NOT NULL REFERENCES clinics(id) ON DELETE CASCADE,
   user_id    UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -98,12 +132,12 @@ CREATE TABLE clinic_staff (
   UNIQUE (clinic_id, user_id)
 );
 
+DROP TRIGGER IF EXISTS trg_clinic_staff_updated_at ON clinic_staff;
 CREATE TRIGGER trg_clinic_staff_updated_at
   BEFORE UPDATE ON clinic_staff
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- doctors
-CREATE TABLE doctors (
+CREATE TABLE IF NOT EXISTS doctors (
   id                            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   staff_id                      UUID NOT NULL UNIQUE REFERENCES clinic_staff(id) ON DELETE CASCADE,
   specialization                TEXT,
@@ -115,12 +149,12 @@ CREATE TABLE doctors (
   updated_at                    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS trg_doctors_updated_at ON doctors;
 CREATE TRIGGER trg_doctors_updated_at
   BEFORE UPDATE ON doctors
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- doctor_schedules (weekly template)
-CREATE TABLE doctor_schedules (
+CREATE TABLE IF NOT EXISTS doctor_schedules (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   doctor_id             UUID NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
   day_of_week           SMALLINT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
@@ -133,8 +167,7 @@ CREATE TABLE doctor_schedules (
   CHECK (end_time > start_time)
 );
 
--- time_slots (generated concrete slots per doctor per date)
-CREATE TABLE time_slots (
+CREATE TABLE IF NOT EXISTS time_slots (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   doctor_id  UUID NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
   slot_date  DATE NOT NULL,
@@ -145,8 +178,7 @@ CREATE TABLE time_slots (
   UNIQUE (doctor_id, slot_date, start_time)
 );
 
--- appointments
-CREATE TABLE appointments (
+CREATE TABLE IF NOT EXISTS appointments (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   patient_id       UUID NOT NULL REFERENCES profiles(id) ON DELETE RESTRICT,
   doctor_id        UUID NOT NULL REFERENCES doctors(id) ON DELETE RESTRICT,
@@ -159,12 +191,12 @@ CREATE TABLE appointments (
   updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS trg_appointments_updated_at ON appointments;
 CREATE TRIGGER trg_appointments_updated_at
   BEFORE UPDATE ON appointments
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- queues (one active queue per doctor per day)
-CREATE TABLE queues (
+CREATE TABLE IF NOT EXISTS queues (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   clinic_id      UUID NOT NULL REFERENCES clinics(id) ON DELETE CASCADE,
   doctor_id      UUID NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
@@ -176,12 +208,12 @@ CREATE TABLE queues (
   UNIQUE (doctor_id, queue_date)
 );
 
+DROP TRIGGER IF EXISTS trg_queues_updated_at ON queues;
 CREATE TRIGGER trg_queues_updated_at
   BEFORE UPDATE ON queues
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- queue_entries
-CREATE TABLE queue_entries (
+CREATE TABLE IF NOT EXISTS queue_entries (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   queue_id       UUID NOT NULL REFERENCES queues(id) ON DELETE CASCADE,
   patient_id     UUID NOT NULL REFERENCES profiles(id) ON DELETE RESTRICT,
@@ -198,12 +230,12 @@ CREATE TABLE queue_entries (
   UNIQUE (queue_id, queue_number)
 );
 
+DROP TRIGGER IF EXISTS trg_queue_entries_updated_at ON queue_entries;
 CREATE TRIGGER trg_queue_entries_updated_at
   BEFORE UPDATE ON queue_entries
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- notifications
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id    UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   type       notification_type NOT NULL,
@@ -216,31 +248,31 @@ CREATE TABLE notifications (
 );
 
 -- =============================================================================
--- Indexes
+-- Indexes (IF NOT EXISTS)
 -- =============================================================================
 
-CREATE INDEX idx_clinic_staff_clinic_id   ON clinic_staff(clinic_id);
-CREATE INDEX idx_clinic_staff_user_id     ON clinic_staff(user_id);
-CREATE INDEX idx_doctors_staff_id         ON doctors(staff_id);
-CREATE INDEX idx_doctor_schedules_doctor  ON doctor_schedules(doctor_id);
-CREATE INDEX idx_time_slots_doctor_date   ON time_slots(doctor_id, slot_date);
-CREATE INDEX idx_time_slots_available     ON time_slots(doctor_id, slot_date) WHERE status = 'AVAILABLE';
-CREATE INDEX idx_appointments_patient     ON appointments(patient_id);
-CREATE INDEX idx_appointments_doctor_date ON appointments(doctor_id, appointment_date);
-CREATE INDEX idx_appointments_clinic      ON appointments(clinic_id);
-CREATE INDEX idx_appointments_status      ON appointments(status);
-CREATE INDEX idx_queues_doctor_date       ON queues(doctor_id, queue_date);
-CREATE INDEX idx_queues_active            ON queues(clinic_id, queue_date) WHERE is_active = TRUE;
-CREATE INDEX idx_queue_entries_queue      ON queue_entries(queue_id);
-CREATE INDEX idx_queue_entries_patient    ON queue_entries(patient_id);
-CREATE INDEX idx_queue_entries_waiting    ON queue_entries(queue_id, priority, queue_number) WHERE status = 'WAITING';
-CREATE INDEX idx_notifications_user       ON notifications(user_id);
-CREATE INDEX idx_notifications_unread     ON notifications(user_id) WHERE is_read = FALSE;
-CREATE INDEX idx_clinics_active           ON clinics(is_active) WHERE is_active = TRUE;
-CREATE INDEX idx_clinics_name_trgm        ON clinics USING gin(name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_clinic_staff_clinic_id   ON clinic_staff(clinic_id);
+CREATE INDEX IF NOT EXISTS idx_clinic_staff_user_id     ON clinic_staff(user_id);
+CREATE INDEX IF NOT EXISTS idx_doctors_staff_id         ON doctors(staff_id);
+CREATE INDEX IF NOT EXISTS idx_doctor_schedules_doctor  ON doctor_schedules(doctor_id);
+CREATE INDEX IF NOT EXISTS idx_time_slots_doctor_date   ON time_slots(doctor_id, slot_date);
+CREATE INDEX IF NOT EXISTS idx_time_slots_available     ON time_slots(doctor_id, slot_date) WHERE status = 'AVAILABLE';
+CREATE INDEX IF NOT EXISTS idx_appointments_patient     ON appointments(patient_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_doctor_date ON appointments(doctor_id, appointment_date);
+CREATE INDEX IF NOT EXISTS idx_appointments_clinic      ON appointments(clinic_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_status      ON appointments(status);
+CREATE INDEX IF NOT EXISTS idx_queues_doctor_date       ON queues(doctor_id, queue_date);
+CREATE INDEX IF NOT EXISTS idx_queues_active            ON queues(clinic_id, queue_date) WHERE is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_queue_entries_queue      ON queue_entries(queue_id);
+CREATE INDEX IF NOT EXISTS idx_queue_entries_patient    ON queue_entries(patient_id);
+CREATE INDEX IF NOT EXISTS idx_queue_entries_waiting    ON queue_entries(queue_id, priority, queue_number) WHERE status = 'WAITING';
+CREATE INDEX IF NOT EXISTS idx_notifications_user       ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_unread     ON notifications(user_id) WHERE is_read = FALSE;
+CREATE INDEX IF NOT EXISTS idx_clinics_active           ON clinics(is_active) WHERE is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_clinics_name_trgm        ON clinics USING gin(name gin_trgm_ops);
 
 -- =============================================================================
--- Row Level Security
+-- Row Level Security (enabling RLS is idempotent)
 -- =============================================================================
 
 ALTER TABLE profiles        ENABLE ROW LEVEL SECURITY;
@@ -255,7 +287,7 @@ ALTER TABLE queue_entries    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications    ENABLE ROW LEVEL SECURITY;
 
 -- =============================================================================
--- Helper Functions (public schema — auth schema is read-only on Supabase cloud)
+-- Helper Functions (CREATE OR REPLACE — idempotent)
 -- =============================================================================
 
 CREATE OR REPLACE FUNCTION public.get_user_clinic_id()
@@ -283,10 +315,15 @@ RETURNS BOOLEAN AS $$
 $$ LANGUAGE SQL SECURITY DEFINER STABLE;
 
 -- =============================================================================
--- RLS Policies
+-- RLS Policies (DROP IF EXISTS before each CREATE to survive prior runs)
 -- =============================================================================
 
 -- ── profiles ──────────────────────────────────────────────────────────────────
+DROP POLICY IF EXISTS "profiles: owner read"        ON profiles;
+DROP POLICY IF EXISTS "profiles: owner insert"      ON profiles;
+DROP POLICY IF EXISTS "profiles: owner update"      ON profiles;
+DROP POLICY IF EXISTS "profiles: clinic staff read" ON profiles;
+
 CREATE POLICY "profiles: owner read"
   ON profiles FOR SELECT USING (auth.uid() = id);
 
@@ -300,6 +337,9 @@ CREATE POLICY "profiles: clinic staff read"
   ON profiles FOR SELECT USING (public.get_user_clinic_id() IS NOT NULL);
 
 -- ── clinics ───────────────────────────────────────────────────────────────────
+DROP POLICY IF EXISTS "clinics: public read active" ON clinics;
+DROP POLICY IF EXISTS "clinics: admin update"       ON clinics;
+
 CREATE POLICY "clinics: public read active"
   ON clinics FOR SELECT USING (is_active = TRUE);
 
@@ -309,6 +349,9 @@ CREATE POLICY "clinics: admin update"
   );
 
 -- ── clinic_staff ──────────────────────────────────────────────────────────────
+DROP POLICY IF EXISTS "clinic_staff: same-clinic read" ON clinic_staff;
+DROP POLICY IF EXISTS "clinic_staff: admin manage"     ON clinic_staff;
+
 CREATE POLICY "clinic_staff: same-clinic read"
   ON clinic_staff FOR SELECT USING (public.is_clinic_staff(clinic_id));
 
@@ -318,6 +361,9 @@ CREATE POLICY "clinic_staff: admin manage"
   );
 
 -- ── doctors ───────────────────────────────────────────────────────────────────
+DROP POLICY IF EXISTS "doctors: public read"  ON doctors;
+DROP POLICY IF EXISTS "doctors: admin manage" ON doctors;
+
 CREATE POLICY "doctors: public read"
   ON doctors FOR SELECT USING (TRUE);
 
@@ -325,6 +371,9 @@ CREATE POLICY "doctors: admin manage"
   ON doctors FOR ALL USING (public.get_user_staff_role() = 'ADMIN');
 
 -- ── doctor_schedules ──────────────────────────────────────────────────────────
+DROP POLICY IF EXISTS "doctor_schedules: public read active" ON doctor_schedules;
+DROP POLICY IF EXISTS "doctor_schedules: admin manage"       ON doctor_schedules;
+
 CREATE POLICY "doctor_schedules: public read active"
   ON doctor_schedules FOR SELECT USING (is_active = TRUE);
 
@@ -332,6 +381,9 @@ CREATE POLICY "doctor_schedules: admin manage"
   ON doctor_schedules FOR ALL USING (public.get_user_staff_role() = 'ADMIN');
 
 -- ── time_slots ────────────────────────────────────────────────────────────────
+DROP POLICY IF EXISTS "time_slots: public read"  ON time_slots;
+DROP POLICY IF EXISTS "time_slots: staff manage" ON time_slots;
+
 CREATE POLICY "time_slots: public read"
   ON time_slots FOR SELECT USING (TRUE);
 
@@ -339,6 +391,12 @@ CREATE POLICY "time_slots: staff manage"
   ON time_slots FOR ALL USING (public.get_user_clinic_id() IS NOT NULL);
 
 -- ── appointments ──────────────────────────────────────────────────────────────
+DROP POLICY IF EXISTS "appointments: patient read own"  ON appointments;
+DROP POLICY IF EXISTS "appointments: patient create"    ON appointments;
+DROP POLICY IF EXISTS "appointments: patient cancel"    ON appointments;
+DROP POLICY IF EXISTS "appointments: staff read clinic" ON appointments;
+DROP POLICY IF EXISTS "appointments: staff update"      ON appointments;
+
 CREATE POLICY "appointments: patient read own"
   ON appointments FOR SELECT USING (patient_id = auth.uid());
 
@@ -357,6 +415,9 @@ CREATE POLICY "appointments: staff update"
   ON appointments FOR UPDATE USING (public.is_clinic_staff(clinic_id));
 
 -- ── queues ────────────────────────────────────────────────────────────────────
+DROP POLICY IF EXISTS "queues: public read active" ON queues;
+DROP POLICY IF EXISTS "queues: staff manage"       ON queues;
+
 CREATE POLICY "queues: public read active"
   ON queues FOR SELECT USING (is_active = TRUE);
 
@@ -364,6 +425,10 @@ CREATE POLICY "queues: staff manage"
   ON queues FOR ALL USING (public.is_clinic_staff(clinic_id));
 
 -- ── queue_entries ─────────────────────────────────────────────────────────────
+DROP POLICY IF EXISTS "queue_entries: patient read own" ON queue_entries;
+DROP POLICY IF EXISTS "queue_entries: patient join"     ON queue_entries;
+DROP POLICY IF EXISTS "queue_entries: staff manage"     ON queue_entries;
+
 CREATE POLICY "queue_entries: patient read own"
   ON queue_entries FOR SELECT USING (patient_id = auth.uid());
 
@@ -382,6 +447,9 @@ CREATE POLICY "queue_entries: staff manage"
   );
 
 -- ── notifications ─────────────────────────────────────────────────────────────
+DROP POLICY IF EXISTS "notifications: owner read"      ON notifications;
+DROP POLICY IF EXISTS "notifications: owner mark read" ON notifications;
+
 CREATE POLICY "notifications: owner read"
   ON notifications FOR SELECT USING (user_id = auth.uid());
 
