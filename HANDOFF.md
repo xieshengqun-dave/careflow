@@ -169,7 +169,7 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 |---|---|---|---|
 | Patient — Onboarding / name capture | `apps/patient-mobile/src/app/onboarding/index.tsx` | Phase 5.1 | ❌ Pending |
 | Patient — Check-In (QR / confirm) | `apps/patient-mobile/src/app/(tabs)/checkin.tsx` | Phase 1.3 ✅ | ✅ Done (session 4) |
-| Patient — Reschedule | new `apps/patient-mobile/src/app/booking/reschedule.tsx` | reschedule logic (not built) | ❌ Pending |
+| Patient — Reschedule | new `apps/patient-mobile/src/app/booking/reschedule.tsx` | `reschedule_appointment` fn | ✅ Done (session 4) |
 | Patient — UI states (skeleton/empty/error) | reusable components | — | ✅ Done (session 4) |
 | Clinic staff Login (web) | `apps/clinic-web/src/app/(auth)/login/page.tsx` | Phase 1.4 ✅ | ✅ Done (existed) |
 | Clinic Forgot/Reset password (web) | `(auth)/forgot-password`, `reset-password` | Supabase auth | ✅ Done (session 4, logo polish) |
@@ -220,6 +220,15 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 **Auth pages logo polish** (clinic-web)
 - `forgot-password/page.tsx` and `reset-password/page.tsx`: replaced plain text `<h1>CareFlow</h1>` with `<Image src="/logo.png">` to match login page.
 
+**Patient — Reschedule screen** (`apps/patient-mobile/src/app/booking/reschedule.tsx`)
+- New screen; takes `appointmentId`, `doctorId`, `doctorName`, `currentDate`, `currentTime` params.
+- Shows current appointment summary, then a date picker (starts from tomorrow) + time slot grid for the same doctor.
+- On confirm: calls `rescheduleAppointment()` → `reschedule_appointment()` RPC (atomically frees old slot + claims new one).
+- On success: Alert with new time, then replaces navigation to appointments list.
+- `appointments.tsx`: updated `handleReschedule` to navigate with full appointment context; `FullAppointment` now includes `doctorId`; query now selects `doctors.id`.
+- New migration: `supabase/migrations/20260626000002_reschedule_appointment_fn.sql` — **must be applied manually**.
+- New API: `rescheduleAppointment()` in `apps/patient-mobile/src/lib/api/appointments.ts`.
+
 **Patient-mobile UI states**
 - `apps/patient-mobile/src/components/ui/Skeleton.tsx` — `Skeleton` base (pulse animation via `Animated`), `SkeletonAppointmentCard`, `SkeletonClinicCard`, `SkeletonHeroCard` presets.
 - Home screen (`(tabs)/index.tsx`) — added `loading` state; clinics section shows 3 `SkeletonClinicCard` placeholders while data loads, then falls back to "No clinics found nearby" when empty.
@@ -252,10 +261,11 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 - **expo-notifications crash in Expo Go (SDK 53+)** — Fixed in session 2 & 3: lazy import + full try/catch around API calls. Works in a dev build with EAS.
 - **Fake "Live Queue Updates" data** in `queue/[queueId].tsx` — hardcoded scripted feed + hardcoded timestamps. Explicitly out of scope for now (Phase 2 handles real push; the fake feed is a separate cleanup).
 - **Realtime needs manual setup** in Supabase dashboard: Database → Replication → toggle on `queue_entries` + `queues`, then run `ALTER TABLE queue_entries REPLICA IDENTITY FULL;`.
-- **Three pending migrations not yet applied**:
+- **Four pending migrations not yet applied**:
   - `supabase/migrations/20260620000000_doctor_breaks.sql` — doctor break slots
   - `supabase/migrations/20260620000001_book_appointment_fn.sql` — `book_appointment()` patient function
   - `supabase/migrations/20260626000001_staff_book_appointment_fn.sql` — `staff_book_appointment()` for New Appointment dialog
+  - `supabase/migrations/20260626000002_reschedule_appointment_fn.sql` — `reschedule_appointment()` for Reschedule screen
 - **Phase 2 push requires one-time setup:**
   - Supabase Vault secret `send_notification_url` pointing to the Edge Function URL.
   - `pg_cron` extension enabled for the reminder job.

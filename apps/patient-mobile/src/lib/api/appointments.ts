@@ -102,3 +102,28 @@ export async function cancelAppointment(appointmentId: string): Promise<{ error?
   const { error } = await supabase.rpc("cancel_appointment", { p_appointment_id: appointmentId });
   return error ? { error: error.message } : {};
 }
+
+export async function rescheduleAppointment(
+  appointmentId: string,
+  newDate: string,
+  newStartTime: string,
+  newEndTime: string,
+): Promise<{ newAppointmentId?: string; error?: string }> {
+  const { data, error } = await supabase.rpc("reschedule_appointment", {
+    p_appointment_id: appointmentId,
+    p_new_slot_date:  newDate,
+    p_new_start_time: `${newStartTime}:00`,
+    p_new_end_time:   `${newEndTime}:00`,
+  });
+
+  if (error) {
+    const hint = error.message.includes("SLOT_UNAVAILABLE")
+      ? "This slot was just taken. Please choose another time."
+      : error.message.includes("INVALID_STATUS")
+      ? "This appointment can no longer be rescheduled."
+      : error.message;
+    return { error: hint };
+  }
+
+  return { newAppointmentId: data as string };
+}

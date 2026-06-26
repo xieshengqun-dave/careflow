@@ -28,6 +28,7 @@ interface FullAppointment {
   date: string;
   startTime: string;
   status: string;
+  doctorId: string;
   doctorName: string;
   specialization: string | null;
   clinicName: string;
@@ -134,6 +135,7 @@ async function fetchAppointments(tab: TabKey): Promise<FullAppointment[]> {
         end_time
       ),
       doctors (
+        id,
         specialization,
         clinic_staff (
           full_name
@@ -156,6 +158,7 @@ async function fetchAppointments(tab: TabKey): Promise<FullAppointment[]> {
       end_time: string;
     } | null;
     const doc = appt.doctors as unknown as {
+      id: string;
       specialization: string | null;
       clinic_staff: { full_name: string } | Array<{ full_name: string }> | null;
     } | null;
@@ -169,6 +172,7 @@ async function fetchAppointments(tab: TabKey): Promise<FullAppointment[]> {
       date: appt.appointment_date,
       startTime: slot ? slot.start_time.slice(0, 5) : "",
       status: appt.status,
+      doctorId: doc?.id ?? "",
       doctorName: staff?.full_name ?? "Doctor",
       specialization: doc?.specialization ?? null,
       clinicName: clinic?.name ?? "",
@@ -194,7 +198,7 @@ function AppointmentCard({
   accentColor?: string;
   onCancel: (id: string) => void;
   onBookAgain: () => void;
-  onReschedule: (id: string) => void;
+  onReschedule: (appt: FullAppointment) => void;
 }) {
   const statusKey = STATUS_KEY[appt.status] ?? "waitingNext";
   const statusLabel = STATUS_LABEL[appt.status] ?? appt.status;
@@ -276,7 +280,7 @@ function AppointmentCard({
         <View style={styles.actionRow}>
           <TouchableOpacity
             style={styles.rescheduleBtn}
-            onPress={() => onReschedule(appt.id)}
+            onPress={() => onReschedule(appt)}
             activeOpacity={0.75}
           >
             <Icon name="calendar-outline" size={14} color={palette.primary600} />
@@ -358,9 +362,17 @@ export default function AppointmentsScreen() {
     );
   }
 
-  function handleReschedule(_id: string) {
-    // Navigate to home to initiate a new booking flow
-    router.push("/");
+  function handleReschedule(appt: FullAppointment) {
+    router.push({
+      pathname: "/booking/reschedule",
+      params: {
+        appointmentId: appt.id,
+        doctorId: appt.doctorId,
+        doctorName: appt.doctorName,
+        currentDate: appt.date,
+        currentTime: appt.startTime,
+      },
+    });
   }
 
   function handleBookAgain() {
