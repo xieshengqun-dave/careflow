@@ -35,8 +35,8 @@ BEGIN
   RETURNING id INTO v_id;
 
   BEGIN
-    SELECT decrypted_secret INTO v_project_url FROM vault.decrypted_secrets WHERE name = 'project_url';
-    SELECT decrypted_secret INTO v_service_key FROM vault.decrypted_secrets WHERE name = 'service_role_key';
+    SELECT decrypted_secret INTO v_project_url FROM vault.decrypted_secrets WHERE name = 'https://xcqkwidbawxrahbrnkqs.supabase.co';
+    SELECT decrypted_secret INTO v_service_key FROM vault.decrypted_secrets WHERE name = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjcWt3aWRiYXd4cmFoYnJua3FzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTc2NTYzMCwiZXhwIjoyMDk3MzQxNjMwfQ.elSzGaBMWW0JFx_xwo69SSyxKCjRzXKXD_HLSKksiqI';
 
     IF v_project_url IS NOT NULL AND v_service_key IS NOT NULL THEN
       PERFORM net.http_post(

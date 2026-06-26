@@ -15,6 +15,18 @@ export const palette = {
   primary700: '#1D4ED8', // filled buttons, pressed
   primary800: '#1E40AF', // hero gradient end
 
+  // Platform-operator console (vendor super-admin area) — visually distinct
+  // from the single-clinic portal: deep navy sidebar + indigo accent.
+  platformNavy: '#141B33',     // sidebar gradient start
+  platformNavyDeep: '#0E1426', // sidebar gradient end + login bg
+  platformPanel: '#1A2342',    // login button / left login panel
+  indigo600: '#4F46E5',        // platform accent (badges, links in console)
+  indigo500: '#6366F1',
+  indigo400: '#818CF8',        // active-nav bar / "PLATFORM" badge text
+  indigo100: '#EEF1FF',        // indigo tint (stat icon backgrounds)
+  navTextIdle: '#94A3C2',      // sidebar idle item text
+  navActiveBg: 'rgba(99,102,241,0.18)', // sidebar active item background
+
   // Green (queue / success / walk-in)
   green50: '#E6F8EE',
   green100: '#F1F8F4',

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#eef1f6;}
+::-webkit-scrollbar{width:9px;height:9px;}::-webkit-scrollbar-thumb{background:#d4dbe6;border-radius:5px;}
+@keyframes cfshimmer{0%{background-position:-360px 0}100%{background-position:360px 0}}
+.cfsk{background:#EAEEF4;background-image:linear-gradient(90deg,#EAEEF4 0px,#F4F7FB 180px,#EAEEF4 360px);background-size:720px 100%;border-radius:7px;animation:cfshimmer 1.3s linear infinite;}
+</style>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#141B33"/><circle cx="50" cy="40" r="13" fill="none" stroke="#6366F1" stroke-width="4"/><path d="M50 53v18M34 62h32" stroke="#22C55E" stroke-width="4" stroke-linecap="round"/></svg></template>
+</helmet>
+<div style="width:100%;min-height:100vh;background:#F6F8FB;">
+
+  <sc-if value="{{ screenLogin }}" hint-placeholder-val="{{ true }}">
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1B2342,#0E1426);padding:40px;position:relative;">
+      <div style="position:absolute;inset:0;background:radial-gradient(60% 50% at 85% 90%,rgba(99,102,241,.22),transparent 60%);"></div>
+      <div style="display:flex;width:920px;max-width:100%;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 40px 90px -30px rgba(8,12,28,.7);position:relative;z-index:2;">
+        <div style="width:400px;flex:none;background:linear-gradient(165deg,#1A2342,#0E1426);padding:40px 36px;color:#fff;display:flex;flex-direction:column;">
+          <div style="display:flex;align-items:center;gap:11px;"><div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#6366F1,#22C55E);display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5 6 5c2 0 3.2 1.2 4 2.3C10.8 6.2 12 5 14 5c3.5 0 5 4 3.5 7-2.5 4.5-5.5 9-5.5 9z"/></svg></div><div><div style="font-size:18px;font-weight:800;letter-spacing:-.02em;">CareFlow</div><div style="font-size:10px;font-weight:700;color:#A5B4FC;letter-spacing:.16em;">PLATFORM CONSOLE</div></div></div>
+          <div style="margin-top:48px;"><div style="display:inline-flex;align-items:center;gap:7px;background:rgba(99,102,241,.2);border:1px solid rgba(129,140,248,.35);border-radius:9px;padding:6px 12px;font-size:11px;font-weight:700;color:#C7D2FE;letter-spacing:.04em;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#A5B4FC" stroke-width="2" stroke-linejoin="round"/></svg>PLATFORM OPERATOR</div>
+          <h1 style="font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin:22px 0 12px;">Operate the entire CareFlow network</h1>
+          <p style="font-size:14px;color:#9FB0D0;line-height:1.6;margin:0;">Manage every clinic, doctor and patient across the platform. Provision new tenants, monitor live queues, and track network-wide performance.</p></div>
+          <div style="margin-top:auto;display:flex;flex-direction:column;gap:14px;padding-top:36px;">
+            <div style="display:flex;align-items:center;gap:11px;font-size:13px;color:#C3D0E8;"><div style="width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="8" height="12" rx="1.5" stroke="#A5B4FC" stroke-width="2"/><path d="M13 21V5a2 2 0 012-2h4a2 2 0 012 2v16" stroke="#A5B4FC" stroke-width="2"/></svg></div>142 clinics, 1,284 doctors</div>
+            <div style="display:flex;align-items:center;gap:11px;font-size:13px;color:#C3D0E8;"><div style="width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#86EFAC" stroke-width="2"/><path d="M12 7v5l3 2" stroke="#86EFAC" stroke-width="2" stroke-linecap="round"/></svg></div>76 live queues right now</div>
+          </div>
+        </div>
+        <div style="flex:1;padding:48px 44px;display:flex;flex-direction:column;justify-content:center;">
+          <h2 style="margin:0;font-size:26px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Sign in to Platform</h2>
+          <p style="margin:7px 0 28px;font-size:14px;color:#64748B;">Authorized operators only.</p>
+          <label style="font-size:13px;font-weight:700;color:#0F172A;">Work Email</label>
+          <div style="margin:8px 0 16px;display:flex;align-items:center;border:1.5px solid #E2E8F0;border-radius:12px;height:50px;padding:0 14px;gap:10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="#94A3B8" stroke-width="2"/><path d="M4 7l8 6 8-6" stroke="#94A3B8" stroke-width="2"/></svg><span style="font-size:14px;color:#94A3B8;">operator@careflow.io</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;"><label style="font-size:13px;font-weight:700;color:#0F172A;">Password</label><span style="font-size:12px;font-weight:700;color:#4F46E5;cursor:pointer;">Forgot?</span></div>
+          <div style="margin:8px 0 14px;display:flex;align-items:center;border:1.5px solid #E2E8F0;border-radius:12px;height:50px;padding:0 14px;gap:10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="#94A3B8" stroke-width="2"/><path d="M8 11V8a4 4 0 018 0v3" stroke="#94A3B8" stroke-width="2"/></svg><span style="flex:1;font-size:14px;color:#0F172A;letter-spacing:3px;">••••••••••</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" stroke="#94A3B8" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#94A3B8" stroke-width="2"/></svg></div>
+          <label style="display:flex;align-items:center;gap:9px;font-size:13px;color:#475569;margin-bottom:20px;cursor:pointer;"><span style="width:18px;height:18px;border-radius:5px;background:#4F46E5;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Keep me signed in on this device</label>
+          <button onClick="{{ doLogin }}" style="width:100%;height:52px;border:none;border-radius:13px;background:#1A2342;color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 12px 24px -10px rgba(26,35,66,.7);" style-active="transform:scale(.99)">Sign In <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div style="margin-top:22px;background:#F1F5F9;border-radius:12px;padding:13px 14px;display:flex;align-items:center;gap:10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:none;"><circle cx="12" cy="12" r="10" stroke="#64748B" stroke-width="2"/><path d="M12 16v-4M12 8h.01" stroke="#64748B" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:12px;color:#64748B;line-height:1.45;">This is a restricted operator console. All sign-ins and actions are <strong style="color:#334155;">logged and audited</strong>.</span></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ screenApp }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;width:100%;min-height:100vh;">
+      <aside style="width:248px;flex:none;background:linear-gradient(180deg,#141B33,#0E1426);display:flex;flex-direction:column;padding:20px 14px;position:sticky;top:0;height:100vh;">
+        <div style="display:flex;align-items:center;gap:10px;padding:0 8px 14px;border-bottom:1px solid rgba(255,255,255,.08);">
+          <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#6366F1,#22C55E);display:flex;align-items:center;justify-content:center;flex:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5 6 5c2 0 3.2 1.2 4 2.3C10.8 6.2 12 5 14 5c3.5 0 5 4 3.5 7-2.5 4.5-5.5 9-5.5 9z"/></svg></div>
+          <div><div style="font-size:16px;font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1;">CareFlow</div><div style="display:inline-flex;align-items:center;gap:5px;margin-top:4px;background:rgba(99,102,241,.22);border:1px solid rgba(129,140,248,.4);border-radius:6px;padding:2px 7px;"><span style="width:5px;height:5px;border-radius:50%;background:#818CF8;"></span><span style="font-size:9px;font-weight:800;color:#C7D2FE;letter-spacing:.13em;">PLATFORM</span></div></div>
+        </div>
+        <nav style="display:flex;flex-direction:column;gap:3px;margin-top:14px;">
+          <button onClick="{{ goOverview }}" style="display:flex;align-items:center;gap:11px;border:none;background:{{ navOverviewB }};border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;color:{{ navOverviewC }};text-align:left;position:relative;"><span style="position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:2px;background:{{ navOverviewBar }};"></span><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="{{ navOverviewC }}" stroke-width="2"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="{{ navOverviewC }}" stroke-width="2"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="{{ navOverviewC }}" stroke-width="2"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="{{ navOverviewC }}" stroke-width="2"/></svg>Overview</button>
+          <button onClick="{{ goClinics }}" style="display:flex;align-items:center;gap:11px;border:none;background:{{ navClinicsB }};border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;color:{{ navClinicsC }};text-align:left;position:relative;"><span style="position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:2px;background:{{ navClinicsBar }};"></span><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="8" height="12" rx="1.5" stroke="{{ navClinicsC }}" stroke-width="2"/><path d="M13 21V5a2 2 0 012-2h4a2 2 0 012 2v16" stroke="{{ navClinicsC }}" stroke-width="2"/><path d="M7 13h.01M7 17h.01M17 8h.01M17 12h.01M17 16h.01" stroke="{{ navClinicsC }}" stroke-width="2" stroke-linecap="round"/></svg>Clinics</button>
+          <button onClick="{{ goDoctors }}" style="display:flex;align-items:center;gap:11px;border:none;background:{{ navDoctorsB }};border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;color:{{ navDoctorsC }};text-align:left;position:relative;"><span style="position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:2px;background:{{ navDoctorsBar }};"></span><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" stroke="{{ navDoctorsC }}" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="{{ navDoctorsC }}" stroke-width="2"/><path d="M16 3.1a4 4 0 010 7.8M21 21v-2a4 4 0 00-3-3.8" stroke="{{ navDoctorsC }}" stroke-width="2"/></svg>Doctors</button>
+          <button onClick="{{ goPatients }}" style="display:flex;align-items:center;gap:11px;border:none;background:{{ navPatientsB }};border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;color:{{ navPatientsC }};text-align:left;position:relative;"><span style="position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:2px;background:{{ navPatientsBar }};"></span><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="{{ navPatientsC }}" stroke-width="2"/><path d="M5 20a7 7 0 0114 0" stroke="{{ navPatientsC }}" stroke-width="2"/></svg>Patients</button>
+          <div style="height:1px;background:rgba(255,255,255,.08);margin:11px 8px;"></div>
+          <button onClick="{{ goOnboard }}" style="display:flex;align-items:center;gap:11px;border:none;background:{{ navOnboardB }};border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;color:{{ navOnboardC }};text-align:left;position:relative;"><span style="position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:2px;background:{{ navOnboardBar }};"></span><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="8" height="12" rx="1.5" stroke="{{ navOnboardC }}" stroke-width="2"/><path d="M13 21V9" stroke="{{ navOnboardC }}" stroke-width="2"/><path d="M18 4v6M21 7h-6" stroke="#34D399" stroke-width="2" stroke-linecap="round"/></svg>Onboard Clinic</button>
+          <button onClick="{{ goSettings }}" style="display:flex;align-items:center;gap:11px;border:none;background:{{ navSettingsB }};border-radius:11px;padding:11px 12px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;color:{{ navSettingsC }};text-align:left;position:relative;"><span style="position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:2px;background:{{ navSettingsBar }};"></span><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="{{ navSettingsC }}" stroke-width="2"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.6 1.6 0 00-1-1.5 1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H3a2 2 0 010-4h.1a1.6 1.6 0 001.5-1 1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H10a1.6 1.6 0 001-1.5V3a2 2 0 014 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V10a1.6 1.6 0 001.5 1H21a2 2 0 010 4h-.1a1.6 1.6 0 00-1.5 1z" stroke="{{ navSettingsC }}" stroke-width="2"/></svg>Settings</button>
+        </nav>
+        <div style="margin-top:auto;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:11px;"><div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#22C55E);flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;">SC</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:800;color:#fff;">Sarah Chen</div><div style="font-size:11px;color:#8B9AC0;">Platform Operator</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M16 17l5-5-5-5M21 12H9M9 3H7a2 2 0 00-2 2v14a2 2 0 002 2h2" stroke="#8B9AC0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </aside>
+
+      <main style="flex:1;min-width:0;overflow-x:hidden;">
+        <header style="height:66px;background:#fff;border-bottom:1px solid #EEF2F6;display:flex;align-items:center;gap:16px;padding:0 30px;position:sticky;top:0;z-index:20;">
+          <div style="display:flex;align-items:center;gap:9px;flex:1;min-width:0;max-width:420px;background:#F1F5F9;border-radius:11px;height:40px;padding:0 14px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:none;"><circle cx="11" cy="11" r="7" stroke="#94A3B8" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:13px;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Search clinics, doctors, patients…</span></div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+            <div style="display:flex;align-items:center;gap:6px;background:#ECFDF3;border:1px solid #C9F0D8;border-radius:9px;padding:6px 11px;font-size:12px;font-weight:700;color:#16794C;"><span style="width:7px;height:7px;border-radius:50%;background:#22C55E;"></span>Production</div>
+            <div style="display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #E2E8F0;border-radius:9px;padding:5px 5px 5px 11px;">
+              <span style="font-size:11px;font-weight:700;color:#94A3B8;letter-spacing:.04em;">PREVIEW</span>
+              <button onClick="{{ stDefault }}" style="border:none;border-radius:6px;padding:5px 9px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;background:{{ psDefaultB }};color:{{ psDefaultC }};">Default</button>
+              <button onClick="{{ stLoading }}" style="border:none;border-radius:6px;padding:5px 9px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;background:{{ psLoadingB }};color:{{ psLoadingC }};">Loading</button>
+              <button onClick="{{ stEmpty }}" style="border:none;border-radius:6px;padding:5px 9px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;background:{{ psEmptyB }};color:{{ psEmptyC }};">Empty</button>
+              <button onClick="{{ stError }}" style="border:none;border-radius:6px;padding:5px 9px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;background:{{ psErrorB }};color:{{ psErrorC }};">Error</button>
+            </div>
+            <div style="position:relative;width:40px;height:40px;border-radius:11px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9" stroke="#334155" stroke-width="2" stroke-linejoin="round"/><path d="M10.3 21a1.94 1.94 0 003.4 0" stroke="#334155" stroke-width="2"/></svg><span style="position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:#EF4444;border:1.5px solid #fff;"></span></div>
+          </div>
+        </header>
+
+        <div style="padding:26px 30px 44px;">
+          <sc-if value="{{ stateLoading }}" hint-placeholder-val="{{ true }}">
+            <div style="height:34px;width:240px;margin-bottom:8px;" class="cfsk"></div>
+            <div style="height:16px;width:340px;margin-bottom:24px;" class="cfsk"></div>
+            <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:18px;"><div style="height:118px;" class="cfsk"></div><div style="height:118px;" class="cfsk"></div><div style="height:118px;" class="cfsk"></div><div style="height:118px;" class="cfsk"></div><div style="height:118px;" class="cfsk"></div><div style="height:118px;" class="cfsk"></div></div>
+              <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:18px;"><div style="height:300px;" class="cfsk"></div><div style="height:300px;" class="cfsk"></div></div>
+            </sc-if>
+            <sc-if value="{{ isTableView }}" hint-placeholder-val="{{ true }}">
+              <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:18px;">
+                <div style="height:18px;width:160px;margin-bottom:18px;" class="cfsk"></div>
+                <sc-for list="{{ skeletonRows }}" as="r" hint-placeholder-count="8"><div style="display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid #F1F5F9;"><div style="width:38px;height:38px;border-radius:50%;flex:none;" class="cfsk"></div><div style="height:14px;width:24%;" class="cfsk"></div><div style="height:14px;width:20%;" class="cfsk"></div><div style="height:14px;width:14%;" class="cfsk"></div><div style="height:22px;width:74px;border-radius:8px;margin-left:auto;" class="cfsk"></div></div></sc-for>
+              </div>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{ stateError }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 20px;text-align:center;">
+              <div style="width:74px;height:74px;border-radius:50%;background:#FEF2F2;display:flex;align-items:center;justify-content:center;margin-bottom:18px;"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M10.3 3.6L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.6a2 2 0 00-3.4 0z" stroke="#EF4444" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v4M12 17h.01" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/></svg></div>
+              <h2 style="margin:0;font-size:20px;font-weight:800;color:#0F172A;">Couldn't load {{ viewLabel }}</h2>
+              <p style="margin:8px 0 22px;font-size:14px;color:#64748B;max-width:380px;line-height:1.55;">Something went wrong while fetching data from the platform service. This is usually temporary.</p>
+              <div style="display:flex;gap:11px;"><button onClick="{{ stDefault }}" style="display:flex;align-items:center;gap:8px;border:none;background:#1A2342;color:#fff;font-family:inherit;font-size:14px;font-weight:700;padding:11px 20px;border-radius:12px;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M3.5 9a9 9 0 0114.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0020.5 15" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>Retry</button><button style="border:1px solid #E2E8F0;background:#fff;color:#334155;font-family:inherit;font-size:14px;font-weight:700;padding:11px 20px;border-radius:12px;cursor:pointer;">Contact Engineering</button></div>
+              <div class="mono" style="font-family:ui-monospace,monospace;font-size:11px;color:#94A3B8;margin-top:20px;">error_ref: CF-503-QUEUE-SYNC</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ stateEmpty }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 20px;text-align:center;">
+              <div style="width:74px;height:74px;border-radius:50%;background:#EEF3FE;display:flex;align-items:center;justify-content:center;margin-bottom:18px;"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M3 7l9-4 9 4-9 4-9-4z" stroke="#2563EB" stroke-width="2" stroke-linejoin="round"/><path d="M3 7v10l9 4 9-4V7" stroke="#2563EB" stroke-width="2" stroke-linejoin="round"/></svg></div>
+              <h2 style="margin:0;font-size:20px;font-weight:800;color:#0F172A;">No {{ viewLabel }} yet</h2>
+              <p style="margin:8px 0 22px;font-size:14px;color:#64748B;max-width:380px;line-height:1.55;">{{ emptyText }}</p>
+              <button onClick="{{ goOnboard }}" style="display:flex;align-items:center;gap:8px;border:none;background:#1D4ED8;color:#fff;font-family:inherit;font-size:14px;font-weight:700;padding:11px 20px;border-radius:12px;cursor:pointer;box-shadow:0 8px 16px -8px rgba(29,78,216,.6);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>Onboard a Clinic</button>
+            </div>
+          </sc-if>
+
+            <sc-if value="{{ showOverview }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;">
+                <div><h1 style="margin:0;font-size:28px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Platform Overview</h1><p style="margin:5px 0 0;font-size:14px;color:#64748B;">Network-wide performance across all clinics · 20 May 2025</p></div>
+                <button style="display:flex;align-items:center;gap:7px;border:1px solid #E2E8F0;background:#fff;border-radius:11px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;color:#334155;cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="#334155" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Export Report</button>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:18px;">
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:40px;height:40px;border-radius:11px;background:#EEF1FF;display:flex;align-items:center;justify-content:center;margin-bottom:11px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="8" height="12" rx="1.5" stroke="#4F46E5" stroke-width="2"/><path d="M13 21V5a2 2 0 012-2h4a2 2 0 012 2v16" stroke="#4F46E5" stroke-width="2"/></svg></div><div style="font-size:12px;color:#64748B;font-weight:600;">Total Clinics</div><div style="font-size:26px;font-weight:800;color:#0F172A;">142</div><div style="font-size:11px;color:#16A34A;font-weight:700;">↑ 6 this month</div></div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:40px;height:40px;border-radius:11px;background:#EEF3FE;display:flex;align-items:center;justify-content:center;margin-bottom:11px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" stroke="#2563EB" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="#2563EB" stroke-width="2"/></svg></div><div style="font-size:12px;color:#64748B;font-weight:600;">Total Doctors</div><div style="font-size:26px;font-weight:800;color:#0F172A;">1,284</div><div style="font-size:11px;color:#16A34A;font-weight:700;">↑ 38 this month</div></div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:40px;height:40px;border-radius:11px;background:#F3EEFE;display:flex;align-items:center;justify-content:center;margin-bottom:11px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#7C3AED" stroke-width="2"/><path d="M5 20a7 7 0 0114 0" stroke="#7C3AED" stroke-width="2"/></svg></div><div style="font-size:12px;color:#64748B;font-weight:600;">Total Patients</div><div style="font-size:26px;font-weight:800;color:#0F172A;">86,420</div><div style="font-size:11px;color:#16A34A;font-weight:700;">↑ 2.1k this month</div></div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:40px;height:40px;border-radius:11px;background:#E6F8EE;display:flex;align-items:center;justify-content:center;margin-bottom:11px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="3" stroke="#16A34A" stroke-width="2"/><path d="M8 2v4M16 2v4M3 10h18" stroke="#16A34A" stroke-width="2"/></svg></div><div style="font-size:12px;color:#64748B;font-weight:600;">Appointments Today</div><div style="font-size:26px;font-weight:800;color:#0F172A;">3,610</div><div style="font-size:11px;color:#16A34A;font-weight:700;">↑ 9% vs avg</div></div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:40px;height:40px;border-radius:11px;background:#E6F8EE;display:flex;align-items:center;justify-content:center;margin-bottom:11px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M17 20v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="#16A34A" stroke-width="2"/><circle cx="9" cy="7" r="3" stroke="#16A34A" stroke-width="2"/></svg></div><div style="font-size:12px;color:#64748B;font-weight:600;">Active Queues</div><div style="font-size:26px;font-weight:800;color:#0F172A;">76</div><div style="font-size:11px;color:#94A3B8;font-weight:600;">across 64 clinics</div></div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="width:40px;height:40px;border-radius:11px;background:#FEF3E2;display:flex;align-items:center;justify-content:center;margin-bottom:11px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18" stroke="#F59E0B" stroke-width="2"/><path d="M7 14l3-3 3 2 5-6" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="font-size:12px;color:#64748B;font-weight:600;">No-Show Rate</div><div style="font-size:26px;font-weight:800;color:#0F172A;">3.1%</div><div style="font-size:11px;color:#16A34A;font-weight:700;">↓ 0.4% this month</div></div>
+              </div>
+              <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:18px;margin-bottom:18px;">
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><h3 style="margin:0;font-size:17px;font-weight:800;color:#0F172A;">Appointments — Platform-wide</h3><div style="display:flex;gap:7px;"><span style="font-size:12px;font-weight:700;color:#fff;background:#1A2342;padding:5px 11px;border-radius:8px;">30 days</span><span style="font-size:12px;font-weight:700;color:#64748B;background:#F1F5F9;padding:5px 11px;border-radius:8px;">90 days</span></div></div>
+                  <div style="font-size:30px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">98,240 <span style="font-size:13px;font-weight:700;color:#16A34A;">↑ 12.5%</span></div>
+                  <svg width="100%" height="170" viewBox="0 0 600 170" preserveAspectRatio="none" style="margin-top:10px;"><defs><linearGradient id="pa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2563EB" stop-opacity=".22"/><stop offset="1" stop-color="#2563EB" stop-opacity="0"/></linearGradient></defs><path d="M0,130 C40,120 70,90 110,96 C150,102 180,70 220,74 C260,78 290,50 330,58 C370,66 400,40 440,36 C480,32 520,52 560,40 L600,34 L600,170 L0,170 Z" fill="url(#pa)"/><path d="M0,130 C40,120 70,90 110,96 C150,102 180,70 220,74 C260,78 290,50 330,58 C370,66 400,40 440,36 C480,32 520,52 560,40 L600,34" fill="none" stroke="#2563EB" stroke-width="2.5"/></svg>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;color:#94A3B8;margin-top:6px;"><span>Apr 21</span><span>Apr 28</span><span>May 5</span><span>May 12</span><span>May 20</span></div>
+                </div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><h3 style="margin:0;font-size:16px;font-weight:800;color:#0F172A;">Clinics Needing Attention</h3><span style="font-size:12px;font-weight:700;color:#EF4444;background:#FEF2F2;padding:3px 9px;border-radius:7px;">4</span></div>
+                  <div style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid #F1F5F9;"><div style="width:34px;height:34px;border-radius:9px;background:#FEF2F2;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#EF4444" stroke-width="2"/><path d="M12 7v5M12 16h.01" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/></svg></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Klinik Mediviron Cheras</div><div style="font-size:11px;color:#DC2626;">No-show rate 14% · above threshold</div></div></div>
+                  <div style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid #F1F5F9;"><div style="width:34px;height:34px;border-radius:9px;background:#FEF3E2;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#F59E0B" stroke-width="2"/><path d="M12 7v5l3 2" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/></svg></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Sunway Medical — Klang</div><div style="font-size:11px;color:#B45309;">Avg wait 82 min · long queues</div></div></div>
+                  <div style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid #F1F5F9;"><div style="width:34px;height:34px;border-radius:9px;background:#FEF2F2;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="#EF4444" stroke-width="2"/><path d="M8 11V8a4 4 0 018 0v3" stroke="#EF4444" stroke-width="2"/></svg></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">KPJ Tawakkal</div><div style="font-size:11px;color:#DC2626;">Suspended · billing overdue</div></div></div>
+                  <div style="display:flex;align-items:center;gap:11px;padding:10px 0;"><div style="width:34px;height:34px;border-radius:9px;background:#FEF3E2;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" stroke="#F59E0B" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="#F59E0B" stroke-width="2"/></svg></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Poliklinik Sentosa JB</div><div style="font-size:11px;color:#B45309;">Only 1 active doctor</div></div></div>
+                </div>
+              </div>
+              <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><h3 style="margin:0;font-size:16px;font-weight:800;color:#0F172A;">Recent Platform Activity</h3><span style="font-size:12px;font-weight:700;color:#2563EB;cursor:pointer;">View Audit Log</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F1F5F9;"><div style="width:32px;height:32px;border-radius:9px;background:#E6F8EE;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#16A34A" stroke-width="2.4" stroke-linecap="round"/></svg></div><div style="flex:1;"><span style="font-size:13px;color:#334155;"><strong style="color:#0F172A;">Gleneagles Penang</strong> was onboarded by Sarah Chen</span></div><span style="font-size:12px;color:#94A3B8;">12 min ago</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F1F5F9;"><div style="width:32px;height:32px;border-radius:9px;background:#FEF2F2;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="#EF4444" stroke-width="2"/><path d="M8 11V8a4 4 0 018 0v3" stroke="#EF4444" stroke-width="2"/></svg></div><div style="flex:1;"><span style="font-size:13px;color:#334155;"><strong style="color:#0F172A;">KPJ Tawakkal</strong> was suspended · billing overdue</span></div><span style="font-size:12px;color:#94A3B8;">1 hr ago</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F1F5F9;"><div style="width:32px;height:32px;border-radius:9px;background:#EEF3FE;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" stroke="#2563EB" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="#2563EB" stroke-width="2"/></svg></div><div style="flex:1;"><span style="font-size:13px;color:#334155;"><strong style="color:#0F172A;">18 new doctors</strong> joined across 5 clinics</span></div><span style="font-size:12px;color:#94A3B8;">3 hrs ago</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;"><div style="width:32px;height:32px;border-radius:9px;background:#F3EEFE;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#7C3AED" stroke-width="2"/><path d="M5 20a7 7 0 0114 0" stroke="#7C3AED" stroke-width="2"/></svg></div><div style="flex:1;"><span style="font-size:13px;color:#334155;">Patient milestone — <strong style="color:#0F172A;">86,000</strong> registered platform-wide</span></div><span style="font-size:12px;color:#94A3B8;">Yesterday</span></div>
+              </div>
+            </sc-if>
+
+<sc-if value="{{ showClinics }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;">
+                <div><h1 style="margin:0;font-size:28px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Clinics</h1><p style="margin:5px 0 0;font-size:14px;color:#64748B;">142 clinics on the platform · 139 active, 3 suspended</p></div>
+                <button onClick="{{ goOnboard }}" style="display:flex;align-items:center;gap:7px;border:none;background:#1D4ED8;border-radius:11px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 8px 16px -8px rgba(29,78,216,.6);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>Onboard Clinic</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:9px;flex:1;max-width:340px;background:#fff;border:1px solid #EEF2F6;border-radius:11px;height:42px;padding:0 14px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#94A3B8" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:13px;color:#94A3B8;">Search clinic name or location…</span></div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:11px 14px;font-size:13px;font-weight:700;color:#334155;">State: All ▾</div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:11px 14px;font-size:13px;font-weight:700;color:#334155;">Status: All ▾</div>
+                <div style="margin-left:auto;font-size:13px;color:#64748B;">Sorted by: <span style="color:#0F172A;font-weight:700;">Most patients</span> ▾</div>
+              </div>
+              <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+                <div style="display:grid;grid-template-columns:2.4fr 1fr 1fr 1fr 1fr 50px;padding:13px 20px;background:#F8FAFC;border-bottom:1px solid #EEF2F6;font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.04em;"><span>Clinic</span><span>Doctors</span><span>Patients</span><span>Status</span><span>Joined</span><span></span></div>
+                <sc-for list="{{ clinics }}" as="c" hint-placeholder-count="9">
+                  <div onClick="{{ c.onOpen }}" style="display:grid;grid-template-columns:2.4fr 1fr 1fr 1fr 1fr 50px;align-items:center;padding:13px 20px;border-bottom:1px solid #F1F5F9;cursor:pointer;" style-hover="background:#F8FAFC">
+                    <div style="display:flex;align-items:center;gap:12px;"><div style="width:40px;height:40px;border-radius:11px;background:{{ c.ig }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#1E3A8A;flex:none;">{{ c.init }}</div><div><div style="font-size:14px;font-weight:700;color:#0F172A;">{{ c.name }}</div><div style="font-size:12px;color:#94A3B8;">{{ c.loc }}</div></div></div>
+                    <span style="font-size:14px;font-weight:700;color:#0F172A;">{{ c.doctors }}</span>
+                    <span style="font-size:14px;font-weight:700;color:#0F172A;">{{ c.patients }}</span>
+                    <span style="justify-self:start;font-size:12px;font-weight:700;color:{{ c.stC }};background:{{ c.stBg }};padding:4px 11px;border-radius:8px;">{{ c.status }}</span>
+                    <span style="font-size:13px;color:#64748B;">{{ c.joined }}</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="justify-self:center;"><path d="M9 18l6-6-6-6" stroke="#CBD5E1" stroke-width="2"/></svg>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;"><span style="font-size:13px;color:#94A3B8;">Showing 9 of 142 clinics</span><div style="display:flex;gap:7px;"><span style="width:32px;height:32px;border-radius:8px;background:#1A2342;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;">1</span><span style="width:32px;height:32px;border-radius:8px;background:#fff;border:1px solid #EEF2F6;color:#334155;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;">2</span><span style="width:32px;height:32px;border-radius:8px;background:#fff;border:1px solid #EEF2F6;color:#334155;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;">3</span><span style="width:32px;height:32px;border-radius:8px;background:#fff;border:1px solid #EEF2F6;color:#334155;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;">›</span></div></div>
+            </sc-if>
+
+            <sc-if value="{{ showClinicDetail }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:9px;font-size:13px;color:#64748B;margin-bottom:16px;"><span onClick="{{ goClinics }}" style="color:#2563EB;font-weight:700;cursor:pointer;">Clinics</span><span>/</span><span style="color:#0F172A;font-weight:700;">{{ sel.name }}</span></div>
+              <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:22px;margin-bottom:18px;box-shadow:0 1px 3px rgba(15,23,42,.04);display:flex;align-items:center;gap:18px;">
+                <div style="width:64px;height:64px;border-radius:16px;background:{{ sel.ig }};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#1E3A8A;flex:none;">{{ sel.init }}</div>
+                <div style="flex:1;"><div style="display:flex;align-items:center;gap:10px;"><h1 style="margin:0;font-size:24px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">{{ sel.name }}</h1><span style="font-size:12px;font-weight:700;color:{{ sel.stC }};background:{{ sel.stBg }};padding:4px 11px;border-radius:8px;">{{ sel.status }}</span></div><div style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;color:#64748B;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="#94A3B8" stroke-width="2"/><circle cx="12" cy="10" r="2.6" stroke="#94A3B8" stroke-width="2"/></svg>{{ sel.loc }} · Joined {{ sel.joined }}</div></div>
+                <div style="display:flex;gap:9px;"><button style="border:1px solid #E2E8F0;background:#fff;border-radius:11px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;color:#334155;cursor:pointer;">View as Clinic</button><button style="border:1px solid #FBE0E0;background:#fff;border-radius:11px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;color:#DC2626;cursor:pointer;">Suspend</button></div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;">
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="font-size:12px;color:#64748B;font-weight:600;">Doctors</div><div style="font-size:24px;font-weight:800;color:#0F172A;">{{ sel.doctors }}</div></div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="font-size:12px;color:#64748B;font-weight:600;">Patients</div><div style="font-size:24px;font-weight:800;color:#0F172A;">{{ sel.patients }}</div></div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="font-size:12px;color:#64748B;font-weight:600;">Appointments Today</div><div style="font-size:24px;font-weight:800;color:#0F172A;">48</div></div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:16px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="font-size:12px;color:#64748B;font-weight:600;">Active Queue</div><div style="font-size:24px;font-weight:800;color:#0F172A;">7</div></div>
+              </div>
+              <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:18px;">
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+                  <h3 style="margin:0 0 12px;font-size:16px;font-weight:800;color:#0F172A;">Doctors at this clinic</h3>
+                  <div style="display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid #F1F5F9;"><div style="width:34px;height:34px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Dr. Lim Wei Sheng</div><div style="font-size:11px;color:#94A3B8;">Family Medicine</div></div><span style="font-size:11px;font-weight:700;color:#16A34A;background:#E6F8EE;padding:3px 9px;border-radius:7px;">Active</span></div>
+                  <div style="display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid #F1F5F9;"><div style="width:34px;height:34px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Dr. Lee Chee Kiat</div><div style="font-size:11px;color:#94A3B8;">Orthopaedics</div></div><span style="font-size:11px;font-weight:700;color:#16A34A;background:#E6F8EE;padding:3px 9px;border-radius:7px;">Active</span></div>
+                  <div style="display:flex;align-items:center;gap:11px;padding:9px 0;"><div style="width:34px;height:34px;border-radius:50%;background:#EEF2F6;flex:none;"></div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Dr. Sarah Abdullah</div><div style="font-size:11px;color:#94A3B8;">Dermatology</div></div><span style="font-size:11px;font-weight:700;color:#B45309;background:#FEF3E2;padding:3px 9px;border-radius:7px;">On Leave</span></div>
+                  <button style="width:100%;border:none;background:none;color:#2563EB;font-family:inherit;font-size:13px;font-weight:700;padding:11px 0 0;cursor:pointer;border-top:1px solid #F1F5F9;margin-top:8px;">View all {{ sel.doctors }} doctors</button>
+                </div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+                  <h3 style="margin:0 0 12px;font-size:16px;font-weight:800;color:#0F172A;">Clinic Admins</h3>
+                  <div style="display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid #F1F5F9;"><div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#22C55E);flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;">AT</div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Dr. Alice Tan</div><div style="font-size:11px;color:#94A3B8;">alice.tan@kpj.com.my</div></div></div>
+                  <div style="display:flex;align-items:center;gap:11px;padding:9px 0;"><div style="width:38px;height:38px;border-radius:50%;background:#EEF2F6;flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#64748B;">RH</div><div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0F172A;">Razif Hamid</div><div style="font-size:11px;color:#94A3B8;">razif.h@kpj.com.my</div></div></div>
+                  <div style="background:#F1F5F9;border-radius:11px;padding:11px 12px;margin-top:12px;display:flex;align-items:center;gap:9px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex:none;"><circle cx="12" cy="12" r="10" stroke="#64748B" stroke-width="2"/><path d="M12 16v-4M12 8h.01" stroke="#64748B" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:12px;color:#64748B;line-height:1.4;">Read-only from the platform console. Clinic admins manage their own staff.</span></div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ showDoctors }}" hint-placeholder-val="{{ true }}">
+              <div style="margin-bottom:20px;"><h1 style="margin:0;font-size:28px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Doctors</h1><p style="margin:5px 0 0;font-size:14px;color:#64748B;">1,284 doctors across 142 clinics</p></div>
+              <div style="display:flex;align-items:center;gap:11px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:9px;flex:1;max-width:340px;background:#fff;border:1px solid #EEF2F6;border-radius:11px;height:42px;padding:0 14px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#94A3B8" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:13px;color:#94A3B8;">Search doctor name…</span></div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:11px 14px;font-size:13px;font-weight:700;color:#334155;">Clinic: All ▾</div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:11px 14px;font-size:13px;font-weight:700;color:#334155;">Specialization: All ▾</div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:11px 14px;font-size:13px;font-weight:700;color:#334155;">Status: All ▾</div>
+              </div>
+              <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+                <div style="display:grid;grid-template-columns:1.6fr 1.8fr 1.2fr 1fr 90px;padding:13px 20px;background:#F8FAFC;border-bottom:1px solid #EEF2F6;font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.04em;"><span>Doctor</span><span>Clinic</span><span>Specialization</span><span>Status</span><span>Rating</span></div>
+                <sc-for list="{{ doctors }}" as="d" hint-placeholder-count="8">
+                  <div style="display:grid;grid-template-columns:1.6fr 1.8fr 1.2fr 1fr 90px;align-items:center;padding:13px 20px;border-bottom:1px solid #F1F5F9;" style-hover="background:#F8FAFC">
+                    <div style="display:flex;align-items:center;gap:11px;"><div style="width:36px;height:36px;border-radius:50%;background:#EEF2F6;flex:none;"></div><span style="font-size:14px;font-weight:700;color:#0F172A;">{{ d.name }}</span></div>
+                    <span style="font-size:13px;color:#475569;font-weight:600;">{{ d.clinic }}</span>
+                    <span style="justify-self:start;font-size:12px;font-weight:700;color:{{ d.specC }};background:{{ d.specBg }};padding:4px 11px;border-radius:8px;">{{ d.spec }}</span>
+                    <span style="justify-self:start;font-size:12px;font-weight:700;color:{{ d.stC }};background:{{ d.stBg }};padding:4px 11px;border-radius:8px;">{{ d.status }}</span>
+                    <div style="display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#FBBF24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><span style="font-size:13px;font-weight:700;color:#0F172A;">{{ d.rating }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:16px;font-size:13px;color:#94A3B8;">Showing 8 of 1,284 doctors</div>
+            </sc-if>
+
+            <sc-if value="{{ showPatients }}" hint-placeholder-val="{{ true }}">
+              <div style="margin-bottom:18px;"><h1 style="margin:0;font-size:28px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Patients</h1><p style="margin:5px 0 0;font-size:14px;color:#64748B;">86,420 patients registered platform-wide</p></div>
+              <div style="background:#FFF7ED;border:1px solid #FBE3C2;border-radius:14px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;gap:11px;">
+                <div style="width:36px;height:36px;border-radius:10px;background:#FEF0DC;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#B45309" stroke-width="2" stroke-linejoin="round"/><path d="M9 11l2 2 4-4" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div style="flex:1;"><div style="font-size:13px;font-weight:800;color:#92400E;">Protected personal data — access is logged &amp; audited</div><div style="font-size:12px;color:#B45309;line-height:1.4;">Search for a specific patient rather than browsing. Every record you open is recorded against your operator account.</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:9px;flex:1;background:#fff;border:1.5px solid #BFD4FB;border-radius:11px;height:46px;padding:0 14px;box-shadow:0 0 0 4px rgba(37,99,235,.06);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#2563EB" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="#2563EB" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:14px;color:#94A3B8;">Search by name, phone or patient ID…</span></div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:11px;padding:12px 14px;font-size:13px;font-weight:700;color:#334155;">Clinic used: All ▾</div>
+              </div>
+              <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+                <div style="display:grid;grid-template-columns:2fr 1.4fr 1fr 1fr 90px;padding:13px 20px;background:#F8FAFC;border-bottom:1px solid #EEF2F6;font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.04em;"><span>Patient</span><span>Phone</span><span>Appointments</span><span>Clinics</span><span></span></div>
+                <sc-for list="{{ patients }}" as="p" hint-placeholder-count="7">
+                  <div style="display:grid;grid-template-columns:2fr 1.4fr 1fr 1fr 90px;align-items:center;padding:13px 20px;border-bottom:1px solid #F1F5F9;" style-hover="background:#F8FAFC">
+                    <div style="display:flex;align-items:center;gap:11px;"><div style="width:36px;height:36px;border-radius:50%;background:#F3EEFE;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#7C3AED;">{{ p.init }}</div><span style="font-size:14px;font-weight:700;color:#0F172A;">{{ p.name }}</span></div>
+                    <span class="mono" style="font-family:ui-monospace,monospace;font-size:13px;color:#475569;">{{ p.phone }}</span>
+                    <span style="font-size:14px;font-weight:700;color:#0F172A;">{{ p.appts }}</span>
+                    <span style="font-size:14px;font-weight:700;color:#0F172A;">{{ p.clinics }}</span>
+                    <span style="justify-self:end;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#2563EB;">View <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#2563EB" stroke-width="2"/></svg></span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:16px;font-size:13px;color:#94A3B8;">Showing 7 matching patients · refine your search to narrow results</div>
+            </sc-if>
+
+<sc-if value="{{ showOnboard }}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{ stepDone }}" hint-placeholder-val="{{ true }}">
+                <div style="max-width:560px;margin:30px auto 0;text-align:center;">
+                  <div style="width:78px;height:78px;border-radius:50%;background:#16A34A;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;box-shadow:0 14px 30px -10px rgba(22,163,74,.6);"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <h1 style="margin:0;font-size:26px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Clinic onboarded successfully</h1>
+                  <p style="margin:10px 0 26px;font-size:14px;color:#64748B;line-height:1.6;"><strong style="color:#0F172A;">Gleneagles Penang</strong> is now active on the platform. An invitation has been sent to the Clinic Admin to set up their account.</p>
+                  <div style="background:#fff;border:1px solid #EEF2F6;border-radius:16px;padding:18px;text-align:left;box-shadow:0 1px 3px rgba(15,23,42,.04);margin-bottom:24px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:13px;color:#64748B;">Clinic</span><span style="font-size:13px;font-weight:700;color:#0F172A;">Gleneagles Penang</span></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:13px;color:#64748B;">Location</span><span style="font-size:13px;font-weight:700;color:#0F172A;">George Town, Penang</span></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F5F9;"><span style="font-size:13px;color:#64748B;">Clinic Admin</span><span style="font-size:13px;font-weight:700;color:#0F172A;">Dr. Imran Hashim · invited</span></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;"><span style="font-size:13px;color:#64748B;">Status</span><span style="font-size:12px;font-weight:700;color:#16A34A;background:#E6F8EE;padding:4px 11px;border-radius:8px;">Active</span></div>
+                  </div>
+                  <div style="display:flex;gap:11px;justify-content:center;"><button onClick="{{ goClinics }}" style="border:1px solid #E2E8F0;background:#fff;color:#334155;font-family:inherit;font-size:14px;font-weight:700;padding:12px 22px;border-radius:12px;cursor:pointer;">View All Clinics</button><button onClick="{{ restartOnboard }}" style="border:none;background:#1D4ED8;color:#fff;font-family:inherit;font-size:14px;font-weight:700;padding:12px 22px;border-radius:12px;cursor:pointer;box-shadow:0 8px 16px -8px rgba(29,78,216,.6);">Onboard Another</button></div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ stepForm }}" hint-placeholder-val="{{ true }}">
+                <div style="margin-bottom:8px;"><h1 style="margin:0;font-size:28px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Onboard New Clinic</h1><p style="margin:5px 0 0;font-size:14px;color:#64748B;">Create a new tenant and invite its first Clinic Admin</p></div>
+                <div style="max-width:680px;margin:0 auto;">
+                  <div style="display:flex;align-items:center;margin:18px 0 24px;">
+                    <div style="display:flex;flex-direction:column;align-items:center;flex:none;width:120px;"><div style="width:34px;height:34px;border-radius:50%;background:{{ s1DotB }};border:2px solid {{ s1DotBorder }};display:flex;align-items:center;justify-content:center;color:{{ s1DotC }};font-size:14px;font-weight:800;">{{ s1DotLabel }}</div><div style="font-size:11px;font-weight:700;color:#475569;margin-top:6px;text-align:center;">Clinic Details</div></div>
+                    <div style="flex:1;height:2px;background:{{ s1Bar }};margin:0 -10px 18px;"></div>
+                    <div style="display:flex;flex-direction:column;align-items:center;flex:none;width:120px;"><div style="width:34px;height:34px;border-radius:50%;background:{{ s2DotB }};border:2px solid {{ s2DotBorder }};display:flex;align-items:center;justify-content:center;color:{{ s2DotC }};font-size:14px;font-weight:800;">{{ s2DotLabel }}</div><div style="font-size:11px;font-weight:700;color:#475569;margin-top:6px;text-align:center;">Clinic Admin</div></div>
+                    <div style="flex:1;height:2px;background:{{ s2Bar }};margin:0 -10px 18px;"></div>
+                    <div style="display:flex;flex-direction:column;align-items:center;flex:none;width:120px;"><div style="width:34px;height:34px;border-radius:50%;background:{{ s3DotB }};border:2px solid {{ s3DotBorder }};display:flex;align-items:center;justify-content:center;color:{{ s3DotC }};font-size:14px;font-weight:800;">3</div><div style="font-size:11px;font-weight:700;color:#475569;margin-top:6px;text-align:center;">Review &amp; Confirm</div></div>
+                  </div>
+
+                  <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:24px;box-shadow:0 1px 3px rgba(15,23,42,.04);">
+                    <sc-if value="{{ stepClinic }}" hint-placeholder-val="{{ true }}">
+                      <h3 style="margin:0 0 18px;font-size:17px;font-weight:800;color:#0F172A;">Clinic Details</h3>
+                      <label style="font-size:13px;font-weight:700;color:#0F172A;">Clinic Name</label>
+                      <div style="margin:8px 0 16px;display:flex;align-items:center;border:1.5px solid #E2E8F0;border-radius:12px;height:48px;padding:0 14px;"><span style="font-size:14px;color:#0F172A;">Gleneagles Penang</span></div>
+                      <label style="font-size:13px;font-weight:700;color:#0F172A;">Address</label>
+                      <div style="margin:8px 0 16px;display:flex;align-items:center;border:1.5px solid #E2E8F0;border-radius:12px;height:48px;padding:0 14px;"><span style="font-size:14px;color:#0F172A;">1 Jalan Pangkor, 10050 George Town</span></div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+                        <div><label style="font-size:13px;font-weight:700;color:#0F172A;">State</label><div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;border:1.5px solid #E2E8F0;border-radius:12px;height:48px;padding:0 14px;"><span style="font-size:14px;color:#0F172A;">Penang</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/></svg></div></div>
+                        <div><label style="font-size:13px;font-weight:700;color:#0F172A;">Clinic Type</label><div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;border:1.5px solid #E2E8F0;border-radius:12px;height:48px;padding:0 14px;"><span style="font-size:14px;color:#0F172A;">Specialist Hospital</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/></svg></div></div>
+                      </div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+                        <div><label style="font-size:13px;font-weight:700;color:#0F172A;">Contact Phone</label><div style="margin-top:8px;display:flex;align-items:center;border:1.5px solid #E2E8F0;border-radius:12px;height:48px;padding:0 14px;"><span style="font-size:14px;color:#0F172A;">+60 4-222 9333</span></div></div>
+                        <div><label style="font-size:13px;font-weight:700;color:#0F172A;">Clinic Email</label><div style="margin-top:8px;display:flex;align-items:center;border:1.5px solid #E2E8F0;border-radius:12px;height:48px;padding:0 14px;"><span style="font-size:14px;color:#0F172A;">admin@gleneagles-pg.my</span></div></div>
+                      </div>
+                      <label style="font-size:13px;font-weight:700;color:#0F172A;">Operating Hours</label>
+                      <div style="margin:8px 0 4px;display:flex;align-items:center;border:1.5px solid #E2E8F0;border-radius:12px;height:48px;padding:0 14px;justify-content:space-between;"><span style="font-size:14px;color:#0F172A;">Mon–Sun · 8:00 AM – 10:00 PM</span><span style="font-size:12px;font-weight:700;color:#2563EB;">Edit per day</span></div>
+                    </sc-if>
+                    <sc-if value="{{ stepAdmin }}" hint-placeholder-val="{{ true }}">
+                      <h3 style="margin:0 0 6px;font-size:17px;font-weight:800;color:#0F172A;">First Clinic Admin</h3>
+                      <p style="margin:0 0 18px;font-size:13px;color:#64748B;">This person will receive an invite to set up the clinic and manage its staff.</p>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+                        <div><label style="font-size:13px;font-weight:700;color:#0F172A;">Full Name</label><div style="margin-top:8px;display:flex;align-items:center;border:1.5px solid #E2E8F0;border-radius:12px;height:48px;padding:0 14px;"><span style="font-size:14px;color:#0F172A;">Dr. Imran Hashim</span></div></div>
+                        <div><label style="font-size:13px;font-weight:700;color:#0F172A;">Role</label><div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;border:1.5px solid #E2E8F0;border-radius:12px;height:48px;padding:0 14px;"><span style="font-size:14px;color:#0F172A;">Clinic Admin</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/></svg></div></div>
+                      </div>
+                      <label style="font-size:13px;font-weight:700;color:#0F172A;">Email</label>
+                      <div style="margin:8px 0 16px;display:flex;align-items:center;border:1.5px solid #E2E8F0;border-radius:12px;height:48px;padding:0 14px;"><span style="font-size:14px;color:#0F172A;">imran.hashim@gleneagles-pg.my</span></div>
+                      <label style="font-size:13px;font-weight:700;color:#0F172A;">Mobile Number</label>
+                      <div style="margin:8px 0 16px;display:flex;align-items:center;border:1.5px solid #E2E8F0;border-radius:12px;height:48px;padding:0 14px;gap:9px;"><span style="font-size:15px;">🇲🇾</span><span style="font-size:14px;font-weight:700;color:#0F172A;">+60</span><div style="width:1px;height:22px;background:#E2E8F0;"></div><span style="font-size:14px;color:#0F172A;">12-987 6543</span></div>
+                      <label style="display:flex;align-items:center;gap:9px;font-size:13px;color:#475569;cursor:pointer;"><span style="width:18px;height:18px;border-radius:5px;background:#1D4ED8;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Send invitation email immediately</label>
+                    </sc-if>
+                    <sc-if value="{{ stepReview }}" hint-placeholder-val="{{ true }}">
+                      <h3 style="margin:0 0 18px;font-size:17px;font-weight:800;color:#0F172A;">Review &amp; Confirm</h3>
+                      <div style="background:#F8FAFC;border-radius:13px;padding:16px;margin-bottom:14px;">
+                        <div style="font-size:12px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Clinic</div>
+                        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;"><span style="color:#64748B;">Name</span><span style="font-weight:700;color:#0F172A;">Gleneagles Penang</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;"><span style="color:#64748B;">Address</span><span style="font-weight:700;color:#0F172A;">1 Jalan Pangkor, George Town</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;"><span style="color:#64748B;">Type · Hours</span><span style="font-weight:700;color:#0F172A;">Specialist · 8AM–10PM</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;"><span style="color:#64748B;">Contact</span><span style="font-weight:700;color:#0F172A;">+60 4-222 9333</span></div>
+                      </div>
+                      <div style="background:#F8FAFC;border-radius:13px;padding:16px;margin-bottom:16px;">
+                        <div style="font-size:12px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Clinic Admin</div>
+                        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;"><span style="color:#64748B;">Name</span><span style="font-weight:700;color:#0F172A;">Dr. Imran Hashim</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;"><span style="color:#64748B;">Email</span><span style="font-weight:700;color:#0F172A;">imran.hashim@gleneagles-pg.my</span></div>
+                        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;"><span style="color:#64748B;">Mobile</span><span style="font-weight:700;color:#0F172A;">+60 12-987 6543</span></div>
+                      </div>
+                      <div style="background:#EFF4FF;border-radius:12px;padding:13px 14px;display:flex;align-items:center;gap:10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:none;"><circle cx="12" cy="12" r="10" stroke="#2563EB" stroke-width="2"/><path d="M12 16v-4M12 8h.01" stroke="#2563EB" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:12px;color:#1E40AF;line-height:1.45;">On confirm, the clinic becomes active and the admin is invited by email. This action is logged.</span></div>
+                    </sc-if>
+                    <div style="display:flex;gap:11px;margin-top:22px;">
+                      <sc-if value="{{ s1Done }}" hint-placeholder-val="{{ true }}"><button onClick="{{ prevStep }}" style="border:1px solid #E2E8F0;background:#fff;color:#334155;font-family:inherit;font-size:14px;font-weight:700;padding:12px 22px;border-radius:12px;cursor:pointer;">Back</button></sc-if>
+                      <sc-if value="{{ stepReview }}" hint-placeholder-val="{{ true }}"><button onClick="{{ nextStep }}" style="margin-left:auto;border:none;background:#16A34A;color:#fff;font-family:inherit;font-size:14px;font-weight:700;padding:12px 26px;border-radius:12px;cursor:pointer;box-shadow:0 8px 16px -8px rgba(22,163,74,.6);">Confirm &amp; Onboard Clinic</button></sc-if>
+                      <sc-if value="{{ stepBeforeReview }}" hint-placeholder-val="{{ true }}"><button onClick="{{ nextStep }}" style="margin-left:auto;border:none;background:#1D4ED8;color:#fff;font-family:inherit;font-size:14px;font-weight:700;padding:12px 26px;border-radius:12px;cursor:pointer;box-shadow:0 8px 16px -8px rgba(29,78,216,.6);">Continue</button></sc-if>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+            </sc-if>
+
+            <sc-if value="{{ showSettings }}" hint-placeholder-val="{{ true }}">
+              <div style="margin-bottom:20px;"><h1 style="margin:0;font-size:28px;font-weight:800;color:#0F172A;letter-spacing:-.02em;">Platform Settings</h1><p style="margin:5px 0 0;font-size:14px;color:#64748B;">Operator account, access control, and platform configuration</p></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:880px;">
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="width:36px;height:36px;border-radius:10px;background:#EEF1FF;display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#4F46E5" stroke-width="2"/><path d="M5 20a7 7 0 0114 0" stroke="#4F46E5" stroke-width="2"/></svg></div><h3 style="margin:0;font-size:16px;font-weight:800;color:#0F172A;">Operator Profile</h3></div><div style="font-size:13px;color:#64748B;line-height:1.7;">Sarah Chen · Platform Operator<br/>sarah.chen@careflow.io<br/>Role: Super Admin</div></div>
+                <div style="background:#fff;border:1px solid #EEF2F6;border-radius:18px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.04);"><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="width:36px;height:36px;border-radius:10px;background:#E6F8EE;display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#16A34A" stroke-width="2" stroke-linejoin="round"/></svg></div><h3 style="margin:0;font-size:16px;font-weight:800;color:#0F172A;">Security &amp; Audit</h3></div><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;font-size:13px;"><span style="color:#475569;">Two-factor authentication</span><span style="font-weight:700;color:#16A34A;">Enabled</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;font-size:13px;border-top:1px solid #F1F5F9;"><span style="color:#475569;">Audit logging</span><span style="font-weight:700;color:#16A34A;">Always on</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;font-size:13px;border-top:1px solid #F1F5F9;"><span style="color:#475569;">Session timeout</span><span style="font-weight:700;color:#0F172A;">30 min</span></div></div>
+              </div>
+            </sc-if>
+        </div>
+      </main>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:920}}">
+class Component extends DCLogic {
+  state = { screen:'login', view:'overview', ps:'default', step:1, selectedClinic:0 };
+  go(view){ this.setState({ view, ps:'default', step:1 }); }
+  setPs(ps){ this.setState({ ps }); }
+  openClinic(i){ this.setState({ view:'clinicDetail', ps:'default', selectedClinic:i }); }
+  nextStep(){ this.setState(s=>({ step:Math.min(s.step+1,4) })); }
+  prevStep(){ this.setState(s=>({ step:Math.max(s.step-1,1) })); }
+  restartOnboard(){ this.setState({ step:1 }); }
+  renderVals(){
+    const v=this.state.view, ps=this.state.ps;
+    const onB='rgba(99,102,241,.18)', onC='#fff', onBar='#818CF8', offC='#94A3C2', offBar='transparent';
+    const dataView=['overview','clinics','clinicDetail','doctors','patients'].includes(v);
+    const stateLoading=dataView&&ps==='loading';
+    const stateError=dataView&&ps==='error';
+    const stateEmpty=dataView&&ps==='empty';
+    const stateDefault=!stateLoading&&!stateError&&!stateEmpty;
+    const labels={overview:'platform data',clinics:'clinics',clinicDetail:'clinic',doctors:'doctors',patients:'patients'};
+    const emptyTexts={
+      overview:'No platform metrics are available yet. Onboard your first clinic to start seeing network activity.',
+      clinics:'No clinics are on the platform yet. Onboard the first clinic to get started.',
+      clinicDetail:'This clinic has no data to display yet.',
+      doctors:'No doctors have been added by any clinic yet.',
+      patients:'No patients have registered across the platform yet.'
+    };
+    const psBtn=(k)=>({ B: ps===k?'#1A2342':'transparent', C: ps===k?'#fff':'#64748B' });
+    const pd=psBtn('default'), pl=psBtn('loading'), pe=psBtn('empty'), per=psBtn('error');
+    const clinics=[
+      {name:'KPJ Damansara Specialist Clinic',loc:'Petaling Jaya, Selangor',doctors:14,patients:'8,420',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',joined:'12 Jan 2023',init:'KD',ig:'#EFF4FB'},
+      {name:'Sunway Medical Centre',loc:'Sunway, Selangor',doctors:22,patients:'12,180',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',joined:'03 Mar 2023',init:'SM',ig:'#EAF0FB'},
+      {name:'Gleneagles Penang',loc:'George Town, Penang',doctors:9,patients:'3,240',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',joined:'20 May 2025',init:'GP',ig:'#EAF7EF'},
+      {name:'KL Dental Care',loc:'Mont Kiara, Kuala Lumpur',doctors:6,patients:'2,910',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',joined:'18 Jun 2023',init:'KD',ig:'#F3EEFE'},
+      {name:'Kids Health Clinic',loc:'Bangsar, Kuala Lumpur',doctors:5,patients:'4,060',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',joined:'29 Aug 2023',init:'KH',ig:'#F3EEFE'},
+      {name:'Klinik Mediviron Cheras',loc:'Cheras, Kuala Lumpur',doctors:4,patients:'1,870',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',joined:'11 Oct 2023',init:'MC',ig:'#EFF4FB'},
+      {name:'Sunway Medical — Klang',loc:'Klang, Selangor',doctors:11,patients:'5,520',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',joined:'07 Feb 2024',init:'SK',ig:'#EAF0FB'},
+      {name:'KPJ Tawakkal',loc:'Titiwangsa, Kuala Lumpur',doctors:0,patients:'2,140',status:'Suspended',stBg:'#FEF2F2',stC:'#DC2626',joined:'22 Nov 2022',init:'KT',ig:'#FBECEC'},
+      {name:'Poliklinik Sentosa JB',loc:'Johor Bahru, Johor',doctors:1,patients:'980',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',joined:'14 Apr 2024',init:'PS',ig:'#EFF4FB'}
+    ];
+    const doctors=[
+      {name:'Dr. Lim Wei Sheng',clinic:'KPJ Damansara Specialist Clinic',spec:'Family Medicine',specBg:'#EFF4FF',specC:'#2563EB',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',rating:'4.9'},
+      {name:'Dr. Nurul Aishah',clinic:'Kids Health Clinic',spec:'Paediatrics',specBg:'#F3EEFE',specC:'#7C3AED',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',rating:'4.8'},
+      {name:'Dr. Tan Jian Hong',clinic:'Sunway Medical Centre',spec:'Family Medicine',specBg:'#EFF4FF',specC:'#2563EB',status:'On Leave',stBg:'#FEF3E2',stC:'#B45309',rating:'4.7'},
+      {name:'Dr. Lee Chee Kiat',clinic:'KPJ Damansara Specialist Clinic',spec:'Orthopaedics',specBg:'#EAF7EF',specC:'#16A34A',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',rating:'4.6'},
+      {name:'Dr. Priya Subramaniam',clinic:'Gleneagles Penang',spec:'Cardiology',specBg:'#FEF2F2',specC:'#DC2626',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',rating:'4.9'},
+      {name:'Dr. Wong Mei Yee',clinic:'KL Dental Care',spec:'Dental',specBg:'#EFF1FF',specC:'#4F46E5',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',rating:'4.8'},
+      {name:'Dr. Ahmad Faisal',clinic:'Sunway Medical — Klang',spec:'Family Medicine',specBg:'#EFF4FF',specC:'#2563EB',status:'Active',stBg:'#E6F8EE',stC:'#16A34A',rating:'4.5'},
+      {name:'Dr. Chong Ka Wai',clinic:'Sunway Medical Centre',spec:'Dermatology',specBg:'#FEF3E2',specC:'#B45309',status:'Inactive',stBg:'#F1F5F9',stC:'#64748B',rating:'4.4'}
+    ];
+    const patients=[
+      {name:'Aiman Hakim',phone:'+60 12-•••• 6789',appts:14,clinics:3,init:'AH'},
+      {name:'Siti Nur Aisyah',phone:'+60 13-•••• 2231',appts:9,clinics:2,init:'SA'},
+      {name:'Jason Wong',phone:'+60 16-•••• 4521',appts:6,clinics:1,init:'JW'},
+      {name:'Lim Mei Ling',phone:'+60 12-•••• 1198',appts:22,clinics:4,init:'LM'},
+      {name:'Muhammad Iqbal',phone:'+60 19-•••• 7744',appts:3,clinics:1,init:'MI'},
+      {name:'Priya Nair',phone:'+60 11-•••• 9090',appts:18,clinics:3,init:'PN'},
+      {name:'David Tan',phone:'+60 17-•••• 3320',appts:7,clinics:2,init:'DT'}
+    ];
+    clinics.forEach((c,i)=>{ c.onOpen=()=>this.openClinic(i); });
+    const sel=clinics[this.state.selectedClinic]||clinics[0];
+    const step=this.state.step;
+    return {
+      screenLogin:this.state.screen==='login', screenApp:this.state.screen==='app',
+      doLogin:()=>this.setState({ screen:'app' }),
+      goOverview:()=>this.go('overview'), goClinics:()=>this.go('clinics'), goDoctors:()=>this.go('doctors'),
+      goPatients:()=>this.go('patients'), goOnboard:()=>this.go('onboard'), goSettings:()=>this.go('settings'),
+      navOverviewB:v==='overview'?onB:'transparent', navOverviewC:v==='overview'?onC:offC, navOverviewBar:v==='overview'?onBar:offBar,
+      navClinicsB:(v==='clinics'||v==='clinicDetail')?onB:'transparent', navClinicsC:(v==='clinics'||v==='clinicDetail')?onC:offC, navClinicsBar:(v==='clinics'||v==='clinicDetail')?onBar:offBar,
+      navDoctorsB:v==='doctors'?onB:'transparent', navDoctorsC:v==='doctors'?onC:offC, navDoctorsBar:v==='doctors'?onBar:offBar,
+      navPatientsB:v==='patients'?onB:'transparent', navPatientsC:v==='patients'?onC:offC, navPatientsBar:v==='patients'?onBar:offBar,
+      navOnboardB:v==='onboard'?onB:'transparent', navOnboardC:v==='onboard'?onC:offC, navOnboardBar:v==='onboard'?onBar:offBar,
+      navSettingsB:v==='settings'?onB:'transparent', navSettingsC:v==='settings'?onC:offC, navSettingsBar:v==='settings'?onBar:offBar,
+      stDefault:()=>this.setPs('default'), stLoading:()=>this.setPs('loading'), stEmpty:()=>this.setPs('empty'), stError:()=>this.setPs('error'),
+      psDefaultB:pd.B, psDefaultC:pd.C, psLoadingB:pl.B, psLoadingC:pl.C, psEmptyB:pe.B, psEmptyC:pe.C, psErrorB:per.B, psErrorC:per.C,
+      stateLoading, stateError, stateEmpty, stateDefault,
+      isOverview:v==='overview', isTableView:['clinics','doctors','patients'].includes(v),
+      viewLabel:labels[v]||'data', emptyText:emptyTexts[v]||'Nothing to show yet.',
+      showOverview:v==='overview'&&stateDefault, showClinics:v==='clinics'&&stateDefault, showClinicDetail:v==='clinicDetail'&&stateDefault,
+      showDoctors:v==='doctors'&&stateDefault, showPatients:v==='patients'&&stateDefault, showOnboard:v==='onboard'&&stateDefault, showSettings:v==='settings'&&stateDefault,
+      skeletonRows:[1,2,3,4,5,6,7,8],
+      step,
+      stepClinic:step===1, stepAdmin:step===2, stepReview:step===3, stepDone:step===4, stepForm:step<4,
+      s1Done:step>1, s2Done:step>2, s3Done:step>3, stepBeforeReview:step===1||step===2,
+      s1DotB:step>1?'#16A34A':'#1D4ED8', s1DotBorder:'transparent', s1DotC:'#fff',
+      s1DotLabel:step>1?'✓':'1', s2DotLabel:step>2?'✓':'2',
+      s1Bar:step>1?'#16A34A':(step===1?'#1D4ED8':'#E2E8F0'),
+      s2Bar:step>2?'#16A34A':(step===2?'#1D4ED8':'#E2E8F0'),
+      s2DotB:step>=2?(step>2?'#16A34A':'#1D4ED8'):'#fff', s2DotBorder:step>=2?'transparent':'#CBD5E1', s2DotC:step>=2?'#fff':'#94A3B8',
+      s3DotB:step>=3?(step>3?'#16A34A':'#1D4ED8'):'#fff', s3DotBorder:step>=3?'transparent':'#CBD5E1', s3DotC:step>=3?'#fff':'#94A3B8',
+      nextStep:()=>this.nextStep(), prevStep:()=>this.prevStep(), restartOnboard:()=>this.restartOnboard(),
+      clinics, doctors, patients, sel,
+      openClinic0:()=>this.openClinic(0)
+    };
+  }
+}
+</script>
+</body>
+</html>

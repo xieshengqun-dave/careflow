@@ -33,10 +33,10 @@ function AppointmentRow({ appt }: { appt: ClinicAppointment }) {
 
   return (
     <tr className={`border-b last:border-0 transition-opacity ${isPending ? "opacity-50" : ""}`}>
-      <td className="px-4 py-3 text-sm font-medium text-slate-700 whitespace-nowrap">{formatTime(appt.startTime)}</td>
+      <td className="px-4 py-3 text-sm font-bold text-slate-700 whitespace-nowrap">{formatTime(appt.startTime)}</td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-full bg-cf-primary-50 text-cf-primary-700 flex items-center justify-center text-xs font-semibold shrink-0">
+          <div className="h-8 w-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-semibold shrink-0">
             {initials(appt.patientName)}
           </div>
           <div className="min-w-0">
@@ -45,10 +45,10 @@ function AppointmentRow({ appt }: { appt: ClinicAppointment }) {
           </div>
         </div>
       </td>
-      <td className="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">{appt.doctorName}</td>
+      <td className="px-4 py-3 text-sm font-semibold text-slate-600 whitespace-nowrap">{appt.doctorName}</td>
       <td className="px-4 py-3 text-sm text-slate-400 whitespace-nowrap">Appointment</td>
       <td className="px-4 py-3">
-        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${s.bg} ${s.text}`}>
+        <span className={`text-xs font-semibold px-[11px] py-1 rounded-md ${s.bg} ${s.text}`}>
           {s.label}
         </span>
       </td>
@@ -114,7 +114,7 @@ export function AppointmentList({ appointments }: { appointments: ClinicAppointm
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   return (
-    <div className="bg-white rounded-xl border overflow-hidden shadow-sm">
+    <div className="bg-white rounded-[18px] border overflow-hidden shadow-sm">
       <div className="flex flex-wrap items-center gap-2 p-3 border-b bg-slate-50/50">
         <Select value={doctorFilter} onValueChange={setDoctorFilter}>
           <SelectTrigger className="w-[160px] h-8 text-xs"><SelectValue placeholder="All Doctors" /></SelectTrigger>
@@ -132,12 +132,15 @@ export function AppointmentList({ appointments }: { appointments: ClinicAppointm
             ))}
           </SelectContent>
         </Select>
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search patient…"
-          className="h-8 text-xs w-[200px] ml-auto"
-        />
+        <div className="relative ml-auto">
+          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search patient…"
+            className="h-8 text-xs w-[180px] pl-7"
+          />
+        </div>
       </div>
 
       {filtered.length === 0 ? (
@@ -147,13 +150,13 @@ export function AppointmentList({ appointments }: { appointments: ClinicAppointm
       ) : (
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs text-muted-foreground border-b">
-              <th className="px-4 py-2 font-medium">Time</th>
-              <th className="px-4 py-2 font-medium">Patient</th>
-              <th className="px-4 py-2 font-medium">Doctor</th>
-              <th className="px-4 py-2 font-medium">Type</th>
-              <th className="px-4 py-2 font-medium">Status</th>
-              <th className="px-4 py-2 font-medium text-right">Actions</th>
+            <tr className="text-left text-xs text-slate-500 border-b bg-[#F8FAFC]">
+              <th className="px-4 py-2.5 font-bold uppercase tracking-wide">Time</th>
+              <th className="px-4 py-2.5 font-bold uppercase tracking-wide">Patient</th>
+              <th className="px-4 py-2.5 font-bold uppercase tracking-wide">Doctor</th>
+              <th className="px-4 py-2.5 font-bold uppercase tracking-wide">Type</th>
+              <th className="px-4 py-2.5 font-bold uppercase tracking-wide">Status</th>
+              <th className="px-4 py-2.5 font-bold uppercase tracking-wide text-right">Actions</th>
             </tr>
           </thead>
           <tbody>

@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { Plus } from "lucide-react";
-import { getMYTToday, formatMYTDate } from "@careflow/shared";
+import { getMYTToday } from "@careflow/shared";
 import { requireRole } from "@/lib/auth";
 import { getDoctorSlotsForDate } from "@/lib/queries/slots";
 import { getClinicAppointments } from "@/lib/queries/appointments";
 import { ScheduleBoard } from "@/components/scheduling/ScheduleBoard";
 import { AppointmentList } from "@/components/scheduling/AppointmentList";
+import { DateNav } from "@/components/scheduling/DateNav";
 import { Button } from "@/components/ui/button";
 
 export default async function AppointmentsPage({
@@ -19,8 +19,7 @@ export default async function AppointmentsPage({
 
   const { date, view } = await searchParams;
   const selectedDate = date ?? getMYTToday();
-  const activeView = view === "list" ? "list" : "slots";
-  const dateLabel = formatMYTDate(selectedDate, "EEEE, d MMMM yyyy");
+  const activeView = view === "slots" ? "slots" : "list";
 
   const [doctors, appointments] = await Promise.all([
     getDoctorSlotsForDate(user.clinicId ?? "", selectedDate),
@@ -28,43 +27,55 @@ export default async function AppointmentsPage({
   ]);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-5">
+      {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold">Appointments</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {dateLabel} · {appointments.length} appointment{appointments.length !== 1 ? "s" : ""}
+            Manage and track all clinic appointments
           </p>
         </div>
-        <div className="flex gap-2">
-          <a
-            href={`/appointments?date=${selectedDate}&view=slots`}
-            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${
-              activeView === "slots"
-                ? "bg-cf-primary-700 text-white border-cf-primary-700"
-                : "text-slate-600 border-slate-200 hover:bg-slate-50"
-            }`}
-          >
-            Slot View
-          </a>
-          <a
-            href={`/appointments?date=${selectedDate}&view=list`}
-            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${
-              activeView === "list"
-                ? "bg-cf-primary-700 text-white border-cf-primary-700"
-                : "text-slate-600 border-slate-200 hover:bg-slate-50"
-            }`}
-          >
-            List View
-          </a>
-          <Button size="sm" asChild>
-            <Link href="/appointments?view=slots">
-              <Plus className="h-4 w-4 mr-1.5" />
-              New Appointment
-            </Link>
+        <div className="flex items-center gap-2">
+          {/* List / Slots toggle */}
+          <div className="flex gap-0.5 p-1 bg-slate-100 rounded-lg text-xs font-medium">
+            <a
+              href={`/appointments?date=${selectedDate}&view=list`}
+              className={`px-3 py-1.5 rounded-md transition-colors ${
+                activeView === "list"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              List
+            </a>
+            <a
+              href={`/appointments?date=${selectedDate}&view=slots`}
+              className={`px-3 py-1.5 rounded-md transition-colors ${
+                activeView === "slots"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              Slots
+            </a>
+          </div>
+          <Button size="sm">
+            <Plus className="h-4 w-4 mr-1.5" />
+            New Appointment
           </Button>
         </div>
       </div>
+
+      {/* Date navigation — list view only; ScheduleBoard has its own DateNav */}
+      {activeView === "list" && (
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <DateNav selectedDate={selectedDate} />
+          <span className="text-sm text-slate-500">
+            {appointments.length} appointment{appointments.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+      )}
 
       {activeView === "slots" ? (
         <ScheduleBoard doctors={doctors} date={selectedDate} />

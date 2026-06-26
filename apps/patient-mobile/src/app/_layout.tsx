@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "@expo-google-fonts/plus-jakarta-sans";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
 import { SplashView } from "@/components/SplashView";
@@ -43,9 +44,7 @@ function RootLayoutNav() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)"     options={{ headerShown: false }} />
-      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)"     options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="clinic/search"    options={{ headerShown: true,  title: "Find a Clinic", headerBackTitle: "Back", headerTintColor: palette.primary600 }} />
       <Stack.Screen name="clinic/[clinicId]" options={{ headerShown: true, title: "Clinic", headerBackTitle: "Back", headerTintColor: palette.primary600 }} />
       <Stack.Screen name="queue/[queueId]"  options={{ headerShown: true,  title: "Queue Status", headerBackTitle: "Back", headerTintColor: palette.primary600 }} />
@@ -63,5 +62,9 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <SafeAreaProvider>
+      <RootLayoutNav />
+    </SafeAreaProvider>
+  );
 }

@@ -1,6 +1,6 @@
 # CareFlow — Session Handoff
 
-**Last updated:** 2026-06-26
+**Last updated:** 2026-06-26 (session 3)
 **Branch:** `main`
 **Repo:** https://github.com/xieshengqun-dave/careflow (private)
 
@@ -14,10 +14,10 @@ Phases come from `CAREFLOW_FIX_PROMPT.md`. Work done in order — each phase com
 |---|---|---|
 | **Phase 1** | Tier-1 correctness bugs (cancel, queue race, check-in→queue, auth) | ✅ **Done** — commit `e837fb0` |
 | **Phase 2** | Push notifications (device tokens, Edge Function, event triggers) | ✅ **Done** — commits `dc432be`, `4bd88ad` |
-| **Phase 3** | Operational gaps (slot generation cron, wait estimates, skip recovery, audit log) | ❌ **Pending** |
-| **Phase 4** | Polish / data quality (no-show rate fix, PENDING enum, migration dedup, doc fix) | ❌ **Pending** |
+| **Phase 3** | Operational gaps (slot generation cron, wait estimates, skip recovery, audit log) | ✅ **Done** — commit `2f0b06e` |
+| **Phase 4** | Polish / data quality (no-show rate fix, PENDING enum, migration dedup, doc fix) | ✅ **Done** — commit `9dc793f` |
 | **Phase 5** | Multi-tenant platform (real OTP login, patients module, super_admin/platform console) | ❌ **Pending** |
-| **Phase 6** | Design fidelity (token audit, screen-by-screen rebuild against design_handoff_careflow/) | ❌ **Pending** |
+| **Phase 6** | Design fidelity (token audit, screen-by-screen rebuild against design_handoff_careflow/) | 🔄 **In Progress** — patient-mobile done (`c06d0a8`, `7f0c6e7`); clinic-web Appointments + Schedule done (uncommitted); Queue + Dashboard pending |
 
 ---
 
@@ -148,11 +148,11 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 
 | Screen | File(s) |
 |---|---|
-| Patient — Home ⚠️ | `apps/patient-mobile/src/app/(tabs)/index.tsx` |
-| Appointments (web) ⚠️ | `apps/clinic-web/src/app/(dashboard)/appointments/page.tsx` + `AppointmentList.tsx` |
-| Schedule (web) ⚠️ | `apps/clinic-web/src/app/(dashboard)/schedules/page.tsx` + `components/schedules/*` |
-| Queue Management (web) ⚠️ | `apps/clinic-web/src/app/(dashboard)/queue/page.tsx` + `QueueManagementView.tsx` — currently a per-doctor Kanban, should be a single table + KPI cards + side panel |
-| Clinic Dashboard (web) | `apps/clinic-web/src/app/(dashboard)/dashboard/page.tsx` + `components/dashboard/*` |
+| Patient — Home ⚠️ | `apps/patient-mobile/src/app/(tabs)/index.tsx` | ✅ Done (commit `7f0c6e7`) |
+| Appointments (web) ⚠️ | `apps/clinic-web/src/app/(dashboard)/appointments/page.tsx` + `AppointmentList.tsx` | ✅ Done (session 3, uncommitted) |
+| Schedule (web) ⚠️ | `apps/clinic-web/src/app/(dashboard)/schedules/page.tsx` + `components/schedules/*` | ✅ Done (session 3, uncommitted) |
+| Queue Management (web) ⚠️ | `apps/clinic-web/src/app/(dashboard)/queue/page.tsx` + `QueueManagementView.tsx` | ✅ Done (rebuilt in Phase 3 commit `2f0b06e`) |
+| Clinic Dashboard (web) | `apps/clinic-web/src/app/(dashboard)/dashboard/page.tsx` + `components/dashboard/*` | ✅ Done (rebuilt in earlier session) |
 | Patient — Splash/Login/OTP | `(auth)/login.tsx`, `(auth)/otp.tsx` |
 | Patient — Find Clinics | `apps/patient-mobile/src/app/clinic/search.tsx` |
 | Patient — Clinic Details | `apps/patient-mobile/src/app/clinic/[clinicId].tsx` |
@@ -186,8 +186,25 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 
 ---
 
+## Session 3 — What Was Fixed / Built (2026-06-26)
+
+### Patient-mobile crash fixes
+- **`metro.config.js`** — replaced `extraNodeModules` (loses to pnpm virtual-store symlinks) with `resolveRequest` that intercepts all `react` / `react/*` imports before the node_modules walk, forcing one React instance regardless of which symlink path a transitive dep follows.
+- **`babel.config.js`** — removed `"react-native-reanimated/plugin"` (package not installed, would fail on `--clear`; all animation in the app uses RN core `Animated`, not reanimated).
+- **`_layout.tsx`** — added `SafeAreaProvider` wrapper (was missing; required by all screens that use `SafeAreaView` from `react-native-safe-area-context`). Removed invalid `Stack.Screen name="(auth)"` and `name="onboarding"` entries (not valid route names in Expo Router v6; were generating repeated warnings and unnecessary re-renders).
+- **`authStore.ts`** — wrapped `loadUser()` in try/catch; on any error sets `isLoading: false` so the splash screen never hangs forever (previously a network error or missing env vars would leave `isLoading: true` indefinitely).
+- **`devices.ts`** — wrapped all post-import notification API calls in try/catch; Expo Go throws on `getPermissionsAsync()` even though the module itself loads cleanly.
+
+### Phase 6 clinic-web design fidelity
+- **Appointments page** — removed duplicate server-side search form; added `DateNav` week-picker for list view; added List/Slots toggle pill; renamed button to "New Appointment"; appointment count shown next to date nav.
+- **AppointmentList** — search input now has icon; `initialSearch` prop removed (filter bar is fully client-side); table header, status badges, avatar styling from in-progress staged changes kept.
+- **ScheduleGrid** — rebuilt from vertical day-list to **7-column horizontal week grid** (Mon→Sun). Columns tinted blue if day has blocks. Time blocks are compact pills with left accent bar showing start/end time stacked, hover reveals inline edit/delete. Add button at bottom of each column as dashed row.
+
+---
+
 ## Still Open / Known Issues
 
+- **expo-notifications crash in Expo Go (SDK 53+)** — Fixed in session 2 & 3: lazy import + full try/catch around API calls. Works in a dev build with EAS.
 - **Fake "Live Queue Updates" data** in `queue/[queueId].tsx` — hardcoded scripted feed + hardcoded timestamps. Explicitly out of scope for now (Phase 2 handles real push; the fake feed is a separate cleanup).
 - **Realtime needs manual setup** in Supabase dashboard: Database → Replication → toggle on `queue_entries` + `queues`, then run `ALTER TABLE queue_entries REPLICA IDENTITY FULL;`.
 - **Two pending migrations not yet applied** (written before Phase 1):

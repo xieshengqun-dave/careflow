@@ -5,6 +5,7 @@ CareFlow is a **smart queue & appointment management** product for clinics, with
 
 1. **Patient mobile app** (12 screens) — find clinics, book appointments, join walk-in queues, and track queue position in real time.
 2. **Clinic web dashboard** (4 primary views) — staff overview, appointment management, live queue management, and doctor schedules.
+3. **Platform operator console** (NEW — login + 7 views) — the vendor's multi-tenant super-admin area: network overview, all clinics/doctors/patients, and a clinic-onboarding flow, each with full loading/empty/error states.
 
 This package is the design reference for building the **React Native / Expo** mobile app (primary target) and, optionally, the web dashboard.
 
@@ -63,13 +64,47 @@ A shared status bar sits above a scrollable content area; main screens show a bo
 
 *(A bonus Profile screen is included for the tab; not in the original mockups.)*
 
+### Patient app — added screens & states — NEW
+Reached via the in-frame screen picker (options 13–16); all match the patient-app phone style.
+- **Onboarding / name capture** (13) — shown right after OTP verify (OTP → onboarding → home): warm blue→green hero, avatar, "Welcome to CareFlow 👋", single Name field (focused), Skip / Continue.
+- **Check-In** (14) — opened by the center Check-In tab. Segmented toggle between **Scan QR Code** (dark scanner viewport with green corner brackets + animated scan line, "Simulate Scan & Check In", manual-entry link) and **Confirm Arrival** (clinic card, "location confirmed" note, big "I've Arrived — Check Me In"). Either path → Queue Tracking. Both check-in directions are designed so you can choose; pick one for production.
+- **Reschedule** (15) — from an appointment's Reschedule button: amber "current appointment" banner, new-date chips, the reused booking slot-picker (available/booked/break/selected), sticky Confirm Reschedule → **Reschedule success** (struck-through old time → new time, My Appointments / Home).
+- **UI States sheet** (16) — compact reference of the common mobile states: loading skeleton (shimmer), no-results empty, no-appointments empty, queue-closed, left-the-queue, and network error+retry. Use these patterns wherever a list/queue/network view can be empty, loading, or failed.
+
 ## Views — Clinic Web Dashboard (~1440 wide)
 Fixed 244px left sidebar (logo, clinic name, nav with active = blue tint + blue text, app promo card). Functional views: **Dashboard**, **Appointments**, **Queue Management**, **Schedule**.
 
 - **Dashboard** — header (title + date/time-Live + notifications + admin), Export / New Appointment, 5 KPI stat cards, two-column Live Queue Overview (conic donut) + Today's Appointments, three-column Doctor Schedule / Today's Overview (sparkline mini-cards) / Recent Activity.
 - **Appointments** — filters (date / doctor / status) + New Appointment; table: Time, Patient (avatar), Doctor, Type, Status badge, actions.
 - **Queue Management** — 4 KPI cards, left live-queue table (rank chip, patient, queue time, type, status, current row highlighted green) + right patient detail panel with Quick Actions (Call Next / Mark Arrived / Move to Top / Remove) and drag-reorder hint.
+- **Table states (Appointments & Queue)** — each table has a header **Preview** toggle (Default / Loading / Empty): Loading swaps the rows for shimmer skeletons matching the column grid; Empty shows a centered illustration + copy ("No appointments for this day" → New Appointment; "Queue is empty" for the queue). The toggle is a review affordance — drop it in production and drive these from real fetch state.
 - **Schedule** — week grid: time rows × 7 day columns, cells colored Available / Booked / Break per the legend.
+
+### Clinic staff auth (web) — NEW
+Card-centered on the light app background with a faint blue→green radial accent; reuses the clinic logo + royal-blue primary. The dashboard now sits behind an auth gate (`screen: login | forgot | reset | app`); a **Sign out** button in the sidebar footer returns to login.
+- **Login** — "Sign in to your clinic": work email + password (show toggle), keep-signed-in, Forgot-password link, Sign In; "Contact sales" footer.
+- **Forgot password** — back-to-sign-in, mail icon, email field, Send reset link, spam/admin note.
+- **Reset password** — new + confirm password with a live 3-item rule checklist (met = green check, pending = grey), Reset password.
+
+### Staff dialogs (modals over the dashboard) — NEW
+Both are centered modals on a `rgba(15,23,42,.45)` scrim, white 20px-radius card, sticky header/footer, body scrolls.
+- **New Appointment** (620px) — opened by either New Appointment button (dashboard header or Appointments page). Patient search → selected-patient chip (with "Add new patient" → Add Patient modal), Doctor + Type selects, date chips, **available-slot grid reusing the patient booking slot pattern** (tap to select; unavailable = greyed/not-allowed; selected = filled blue), optional notes; sticky footer shows the live selected slot + Confirm Booking → in-modal **success state** (green check, SMS-sent copy, Done / Book Another).
+- **Add Patient** (480px) — opened by the Appointments-page "Add Patient" button or from inside New Appointment. Full name (**valid** state: green border + check), mobile +60 (**error** state: red border + "Enter a valid Malaysian mobile number"), DOB, gender segmented control, optional email; primary Save Patient is **disabled** until valid. Demonstrates the input valid/error/disabled patterns.
+
+## Views — Platform Operator Console (~1440 wide) — NEW
+The **platform operator's** area (the vendor running CareFlow as multi-tenant SaaS). It is deliberately **visually distinct from the clinic portal**: a deep-navy/indigo sidebar with a "PLATFORM" badge and a global (not clinic-scoped) header showing a Production environment pill and operator identity. Built in `CareFlow Platform Admin.dc.html`. Use the navy/indigo platform tokens in `careflow-tokens.ts` (`platformNavy`, `indigo600`, `navActiveBg`, etc.) for this area — keep the blue primary only for in-content actions.
+
+A **Preview** control in the header (Default / Loading / Empty / Error) flips the current data view between its states — it's a review affordance, not production UI; drop it when implementing.
+
+- **Platform Login** — distinct from clinic/patient sign-in: full navy split-screen, left brand panel ("Platform Console", network stats), right email/password card with "authorized operators only" + "logged and audited" notice.
+- **Shell** — navy sidebar: Overview, Clinics, Doctors, Patients, divider, Onboard Clinic, Settings; operator profile footer. Active item = indigo tint bg + left indigo bar + white text.
+- **Platform Overview** — 6 aggregate KPI cards (total clinics, doctors, patients, appointments today, active queues, no-show rate), platform-wide appointments area chart, "Clinics Needing Attention" strip, recent platform activity feed (with View Audit Log).
+- **Clinics** — searchable/filterable table (clinic, doctors, patients, status active/suspended, joined) → row click opens **Clinic Detail** (breadcrumb, identity + status, today's stat cards, doctors list, clinic admins; read-mostly with View-as-Clinic / Suspend actions).
+- **Doctors** — platform-wide directory table (doctor, clinic, specialization, status, rating) with clinic/specialization/status filters.
+- **Patients** — PII-sensitive: amber "access is logged & audited" banner, prominent search-first input (masked phone numbers), results table (patient, phone, # appointments, # clinics). Designed to discourage open browsing.
+- **Onboard New Clinic** — 3-step provisioning flow with a progress stepper: ① Clinic Details (name, address, state, type, contact, hours) → ② First Clinic Admin (name, role, email, mobile, send-invite) → ③ Review & Confirm → success state (clinic active, admin invited).
+- **Settings** — operator profile + security/audit panel (2FA, audit logging, session timeout).
+- **States** — every data view has default / loading (skeleton) / empty / error designs, reachable via the header Preview control.
 
 ## Interactions & Behavior
 - **Navigation:** both prototypes use simple state routers. Mobile = stacked flow + bottom tabs (map to React Navigation: a stack for Splash/Login/OTP/Details/Booking flows, a bottom-tab navigator for Home/Appointments/Queue/Profile, Check-In as a center action). Dashboard = sidebar-switched views.
@@ -86,7 +121,8 @@ Fixed 244px left sidebar (logo, clinic name, nav with active = blue tint + blue 
 
 ## Files
 - `CareFlow Patient App.standalone.html` — offline patient-app prototype (open in a browser).
-- `CareFlow Clinic Dashboard.standalone.html` — offline dashboard prototype.
+- `CareFlow Clinic Dashboard.standalone.html` — offline clinic-dashboard prototype.
+- `CareFlow Platform Admin.standalone.html` — offline platform-operator console prototype.
 - `CareFlow Design System.standalone.html` — visual token reference.
 - `source/*.dc.html` — editable source prototypes.
 - `theme/careflow-tokens.ts` — drop-in design tokens for Expo.
