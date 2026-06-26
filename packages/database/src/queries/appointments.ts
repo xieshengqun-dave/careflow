@@ -80,7 +80,7 @@ export async function getPatientAppointments(
     .eq("patient_id", patientId)
     .order("appointment_date", { ascending: false });
 
-  if (options?.status) request = request.eq("status", options.status);
+  if (options?.status) request = request.eq("status", options.status as "PENDING" | "CONFIRMED" | "CHECKED_IN" | "COMPLETED" | "CANCELLED" | "NO_SHOW");
   if (options?.limit) request = request.limit(options.limit);
 
   return request;

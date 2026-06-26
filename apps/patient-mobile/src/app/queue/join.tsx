@@ -127,7 +127,7 @@ export default function JoinQueueScreen() {
       return;
     }
 
-    router.replace({ pathname: `/queue/${result.entryId}` });
+    router.replace({ pathname: "/queue/[queueId]", params: { queueId: result.entryId } });
   };
 
   if (loading) {

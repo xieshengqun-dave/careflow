@@ -360,11 +360,11 @@ export default function AppointmentsScreen() {
 
   function handleReschedule(_id: string) {
     // Navigate to home to initiate a new booking flow
-    router.push("/(tabs)/index");
+    router.push("/");
   }
 
   function handleBookAgain() {
-    router.push("/(tabs)/index");
+    router.push("/");
   }
 
   // Banner count for upcoming — only appointments actually scheduled for today

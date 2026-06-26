@@ -17,7 +17,7 @@ export async function getOrCreateQueue(
 
   return client
     .from("queues")
-    .insert({ doctor_id: doctorId, clinic_id: clinicId, queue_date: queueDate })
+    .insert({ doctor_id: doctorId, clinic_id: clinicId, queue_date: queueDate, is_active: true, current_number: 0 })
     .select()
     .single();
 }
@@ -69,6 +69,8 @@ export async function joinQueue(
       priority: params.priority,
       status: "WAITING",
       joined_at: new Date().toISOString(),
+      called_at: null,
+      completed_at: null,
     })
     .select()
     .single();

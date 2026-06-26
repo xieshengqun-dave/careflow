@@ -34,8 +34,8 @@ function DoctorCard({
     <TouchableOpacity
       onPress={() =>
         router.push({
-          pathname: `/booking/${doctor.doctorId}`,
-          params: { clinicId: clinic.id, clinicName: clinic.name, doctorName: doctor.fullName },
+          pathname: "/booking/[doctorId]",
+          params: { doctorId: doctor.doctorId, clinicId: clinic.id, clinicName: clinic.name, doctorName: doctor.fullName },
         })
       }
       activeOpacity={0.85}
@@ -270,8 +270,8 @@ export default function ClinicDetailsScreen() {
           onPress={() => {
             if (clinic.doctors[0]) {
               router.push({
-                pathname: `/booking/${clinic.doctors[0].doctorId}`,
-                params: { clinicId: clinic.id, clinicName: clinic.name, doctorName: clinic.doctors[0].fullName },
+                pathname: "/booking/[doctorId]",
+                params: { doctorId: clinic.doctors[0].doctorId, clinicId: clinic.id, clinicName: clinic.name, doctorName: clinic.doctors[0].fullName },
               });
             } else {
               Alert.alert("No doctors available for booking.");

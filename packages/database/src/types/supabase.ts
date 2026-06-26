@@ -26,6 +26,7 @@ export type Database = {
         };
         Insert: Omit<Database["public"]["Tables"]["profiles"]["Row"], "created_at" | "updated_at">;
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Relationships: [];
       };
       clinics: {
         Row: {
@@ -47,6 +48,65 @@ export type Database = {
         };
         Insert: Omit<Database["public"]["Tables"]["clinics"]["Row"], "id" | "created_at" | "updated_at">;
         Update: Partial<Database["public"]["Tables"]["clinics"]["Insert"]>;
+        Relationships: [];
+      };
+      clinic_staff: {
+        Row: {
+          id: string;
+          user_id: string;
+          clinic_id: string;
+          role: "DOCTOR" | "RECEPTIONIST" | "ADMIN";
+          full_name: string;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["clinic_staff"]["Row"], "id" | "created_at" | "updated_at">;
+        Update: Partial<Database["public"]["Tables"]["clinic_staff"]["Insert"]>;
+        Relationships: [];
+      };
+      doctors: {
+        Row: {
+          id: string;
+          specialization: string | null;
+          qualification: string | null;
+          consultation_duration_minutes: number;
+          avatar_url: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["doctors"]["Row"], "id" | "created_at" | "updated_at">;
+        Update: Partial<Database["public"]["Tables"]["doctors"]["Insert"]>;
+        Relationships: [];
+      };
+      doctor_schedules: {
+        Row: {
+          id: string;
+          doctor_id: string;
+          day_of_week: number;
+          start_time: string;
+          end_time: string;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["doctor_schedules"]["Row"], "id" | "created_at" | "updated_at">;
+        Update: Partial<Database["public"]["Tables"]["doctor_schedules"]["Insert"]>;
+        Relationships: [];
+      };
+      time_slots: {
+        Row: {
+          id: string;
+          doctor_id: string;
+          slot_date: string;
+          start_time: string;
+          end_time: string;
+          status: "AVAILABLE" | "BOOKED" | "BLOCKED" | "BREAK";
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["time_slots"]["Row"], "id" | "created_at">;
+        Update: Partial<Database["public"]["Tables"]["time_slots"]["Insert"]>;
+        Relationships: [];
       };
       appointments: {
         Row: {
@@ -63,6 +123,7 @@ export type Database = {
         };
         Insert: Omit<Database["public"]["Tables"]["appointments"]["Row"], "id" | "created_at" | "updated_at">;
         Update: Partial<Database["public"]["Tables"]["appointments"]["Insert"]>;
+        Relationships: [];
       };
       queues: {
         Row: {
@@ -77,6 +138,7 @@ export type Database = {
         };
         Insert: Omit<Database["public"]["Tables"]["queues"]["Row"], "id" | "created_at" | "updated_at">;
         Update: Partial<Database["public"]["Tables"]["queues"]["Insert"]>;
+        Relationships: [];
       };
       queue_entries: {
         Row: {
@@ -96,11 +158,18 @@ export type Database = {
         };
         Insert: Omit<Database["public"]["Tables"]["queue_entries"]["Row"], "id" | "created_at" | "updated_at">;
         Update: Partial<Database["public"]["Tables"]["queue_entries"]["Insert"]>;
+        Relationships: [];
       };
     };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
-    Enums: Record<string, never>;
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
   };
 };
 

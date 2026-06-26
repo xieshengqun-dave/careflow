@@ -51,7 +51,7 @@ export default function TabsLayout() {
         options={{
           title: "",
           tabBarIcon: () => null,
-          tabBarButton: (props) => <CheckInButton onPress={props.onPress ?? undefined} />,
+          tabBarButton: (props) => <CheckInButton onPress={props.onPress as (() => void) | undefined} />,
         }}
       />
       <Tabs.Screen

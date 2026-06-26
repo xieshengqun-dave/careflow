@@ -24,9 +24,9 @@ describe("generateSlots", () => {
       ...baseInput,
       bookedSlots: [{ startTime: "09:00", appointmentId: "appt-1" }],
     });
-    expect(slots[0].status).toBe("BOOKED");
-    expect(slots[0].appointmentId).toBe("appt-1");
-    expect(slots[1].status).toBe("AVAILABLE");
+    expect(slots[0]!.status).toBe("BOOKED");
+    expect(slots[0]!.appointmentId).toBe("appt-1");
+    expect(slots[1]!.status).toBe("AVAILABLE");
   });
 
   it("marks BREAK slots correctly", () => {
@@ -37,7 +37,7 @@ describe("generateSlots", () => {
     });
     const breakSlots = slots.filter((s) => s.status === "BREAK");
     expect(breakSlots).toHaveLength(2);
-    expect(breakSlots[0].start).toBe("12:00");
+    expect(breakSlots[0]!.start).toBe("12:00");
   });
 
   it("BREAK takes priority over BOOKED", () => {
@@ -46,7 +46,7 @@ describe("generateSlots", () => {
       breaks: [{ start: "09:00", end: "09:30" }],
       bookedSlots: [{ startTime: "09:00" }],
     });
-    expect(slots[0].status).toBe("BREAK");
+    expect(slots[0]!.status).toBe("BREAK");
   });
 
   it("handles multiple working periods (morning + afternoon)", () => {
@@ -60,7 +60,7 @@ describe("generateSlots", () => {
       bookedSlots: [],
     });
     expect(slots).toHaveLength(6);
-    expect(slots[3].start).toBe("14:00");
+    expect(slots[3]!.start).toBe("14:00");
   });
 
   it("handles BLOCKED slots", () => {
@@ -74,8 +74,8 @@ describe("generateSlots", () => {
 
   it("startMinutes and endMinutes are correct", () => {
     const slots = generateSlots(baseInput);
-    expect(slots[0].startMinutes).toBe(540);
-    expect(slots[0].endMinutes).toBe(570);
+    expect(slots[0]!.startMinutes).toBe(540);
+    expect(slots[0]!.endMinutes).toBe(570);
   });
 
   it("does not generate a slot that would exceed working period end", () => {
@@ -84,7 +84,7 @@ describe("generateSlots", () => {
       workingPeriods: [{ start: "09:00", end: "09:45" }],
     });
     expect(slots).toHaveLength(1);
-    expect(slots[0].start).toBe("09:00");
+    expect(slots[0]!.start).toBe("09:00");
   });
 
   it("returns empty array when no working periods", () => {
@@ -97,6 +97,6 @@ describe("generateSlots", () => {
       ...baseInput,
       breaks: [{ start: "09:15", end: "09:45" }],
     });
-    expect(slots[0].status).toBe("BREAK");
+    expect(slots[0]!.status).toBe("BREAK");
   });
 });
