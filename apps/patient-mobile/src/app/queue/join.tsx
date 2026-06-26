@@ -15,7 +15,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabase";
 import { joinQueue } from "@/lib/api/queues";
-import { getMYTToday } from "@careflow/shared";
+import { getMYTToday, estimateWaitMinutes } from "@careflow/shared";
 import { palette, radius, spacing } from "@/theme/careflow-tokens";
 import { fontFamily, textStyle } from "@/theme/typography";
 
@@ -27,7 +27,9 @@ interface ActiveQueue {
   doctorName: string;
   specialization: string | null;
   consultationDuration: number;
+  actualConsultationMinutes: number | null;
   waitingCount: number;
+  isPaused: boolean;
   clinicName: string;
   clinicAddress: string;
 }
@@ -68,6 +70,7 @@ export default function JoinQueueScreen() {
         .from("queues")
         .select(`
           id,
+          is_paused,
           doctors (
             id,
             specialization,
@@ -75,7 +78,7 @@ export default function JoinQueueScreen() {
             clinic_staff ( full_name )
           ),
           clinics ( name, address ),
-          queue_entries ( status )
+          queue_entries ( status, called_at, completed_at )
         `)
         .eq("is_active", true)
         .eq("queue_date", today);
@@ -98,8 +101,22 @@ export default function JoinQueueScreen() {
       } | null;
       const clinic = data.clinics as unknown as { name: string; address: string } | null;
       const staff = Array.isArray(doc?.clinic_staff) ? doc?.clinic_staff[0] : doc?.clinic_staff;
-      const entries = data.queue_entries as unknown as Array<{ status: string }> | null;
+      const entries = data.queue_entries as unknown as Array<{
+        status: string;
+        called_at: string | null;
+        completed_at: string | null;
+      }> | null;
       const waitingCount = entries?.filter((e) => e.status === "WAITING").length ?? 0;
+
+      // Compute actual median consultation pace from today's completed entries
+      const completedTimings = (entries ?? [])
+        .filter((e) => e.status === "COMPLETED" && e.called_at && e.completed_at)
+        .map((e) => (new Date(e.completed_at!).getTime() - new Date(e.called_at!).getTime()) / 60000)
+        .sort((a, b) => a - b);
+      const actualConsultationMinutes =
+        completedTimings.length > 0
+          ? Math.round(completedTimings[Math.floor(completedTimings.length / 2)]!)
+          : null;
 
       setQueue({
         queueId: data.id,
@@ -107,7 +124,9 @@ export default function JoinQueueScreen() {
         doctorName: (staff as { full_name: string } | null)?.full_name ?? "Doctor",
         specialization: doc?.specialization ?? null,
         consultationDuration: doc?.consultation_duration_minutes ?? 15,
+        actualConsultationMinutes,
         waitingCount,
+        isPaused: (data.is_paused as unknown as boolean) ?? false,
         clinicName: clinic?.name ?? "",
         clinicAddress: clinic?.address ?? "",
       });
@@ -138,8 +157,13 @@ export default function JoinQueueScreen() {
     );
   }
 
-  const estWaitMin = queue ? queue.waitingCount * queue.consultationDuration : 0;
-  const estWaitMax = estWaitMin + (queue?.consultationDuration ?? 0);
+  const perPatient = queue
+    ? (queue.actualConsultationMinutes ?? queue.consultationDuration)
+    : 15;
+  const estWaitMin = queue
+    ? estimateWaitMinutes(queue.waitingCount, queue.consultationDuration, queue.actualConsultationMinutes ?? undefined)
+    : 0;
+  const estWaitMax = estWaitMin + Math.round(perPatient);
   const color = queue ? avatarColor(queue.doctorName) : palette.primary600;
 
   return (
@@ -217,15 +241,26 @@ export default function JoinQueueScreen() {
               <View style={styles.statsDivider} />
 
               <Text style={styles.estimateLabel}>Estimated Waiting Time</Text>
-              <View style={styles.estimateRow}>
-                <Icon name="time-outline" size={20} color={palette.green600} />
-                <Text style={styles.estimateWait}>
-                  {estWaitMin} – {estWaitMax} mins
-                </Text>
-              </View>
-              <Text style={styles.estimateNote}>
-                This may vary depending on consultation time.
-              </Text>
+              {queue?.isPaused ? (
+                <View style={styles.pausedBanner}>
+                  <Icon name="pause-circle-outline" size={18} color={palette.amber700} />
+                  <Text style={styles.pausedText}>Queue is currently paused</Text>
+                </View>
+              ) : (
+                <>
+                  <View style={styles.estimateRow}>
+                    <Icon name="time-outline" size={20} color={palette.green600} />
+                    <Text style={styles.estimateWait}>
+                      {estWaitMin} – {estWaitMax} mins
+                    </Text>
+                  </View>
+                  <Text style={styles.estimateNote}>
+                    {queue?.actualConsultationMinutes
+                      ? `Based on today's actual pace (avg ${queue.actualConsultationMinutes} min/patient).`
+                      : "Estimate based on configured slot duration."}
+                  </Text>
+                </>
+              )}
             </Card>
 
             {/* You'll be notified banner */}
@@ -391,6 +426,8 @@ const styles = StyleSheet.create({
   estimateRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   estimateWait: { fontSize: 22, fontFamily: fontFamily(800), color: palette.slate900 },
   estimateNote: { fontSize: 11, color: palette.slate400, marginTop: spacing.xs, lineHeight: 16 },
+  pausedBanner: { flexDirection: "row", alignItems: "center", gap: spacing.xs, marginTop: 2 },
+  pausedText: { fontSize: 14, fontFamily: fontFamily(600), color: palette.amber700 },
 
   // Notify banner
   notifyBanner: {

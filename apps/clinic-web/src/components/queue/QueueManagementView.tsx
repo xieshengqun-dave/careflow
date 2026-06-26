@@ -2,17 +2,21 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { RefreshCw, Phone, CheckCircle2, ArrowUpToLine, XCircle, BellRing } from "lucide-react";
+import { RefreshCw, Phone, CheckCircle2, ArrowUpToLine, XCircle, BellRing, SkipForward, RotateCcw, PauseCircle, PlayCircle } from "lucide-react";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddWalkInDialog } from "./AddWalkInDialog";
 import {
   callNext,
+  skipEntry,
+  requeueEntry,
   startConsultation,
   moveToTop,
   removeEntry,
   notifyQueueDelayed,
+  pauseQueue,
+  resumeQueue,
 } from "@/lib/actions/queue";
 import type { CombinedQueueEntry, CombinedQueueSummary } from "@/lib/queries/queue";
 
@@ -230,6 +234,23 @@ export function QueueManagementView({ summary, clinicId, doctorOptions, lastUpda
                     >
                       <XCircle className="h-3.5 w-3.5 mr-1.5" /> Remove
                     </Button>
+                    {selected.status === "SKIPPED" ? (
+                      <Button
+                        size="sm" variant="outline" disabled={isPending}
+                        onClick={() => runAction(() => requeueEntry(selected.id))}
+                        className="col-span-2 text-cf-primary-700 border-cf-primary-200"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Requeue (move to back)
+                      </Button>
+                    ) : selected.status === "WAITING" ? (
+                      <Button
+                        size="sm" variant="outline" disabled={isPending}
+                        onClick={() => runAction(() => skipEntry(selected.id))}
+                        className="col-span-2 text-cf-amber-700 border-cf-amber-200"
+                      >
+                        <SkipForward className="h-3.5 w-3.5 mr-1.5" /> Skip Patient
+                      </Button>
+                    ) : null}
                   </div>
                   <Button
                     size="sm" variant="outline" disabled={isPending}
@@ -238,6 +259,23 @@ export function QueueManagementView({ summary, clinicId, doctorOptions, lastUpda
                   >
                     <BellRing className="h-3.5 w-3.5 mr-1.5" /> Notify Everyone Waiting: Doctor Delayed
                   </Button>
+                  {selected.isQueuePaused ? (
+                    <Button
+                      size="sm" variant="outline" disabled={isPending}
+                      onClick={() => runAction(() => resumeQueue(selected.queueId))}
+                      className="w-full text-cf-green-600 border-cf-green-200"
+                    >
+                      <PlayCircle className="h-3.5 w-3.5 mr-1.5" /> Resume Queue
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm" variant="outline" disabled={isPending}
+                      onClick={() => runAction(() => pauseQueue(selected.queueId))}
+                      className="w-full text-cf-amber-700 border-cf-amber-200"
+                    >
+                      <PauseCircle className="h-3.5 w-3.5 mr-1.5" /> Pause Queue
+                    </Button>
+                  )}
                 </div>
               </>
             )}

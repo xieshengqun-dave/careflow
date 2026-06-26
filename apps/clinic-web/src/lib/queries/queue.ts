@@ -18,6 +18,7 @@ export interface QueueEntryData {
 export interface CombinedQueueEntry {
   id: string;
   queueId: string;
+  isQueuePaused: boolean;
   queueNumber: number;
   type: QueueEntryType;
   priority: number;
@@ -48,6 +49,7 @@ export async function getCombinedQueue(clinicId: string): Promise<CombinedQueueS
     .select(`
       id,
       doctor_id,
+      is_paused,
       doctors (
         specialization,
         clinic_staff ( full_name )
@@ -76,15 +78,17 @@ export async function getCombinedQueue(clinicId: string): Promise<CombinedQueueS
     } | null;
     const staff = Array.isArray(doc?.clinic_staff) ? doc?.clinic_staff[0] : doc?.clinic_staff;
     const rawEntries = (queue.queue_entries as unknown as Array<Record<string, unknown>>) ?? [];
+    const isPaused = (queue.is_paused as unknown as boolean) ?? false;
 
     for (const e of rawEntries) {
       const status = e.status as QueueEntryStatus;
-      if (!["WAITING", "CALLED", "IN_CONSULTATION"].includes(status)) continue;
+      if (!["WAITING", "CALLED", "IN_CONSULTATION", "SKIPPED"].includes(status)) continue;
       const profile = e.profiles as unknown as { full_name: string | null; phone_number: string | null } | null;
 
       entries.push({
         id: e.id as string,
         queueId: queue.id as string,
+        isQueuePaused: isPaused,
         queueNumber: e.queue_number as number,
         type: e.type as QueueEntryType,
         priority: e.priority as number,

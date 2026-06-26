@@ -117,6 +117,44 @@ export async function skipEntry(entryId: string) {
   return { success: true };
 }
 
+export async function requeueEntry(entryId: string) {
+  const { user, supabase } = await getAuthedSupabase();
+  if (!user || !supabase) return { error: "Unauthorized" };
+
+  const { error } = await supabase.rpc("requeue_entry", { p_entry_id: entryId });
+  if (error) return { error: error.message };
+  revalidatePath("/queue");
+  return { success: true };
+}
+
+export async function pauseQueue(queueId: string) {
+  const { user, supabase } = await getAuthedSupabase();
+  if (!user || !supabase) return { error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("queues")
+    .update({ is_paused: true })
+    .eq("id", queueId);
+
+  if (error) return { error: error.message };
+  revalidatePath("/queue");
+  return { success: true };
+}
+
+export async function resumeQueue(queueId: string) {
+  const { user, supabase } = await getAuthedSupabase();
+  if (!user || !supabase) return { error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("queues")
+    .update({ is_paused: false })
+    .eq("id", queueId);
+
+  if (error) return { error: error.message };
+  revalidatePath("/queue");
+  return { success: true };
+}
+
 export async function notifyQueueDelayed(queueId: string, doctorName: string) {
   const { user, supabase } = await getAuthedSupabase();
   if (!user || !supabase) return { error: "Unauthorized" };

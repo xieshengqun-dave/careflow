@@ -24,9 +24,11 @@ export function getMYTToday(): string {
 
 export function estimateWaitMinutes(
   peopleAhead: number,
-  consultationDurationMinutes: number
+  consultationDurationMinutes: number,
+  actualMedianMinutes?: number
 ): number {
-  return peopleAhead * consultationDurationMinutes;
+  const perPatient = actualMedianMinutes ?? consultationDurationMinutes;
+  return Math.round(peopleAhead * perPatient);
 }
 
 export function formatWaitTime(minutes: number): string {
