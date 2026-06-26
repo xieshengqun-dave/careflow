@@ -14,6 +14,7 @@ import { searchClinics, type ClinicWithDoctors } from "@/lib/api/clinics";
 import { getNotifications } from "@/lib/api/notifications";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { SkeletonClinicCard } from "@/components/ui/Skeleton";
 import { gradients, palette, radius, shadow, spacing } from "@/theme/careflow-tokens";
 import { fontFamily, textStyle } from "@/theme/typography";
 
@@ -96,6 +97,7 @@ export default function HomeScreen() {
   const [queues, setQueues] = useState<QueueEntryStatus[]>([]);
   const [clinics, setClinics] = useState<ClinicWithDoctors[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
@@ -109,6 +111,7 @@ export default function HomeScreen() {
     setQueues(queueData);
     setClinics(clinicData.slice(0, 5));
     setUnreadCount(notifs.filter((n) => !n.read).length);
+    setLoading(false);
     setRefreshing(false);
   }, []);
 
@@ -292,9 +295,19 @@ export default function HomeScreen() {
             <Text style={styles.seeAll}>See All</Text>
           </TouchableOpacity>
         </View>
-        {clinics.map((clinic) => (
-          <ClinicCard key={clinic.id} clinic={clinic} />
-        ))}
+        {loading ? (
+          <>
+            <SkeletonClinicCard />
+            <SkeletonClinicCard />
+            <SkeletonClinicCard />
+          </>
+        ) : clinics.length > 0 ? (
+          clinics.map((clinic) => (
+            <ClinicCard key={clinic.id} clinic={clinic} />
+          ))
+        ) : (
+          <Text style={styles.noClinicsText}>No clinics found nearby.</Text>
+        )}
 
         {/* Notification opt-in banner */}
         <Card style={styles.notifBanner}>
@@ -405,6 +418,7 @@ const styles = StyleSheet.create({
     paddingRight: spacing.lg,
   },
   seeAll: { ...textStyle("label"), color: palette.primary600 },
+  noClinicsText: { fontSize: 13, color: palette.slate400, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
 
   // Quick actions — 4-column single row
   actionsGrid: {

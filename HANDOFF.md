@@ -170,12 +170,12 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 | Patient — Onboarding / name capture | `apps/patient-mobile/src/app/onboarding/index.tsx` | Phase 5.1 | ❌ Pending |
 | Patient — Check-In (QR / confirm) | `apps/patient-mobile/src/app/(tabs)/checkin.tsx` | Phase 1.3 ✅ | ✅ Done (session 4) |
 | Patient — Reschedule | new `apps/patient-mobile/src/app/booking/reschedule.tsx` | reschedule logic (not built) | ❌ Pending |
-| Patient — UI states (skeleton/empty/error) | reusable components | — | ❌ Pending |
+| Patient — UI states (skeleton/empty/error) | reusable components | — | ✅ Done (session 4) |
 | Clinic staff Login (web) | `apps/clinic-web/src/app/(auth)/login/page.tsx` | Phase 1.4 ✅ | ✅ Done (existed) |
 | Clinic Forgot/Reset password (web) | `(auth)/forgot-password`, `reset-password` | Supabase auth | ✅ Done (session 4, logo polish) |
 | New Appointment dialog (staff) | `components/scheduling/NewAppointmentDialog.tsx` | `staff_book_appointment` fn | ✅ Done (session 4) |
 | Add Patient dialog (staff) | modal, reused by New Appointment | Phase 5.2 | ❌ Pending |
-| Table loading/empty states | Appointments + Queue tables | — | ❌ Pending |
+| Table loading/empty states | Appointments + Queue tables | — | ✅ Done (session 4) |
 | Platform Console — Login | new `(platform)` route group | Phase 5.3 | ❌ Pending |
 | Platform Console — Shell/nav | `(platform)` layout | Phase 5.3 | ❌ Pending |
 | Platform — Overview | `(platform)/overview` | Phase 5.3 | ❌ Pending |
@@ -219,6 +219,15 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 
 **Auth pages logo polish** (clinic-web)
 - `forgot-password/page.tsx` and `reset-password/page.tsx`: replaced plain text `<h1>CareFlow</h1>` with `<Image src="/logo.png">` to match login page.
+
+**Patient-mobile UI states**
+- `apps/patient-mobile/src/components/ui/Skeleton.tsx` — `Skeleton` base (pulse animation via `Animated`), `SkeletonAppointmentCard`, `SkeletonClinicCard`, `SkeletonHeroCard` presets.
+- Home screen (`(tabs)/index.tsx`) — added `loading` state; clinics section shows 3 `SkeletonClinicCard` placeholders while data loads, then falls back to "No clinics found nearby" when empty.
+
+**Clinic-web loading states**
+- `(dashboard)/queue/loading.tsx` — stat card + queue board skeleton (previously missing).
+- `(dashboard)/dashboard/loading.tsx` — metric card row + chart area skeleton (previously missing).
+- `(dashboard)/appointments/loading.tsx` — updated to match actual page layout (header + DateNav + table rows).
 
 ---
 
