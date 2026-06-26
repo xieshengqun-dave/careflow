@@ -1,6 +1,6 @@
 # CareFlow — Session Handoff
 
-**Last updated:** 2026-06-26 (session 3)
+**Last updated:** 2026-06-26 (session 4)
 **Branch:** `main`
 **Repo:** https://github.com/xieshengqun-dave/careflow (private)
 
@@ -17,7 +17,7 @@ Phases come from `CAREFLOW_FIX_PROMPT.md`. Work done in order — each phase com
 | **Phase 3** | Operational gaps (slot generation cron, wait estimates, skip recovery, audit log) | ✅ **Done** — commit `2f0b06e` |
 | **Phase 4** | Polish / data quality (no-show rate fix, PENDING enum, migration dedup, doc fix) | ✅ **Done** — commit `9dc793f` |
 | **Phase 5** | Multi-tenant platform (real OTP login, patients module, super_admin/platform console) | ❌ **Pending** |
-| **Phase 6** | Design fidelity (token audit, screen-by-screen rebuild against design_handoff_careflow/) | 🔄 **In Progress** — patient-mobile done (`c06d0a8`, `7f0c6e7`); clinic-web Appointments + Schedule done (uncommitted); Queue + Dashboard pending |
+| **Phase 6** | Design fidelity (token audit, screen-by-screen rebuild against design_handoff_careflow/) | 🔄 **In Progress** — patient-mobile done; clinic-web Appointments + Schedule + Group B screens done; Queue + Dashboard pending |
 
 ---
 
@@ -165,24 +165,60 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 
 **Group B — New screens to build from spec:**
 
-| Screen | Build location | Backend dep |
-|---|---|---|
-| Patient — Onboarding / name capture | `apps/patient-mobile/src/app/onboarding/index.tsx` | Phase 5.1 |
-| Patient — Check-In (QR / confirm) | `apps/patient-mobile/src/app/(tabs)/checkin.tsx` | Phase 1.3 ✅ |
-| Patient — Reschedule | new `apps/patient-mobile/src/app/booking/reschedule.tsx` | reschedule logic (not built) |
-| Patient — UI states (skeleton/empty/error) | reusable components | — |
-| Clinic staff Login (web) | `apps/clinic-web/src/app/(auth)/login/page.tsx` | Phase 1.4 ✅ |
-| Clinic Forgot/Reset password (web) | new `(auth)/forgot-password`, `reset-password` | Supabase auth |
-| New Appointment dialog (staff) | modal over Appointments/Dashboard | staff-create flow (new) |
-| Add Patient dialog (staff) | modal, reused by New Appointment | Phase 5.2 |
-| Table loading/empty states | Appointments + Queue tables | — |
-| Platform Console — Login | new `(platform)` route group | Phase 5.3 |
-| Platform Console — Shell/nav | `(platform)` layout | Phase 5.3 |
-| Platform — Overview | `(platform)/overview` | Phase 5.3 |
-| Platform — Clinics + detail | `(platform)/clinics` | Phase 5.3 |
-| Platform — Doctors | `(platform)/doctors` | Phase 5.3 |
-| Platform — Patients | `(platform)/patients` | Phase 5.3 |
-| Platform — Onboard Clinic | `(platform)/onboard` | Phase 5.3 |
+| Screen | Build location | Backend dep | Status |
+|---|---|---|---|
+| Patient — Onboarding / name capture | `apps/patient-mobile/src/app/onboarding/index.tsx` | Phase 5.1 | ❌ Pending |
+| Patient — Check-In (QR / confirm) | `apps/patient-mobile/src/app/(tabs)/checkin.tsx` | Phase 1.3 ✅ | ✅ Done (session 4) |
+| Patient — Reschedule | new `apps/patient-mobile/src/app/booking/reschedule.tsx` | reschedule logic (not built) | ❌ Pending |
+| Patient — UI states (skeleton/empty/error) | reusable components | — | ❌ Pending |
+| Clinic staff Login (web) | `apps/clinic-web/src/app/(auth)/login/page.tsx` | Phase 1.4 ✅ | ✅ Done (existed) |
+| Clinic Forgot/Reset password (web) | `(auth)/forgot-password`, `reset-password` | Supabase auth | ✅ Done (session 4, logo polish) |
+| New Appointment dialog (staff) | `components/scheduling/NewAppointmentDialog.tsx` | `staff_book_appointment` fn | ✅ Done (session 4) |
+| Add Patient dialog (staff) | modal, reused by New Appointment | Phase 5.2 | ❌ Pending |
+| Table loading/empty states | Appointments + Queue tables | — | ❌ Pending |
+| Platform Console — Login | new `(platform)` route group | Phase 5.3 | ❌ Pending |
+| Platform Console — Shell/nav | `(platform)` layout | Phase 5.3 | ❌ Pending |
+| Platform — Overview | `(platform)/overview` | Phase 5.3 | ❌ Pending |
+| Platform — Clinics + detail | `(platform)/clinics` | Phase 5.3 | ❌ Pending |
+| Platform — Doctors | `(platform)/doctors` | Phase 5.3 | ❌ Pending |
+| Platform — Patients | `(platform)/patients` | Phase 5.3 | ❌ Pending |
+| Platform — Onboard Clinic | `(platform)/onboard` | Phase 5.3 | ❌ Pending |
+
+---
+
+## Session 4 — What Was Built (2026-06-26)
+
+### Group B screens — first batch
+
+**Patient — Check-In screen** (`apps/patient-mobile/src/app/(tabs)/checkin.tsx`)
+- Replaced placeholder (scan icon + static buttons) with a live screen that fetches today's appointments for the logged-in patient.
+- Each appointment card shows doctor avatar, status pill (Confirmed / Checked In), and appointment time.
+- **Pre-check-in state**: displays a 6-char appointment code (last 6 hex chars of UUID) to show at the reception desk. Staff enter it on the web app to trigger `check_in_appointment()`.
+- **Checked-in state**: shows "You're in the queue" badge + "Track Queue" button that navigates to `/queue/[entryId]`.
+- Empty state: two buttons (View All Appointments, Find Clinic) + walk-in hint.
+- Walk-in card at the bottom for patients with appointments who also want to join another queue.
+
+**New Appointment dialog** (staff web — `apps/clinic-web/src/components/scheduling/NewAppointmentDialog.tsx`)
+- 4-step wizard: Find Patient → Select Doctor → Pick Time Slot → Confirm + Notes.
+- Step 1: phone number lookup via `lookupPatientByPhone()` server action; shows error if patient hasn't registered in the app.
+- Step 2: doctor list loaded from `fetchClinicDoctors()` server action.
+- Step 3: date picker + available slot grid loaded via `fetchSlotsForDialog()` (uses existing `getDoctorSlotsForDate` query); date change re-fetches slots.
+- Step 4: summary card + optional notes textarea; submit calls `createStaffAppointment()`.
+- Success state: green checkmark screen, closes dialog and revalidates `/appointments`.
+- Wired into the "New Appointment" button in `appointments/page.tsx` (replaced the static `<Button>`).
+
+**New migration**: `supabase/migrations/20260626000001_staff_book_appointment_fn.sql`
+- `staff_book_appointment()` function — same atomic slot-claim logic as `book_appointment()` but auth check verifies clinic staff instead of requiring caller == patient.
+- **Must be applied manually** in Supabase SQL Editor.
+
+**New server actions** added to `apps/clinic-web/src/lib/actions/appointments.ts`:
+- `createStaffAppointment(params)` — looks up patient by phone, calls `staff_book_appointment` RPC
+- `lookupPatientByPhone(phone)` — returns `{ id, fullName }` or null
+- `fetchSlotsForDialog(clinicId, doctorId, date)` — wraps `getDoctorSlotsForDate` for client use
+- `fetchClinicDoctors(clinicId)` — returns list of `{ id, name, specialization }` for active clinic staff
+
+**Auth pages logo polish** (clinic-web)
+- `forgot-password/page.tsx` and `reset-password/page.tsx`: replaced plain text `<h1>CareFlow</h1>` with `<Image src="/logo.png">` to match login page.
 
 ---
 
@@ -207,9 +243,10 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 - **expo-notifications crash in Expo Go (SDK 53+)** — Fixed in session 2 & 3: lazy import + full try/catch around API calls. Works in a dev build with EAS.
 - **Fake "Live Queue Updates" data** in `queue/[queueId].tsx` — hardcoded scripted feed + hardcoded timestamps. Explicitly out of scope for now (Phase 2 handles real push; the fake feed is a separate cleanup).
 - **Realtime needs manual setup** in Supabase dashboard: Database → Replication → toggle on `queue_entries` + `queues`, then run `ALTER TABLE queue_entries REPLICA IDENTITY FULL;`.
-- **Two pending migrations not yet applied** (written before Phase 1):
+- **Three pending migrations not yet applied**:
   - `supabase/migrations/20260620000000_doctor_breaks.sql` — doctor break slots
-  - `supabase/migrations/20260620000001_book_appointment_fn.sql` — `book_appointment()` function
+  - `supabase/migrations/20260620000001_book_appointment_fn.sql` — `book_appointment()` patient function
+  - `supabase/migrations/20260626000001_staff_book_appointment_fn.sql` — `staff_book_appointment()` for New Appointment dialog
 - **Phase 2 push requires one-time setup:**
   - Supabase Vault secret `send_notification_url` pointing to the Edge Function URL.
   - `pg_cron` extension enabled for the reminder job.
@@ -257,6 +294,21 @@ await supabase.rpc("check_in_appointment", { p_appointment_id: appointmentId });
 ```typescript
 await supabase.rpc("cancel_appointment", { p_appointment_id: appointmentId });
 // Frees the time_slot and removes any active queue entry
+```
+
+### Staff book appointment (correct call)
+```typescript
+await supabase.rpc("staff_book_appointment", {
+  p_patient_id: patientId,
+  p_doctor_id:  doctorId,
+  p_clinic_id:  clinicId,
+  p_slot_date:  "YYYY-MM-DD",
+  p_start_time: "HH:MM:00",
+  p_end_time:   "HH:MM:00",
+  p_notes:      null,
+});
+// Returns appointment ID. Auth check: caller must be active clinic_staff of this clinic.
+// Different from book_appointment() which checks caller == patient.
 ```
 
 ### Never do

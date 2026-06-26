@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { Plus } from "lucide-react";
 import { getMYTToday } from "@careflow/shared";
 import { requireRole } from "@/lib/auth";
 import { getDoctorSlotsForDate } from "@/lib/queries/slots";
@@ -7,7 +6,7 @@ import { getClinicAppointments } from "@/lib/queries/appointments";
 import { ScheduleBoard } from "@/components/scheduling/ScheduleBoard";
 import { AppointmentList } from "@/components/scheduling/AppointmentList";
 import { DateNav } from "@/components/scheduling/DateNav";
-import { Button } from "@/components/ui/button";
+import { NewAppointmentDialog } from "@/components/scheduling/NewAppointmentDialog";
 
 export default async function AppointmentsPage({
   searchParams,
@@ -60,10 +59,7 @@ export default async function AppointmentsPage({
               Slots
             </a>
           </div>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-1.5" />
-            New Appointment
-          </Button>
+          <NewAppointmentDialog clinicId={user.clinicId ?? ""} />
         </div>
       </div>
 

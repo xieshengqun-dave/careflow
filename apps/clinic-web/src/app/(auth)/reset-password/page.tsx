@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -31,8 +32,8 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/50">
       <div className="w-full max-w-md px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary">CareFlow</h1>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <Image src="/logo.png" alt="CareFlow" width={180} height={80} priority />
         </div>
         <Card>
           <CardHeader>
