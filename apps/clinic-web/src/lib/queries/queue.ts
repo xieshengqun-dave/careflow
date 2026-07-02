@@ -1,5 +1,12 @@
 import { createServerClient } from "@/lib/supabase/server";
-import { getMYTToday } from "@careflow/shared";
+import {
+  getMYTToday,
+  computeQueueEstimates,
+  getEstimatedDuration,
+  FALLBACK_DURATION_MINUTES,
+  type DoctorDurationProfile,
+  type QueueEntryInput,
+} from "@careflow/shared";
 
 export type QueueEntryStatus = "WAITING" | "CALLED" | "IN_CONSULTATION" | "COMPLETED" | "SKIPPED" | "REMOVED";
 export type QueueEntryType = "APPOINTMENT" | "WALK_IN";
@@ -12,6 +19,14 @@ export interface QueueEntryData {
   status: QueueEntryStatus;
   joinedAt: string;
   calledAt: string | null;
+  patientName: string;
+  patientPhone: string | null;
+  treatmentType: string | null;
+  estimatedDurationMinutes: number | null;
+  actualDurationMinutes: number | null;
+  scheduledStartTime: string | null;
+  arrivalStatus: string | null;
+  estimatedWaitMinutes: number | null; // computed by queue engine, set on WAITING entries
 }
 
 /** A single row in the combined, cross-doctor "Current Queue" table. */
@@ -136,6 +151,7 @@ export interface DoctorQueueData {
   doctorId: string;
   doctorName: string;
   specialization: string | null;
+  isPaused: boolean;
   waiting: QueueEntryData[];
   called: QueueEntryData[];
   inConsultation: QueueEntryData | null;
@@ -153,6 +169,7 @@ export interface QueuePageData {
 }
 
 function mapEntry(e: Record<string, unknown>): QueueEntryData {
+  const profile = e.profiles as unknown as { full_name: string | null; phone_number: string | null } | null;
   return {
     id: e.id as string,
     queueNumber: e.queue_number as number,
@@ -161,6 +178,26 @@ function mapEntry(e: Record<string, unknown>): QueueEntryData {
     status: e.status as QueueEntryStatus,
     joinedAt: e.joined_at as string,
     calledAt: (e.called_at as string | null) ?? null,
+    patientName: profile?.full_name ?? "Patient",
+    patientPhone: profile?.phone_number ?? null,
+    treatmentType: (e.treatment_type as string | null) ?? null,
+    estimatedDurationMinutes: (e.estimated_duration_minutes as number | null) ?? null,
+    actualDurationMinutes: (e.actual_duration_minutes as number | null) ?? null,
+    scheduledStartTime: (e.scheduled_start_time as string | null) ?? null,
+    arrivalStatus: (e.arrival_status as string | null) ?? null,
+    estimatedWaitMinutes: null, // populated by queue engine after mapping
+  };
+}
+
+function toEngineInput(e: QueueEntryData): QueueEntryInput {
+  return {
+    id: e.id,
+    priority: e.priority,
+    queueNumber: e.queueNumber,
+    status: e.status,
+    calledAt: e.calledAt ? new Date(e.calledAt) : null,
+    estimatedDurationMinutes: e.estimatedDurationMinutes,
+    treatmentType: e.treatmentType,
   };
 }
 
@@ -168,12 +205,13 @@ export async function getTodayQueueData(clinicId: string): Promise<QueuePageData
   const supabase = await createServerClient();
   const today = getMYTToday();
 
-  // Fetch today's active queues with their entries
+  // Fetch today's active queues with their entries and patient profiles
   const { data: queuesData } = await supabase
     .from("queues")
     .select(`
       id,
       doctor_id,
+      is_paused,
       queue_entries (
         id,
         queue_number,
@@ -181,7 +219,13 @@ export async function getTodayQueueData(clinicId: string): Promise<QueuePageData
         priority,
         status,
         joined_at,
-        called_at
+        called_at,
+        treatment_type,
+        estimated_duration_minutes,
+        actual_duration_minutes,
+        scheduled_start_time,
+        arrival_status,
+        profiles ( full_name, phone_number )
       )
     `)
     .eq("clinic_id", clinicId)
@@ -216,24 +260,68 @@ export async function getTodayQueueData(clinicId: string): Promise<QueuePageData
     });
   }
 
+  // Fetch doctor treatment stats to power the queue engine (gracefully skipped if migration pending)
+  const doctorIds = (queuesData ?? []).map((q) => q.doctor_id as string).filter(Boolean);
+  const profileMap = new Map<string, DoctorDurationProfile>();
+  if (doctorIds.length > 0) {
+    const { data: statsData } = await supabase
+      .from("doctor_treatment_stats" as "queue_entries") // cast: table not in generated types yet
+      .select("doctor_id, treatment_type, avg_duration_minutes")
+      .in("doctor_id" as "id", doctorIds);
+
+    for (const stat of (statsData as unknown as Array<{ doctor_id: string; treatment_type: string; avg_duration_minutes: number | null }>) ?? []) {
+      if (!profileMap.has(stat.doctor_id)) {
+        profileMap.set(stat.doctor_id, { defaultMinutes: FALLBACK_DURATION_MINUTES, byTreatmentType: {} });
+      }
+      if (stat.avg_duration_minutes != null) {
+        profileMap.get(stat.doctor_id)!.byTreatmentType[stat.treatment_type] = Number(stat.avg_duration_minutes);
+      }
+    }
+  }
+  const defaultProfile: DoctorDurationProfile = { defaultMinutes: FALLBACK_DURATION_MINUTES, byTreatmentType: {} };
+
   // Build active queues
   const activeQueues: DoctorQueueData[] = (queuesData ?? []).map((queue) => {
     const docInfo = doctorMap.get(queue.doctor_id as string);
     const entries = (queue.queue_entries as unknown as Array<Record<string, unknown>>) ?? [];
+    const isPaused = (queue.is_paused as unknown as boolean) ?? false;
 
     const activeEntries = entries
       .filter((e) => ["WAITING", "CALLED", "IN_CONSULTATION"].includes(e.status as string))
       .map(mapEntry)
       .sort((a, b) => a.priority - b.priority || a.queueNumber - b.queueNumber);
 
+    const waiting = activeEntries.filter((e) => e.status === "WAITING");
+    const called = activeEntries.filter((e) => e.status === "CALLED");
+    const inConsultation = activeEntries.find((e) => e.status === "IN_CONSULTATION") ?? null;
+
+    // Compute wait estimates for WAITING entries using the queue engine
+    const profile = profileMap.get(queue.doctor_id as string) ?? defaultProfile;
+    const activeForEngine = inConsultation ?? called[0] ?? null;
+    const estimates = computeQueueEstimates({
+      waitingEntries: waiting.map(toEngineInput),
+      activeEntry: activeForEngine ? toEngineInput(activeForEngine) : null,
+      profile,
+    });
+    const estimateMap = new Map(estimates.map((e) => [e.entryId, e.estimatedWaitMinutes]));
+
+    // Seed estimated_duration_minutes on entries that don't have it stored yet
+    const waitingWithEstimates = waiting.map((e) => ({
+      ...e,
+      estimatedWaitMinutes: estimateMap.get(e.id) ?? null,
+      estimatedDurationMinutes:
+        e.estimatedDurationMinutes ?? getEstimatedDuration(e.treatmentType, profile),
+    }));
+
     return {
       queueId: queue.id as string,
       doctorId: queue.doctor_id as string,
       doctorName: docInfo?.name ?? "Doctor",
       specialization: docInfo?.specialization ?? null,
-      waiting: activeEntries.filter((e) => e.status === "WAITING"),
-      called: activeEntries.filter((e) => e.status === "CALLED"),
-      inConsultation: activeEntries.find((e) => e.status === "IN_CONSULTATION") ?? null,
+      isPaused,
+      waiting: waitingWithEstimates,
+      called,
+      inConsultation,
     };
   });
 

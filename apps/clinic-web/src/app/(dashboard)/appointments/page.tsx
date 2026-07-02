@@ -14,7 +14,7 @@ export default async function AppointmentsPage({
   searchParams: Promise<{ date?: string; view?: string }>;
 }) {
   const user = await requireRole(["doctor", "receptionist", "clinic_admin", "super_admin"]);
-  if (!user) redirect("/login");
+  if (!user) redirect("/unauthorized");
 
   const { date, view } = await searchParams;
   const selectedDate = date ?? getMYTToday();
@@ -76,7 +76,7 @@ export default async function AppointmentsPage({
       {activeView === "slots" ? (
         <ScheduleBoard doctors={doctors} date={selectedDate} />
       ) : (
-        <AppointmentList appointments={appointments} />
+        <AppointmentList appointments={appointments} clinicId={user.clinicId ?? ""} />
       )}
     </div>
   );

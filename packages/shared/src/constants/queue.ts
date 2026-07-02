@@ -17,3 +17,14 @@ export const QUEUE_STATUS_LABEL: Record<QueueEntryStatus, string> = {
 
 export const DEFAULT_CONSULTATION_MINUTES = 15;
 export const MALAYSIA_TIMEZONE = "Asia/Kuala_Lumpur";
+
+/** Treatment type display labels — must stay in sync with AddWalkInDialog quick-select pills. */
+export const TREATMENT_TYPE_LABELS = [
+  "Checkup",
+  "Cleaning",
+  "Filling",
+  "Extraction",
+  "Root Canal",
+  "Crown",
+  "Other",
+] as const;

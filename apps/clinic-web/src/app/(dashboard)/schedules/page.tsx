@@ -24,7 +24,7 @@ async function getDoctorsWithSchedules(clinicId: string) {
 
 export default async function SchedulesPage() {
   const user = await requireRole(["doctor", "clinic_admin", "super_admin"]);
-  if (!user) redirect("/login");
+  if (!user) redirect("/unauthorized");
 
   const doctors = user.clinicId ? await getDoctorsWithSchedules(user.clinicId) : [];
   const canManage = user.role === "clinic_admin" || user.role === "super_admin";

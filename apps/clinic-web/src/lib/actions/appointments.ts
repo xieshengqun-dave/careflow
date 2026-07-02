@@ -3,6 +3,7 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { getDoctorSlotsForDate } from "@/lib/queries/slots";
+import { classifyArrival, getEstimatedDuration, FALLBACK_DURATION_MINUTES } from "@careflow/shared";
 
 export async function fetchSlotsForDialog(
   clinicId: string,
@@ -64,8 +65,35 @@ export async function updateAppointmentStatus(
 
 export async function checkInAppointment(appointmentId: string): Promise<{ error?: string }> {
   const supabase = await createServerClient();
-  const { error } = await supabase.rpc("check_in_appointment", { p_appointment_id: appointmentId });
+
+  // Fetch slot time + treatment type for enrichment (before the RPC so we have the data ready)
+  const { data: appt } = await supabase
+    .from("appointments")
+    .select("appointment_date, treatment_type, time_slots(start_time)")
+    .eq("id", appointmentId)
+    .maybeSingle();
+
+  const { data: entryId, error } = await supabase.rpc("check_in_appointment", { p_appointment_id: appointmentId });
   if (error) return { error: error.message };
+
+  // Enrich entry with arrival status and estimated duration (best-effort)
+  if (entryId && appt) {
+    const slot = appt.time_slots as { start_time: string } | Array<{ start_time: string }> | null;
+    const startTime = Array.isArray(slot) ? slot[0]?.start_time : slot?.start_time;
+    const scheduledStart = startTime
+      ? new Date(`${appt.appointment_date}T${startTime}+08:00`)
+      : null;
+    const arrivalStatus = scheduledStart ? classifyArrival(scheduledStart, new Date()) : null;
+    const estimatedMinutes = getEstimatedDuration(
+      (appt.treatment_type as string | null) ?? null,
+      { defaultMinutes: FALLBACK_DURATION_MINUTES, byTreatmentType: {} },
+    );
+    const enrichment: Record<string, unknown> = { estimated_duration_minutes: estimatedMinutes };
+    if (scheduledStart) enrichment.scheduled_start_time = scheduledStart.toISOString();
+    if (arrivalStatus) enrichment.arrival_status = arrivalStatus;
+    await supabase.from("queue_entries").update(enrichment as never).eq("id", entryId as string);
+  }
+
   revalidatePath("/appointments");
   revalidatePath("/queue");
   return {};
@@ -99,6 +127,7 @@ export interface StaffBookingParams {
   startTime: string;
   endTime: string;
   notes?: string;
+  treatmentType?: string;
 }
 
 export async function createStaffAppointment(
@@ -110,8 +139,8 @@ export async function createStaffAppointment(
   const { data: profile } = await supabase
     .from("profiles")
     .select("id")
-    .eq("phone", params.patientPhone)
-    .single();
+    .eq("phone_number", params.patientPhone)
+    .maybeSingle();
 
   if (!profile) {
     return { error: "No patient found with this phone number. Ask them to register via the patient app first." };
@@ -136,6 +165,14 @@ export async function createStaffAppointment(
     return { error: hint };
   }
 
+  // Save treatment type on the appointment (the RPC predates this column)
+  if (data && params.treatmentType) {
+    await supabase
+      .from("appointments")
+      .update({ treatment_type: params.treatmentType })
+      .eq("id", data as string);
+  }
+
   revalidatePath("/appointments");
   return { appointmentId: data as string };
 }
@@ -147,8 +184,53 @@ export async function lookupPatientByPhone(
   const { data } = await supabase
     .from("profiles")
     .select("id, full_name")
-    .eq("phone", phone)
-    .single();
+    .eq("phone_number", phone)
+    .maybeSingle();
   if (!data) return null;
   return { id: data.id, fullName: data.full_name ?? "" };
+}
+
+export async function rescheduleAppointment(
+  appointmentId: string,
+  newDate: string,
+  newStartTime: string,
+): Promise<{ error?: string }> {
+  const supabase = await createServerClient();
+
+  // Get current appointment to find doctor and old slot
+  const { data: appt } = await supabase
+    .from("appointments")
+    .select("slot_id, doctor_id")
+    .eq("id", appointmentId)
+    .maybeSingle();
+
+  if (!appt) return { error: "Appointment not found" };
+
+  // Find the new slot by doctor + date + start time
+  const { data: newSlot } = await supabase
+    .from("time_slots")
+    .select("id, status")
+    .eq("doctor_id", appt.doctor_id)
+    .eq("slot_date", newDate)
+    .eq("start_time", newStartTime.length === 5 ? `${newStartTime}:00` : newStartTime)
+    .maybeSingle();
+
+  if (!newSlot) return { error: "Slot not found for this date and time" };
+  if (newSlot.status !== "AVAILABLE") return { error: "This slot is no longer available" };
+
+  // Free old slot, book new slot, update appointment
+  if (appt.slot_id) {
+    await supabase.from("time_slots").update({ status: "AVAILABLE" }).eq("id", appt.slot_id);
+  }
+  await supabase.from("time_slots").update({ status: "BOOKED" }).eq("id", newSlot.id);
+
+  const { error } = await supabase
+    .from("appointments")
+    .update({ slot_id: newSlot.id, appointment_date: newDate, status: "CONFIRMED" })
+    .eq("id", appointmentId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/appointments");
+  return {};
 }

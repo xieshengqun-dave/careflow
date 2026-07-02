@@ -1,6 +1,6 @@
 # CareFlow — Session Handoff
 
-**Last updated:** 2026-06-26 (session 4)
+**Last updated:** 2026-07-02 (Session 9 — treatment templates implemented; chair management planned)
 **Branch:** `main`
 **Repo:** https://github.com/xieshengqun-dave/careflow (private)
 
@@ -16,7 +16,7 @@ Phases come from `CAREFLOW_FIX_PROMPT.md`. Work done in order — each phase com
 | **Phase 2** | Push notifications (device tokens, Edge Function, event triggers) | ✅ **Done** — commits `dc432be`, `4bd88ad` |
 | **Phase 3** | Operational gaps (slot generation cron, wait estimates, skip recovery, audit log) | ✅ **Done** — commit `2f0b06e` |
 | **Phase 4** | Polish / data quality (no-show rate fix, PENDING enum, migration dedup, doc fix) | ✅ **Done** — commit `9dc793f` |
-| **Phase 5** | Multi-tenant platform (real OTP login, patients module, super_admin/platform console) | ❌ **Pending** |
+| **Phase 5** | Multi-tenant platform (real OTP login, patients module, super_admin/platform console) | 🔄 **In Progress** — Phase 5.3 (super admin / platform console) done; 5.1 (OTP login) + 5.2 (patients module) pending |
 | **Phase 6** | Design fidelity (token audit, screen-by-screen rebuild against design_handoff_careflow/) | 🔄 **In Progress** — patient-mobile done; clinic-web Appointments + Schedule + Queue done; Dashboard pending further polish |
 
 ---
@@ -186,6 +186,188 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 
 ---
 
+## Session 7 — Platform Console Staff Fix (2026-06-30)
+
+### Root Cause Analysis
+
+Three compounding bugs caused the staff management page to show wrong data for all clinics:
+
+**Bug 1 — RLS blocked `createServerClient()` for platform admin**
+`getClinicStaff()` used `createServerClient()` which respects Supabase RLS. Platform admins (`admin@careflow.asia`) have no `clinic_id` in their JWT `app_metadata`, so the RLS policy on `clinic_staff` silently returned empty rows — no error thrown, just zero results.
+
+**Bug 2 — `user.clinicId ?? scopeClinicId` wrong operand order**
+If the platform admin also exists in `clinic_staff` (e.g., with `role = SUPER_ADMIN` from a test row), `getServerUser()` falls through to the `clinic_staff` branch if the `platform_admins` query returns null. This yields `user.clinicId = (that staff row's clinic_id)` — a non-null value. `user.clinicId ?? scopeClinicId` then ignores the URL param entirely and scopes all queries to that one wrong clinic, making every Manage Staff page show the same staff.
+
+**Bug 3 — SUPER_ADMIN rows leaking into staff list**
+`clinic_staff` rows with `role = SUPER_ADMIN` were included in results because there was no role filter. Platform admin appeared as "Admin User / Super Admin" on every clinic's staff page.
+
+### What Was Fixed
+
+**`apps/clinic-web/src/lib/actions/settings.ts`**
+- `getClinicStaff`: switched to `createAdminClient()` to bypass RLS
+- `getClinicStaff`: changed `user.clinicId ?? scopeClinicId` → `scopeClinicId ?? user.clinicId` so URL param always wins
+- `getClinicStaff`: added `if (!targetClinicId) return []` early exit + moved `.eq("clinic_id", targetClinicId)` to first filter (unconditional)
+- `getClinicStaff`: added `.in("role", ["DOCTOR", "RECEPTIONIST", "CLINIC_ADMIN"])` to exclude SUPER_ADMIN rows
+- `getClinicStaff`: now fetches auth email per staff member via `auth.admin.getUserById()`; falls back to email then userId if `full_name` is null
+- `setStaffRole`: switched to `createAdminClient()` + proper conditional query reassignment
+
+**`apps/clinic-web/src/components/settings/StaffPasswordManager.tsx`**
+- Added `email` field to `StaffMember` interface; shows email under each staff row for identity confirmation
+
+**`apps/clinic-web/src/app/(platform)/platform/clinics/[clinicId]/page.tsx`**
+- Added `export const dynamic = "force-dynamic"` to prevent caching
+- Shows account count + last-8-chars clinic ID in subtitle for debugging
+
+### Key Lesson
+When a Supabase filter appears to have no effect, the cause is almost always one of: (1) RLS blocking the query silently (empty result, no error), (2) wrong `??` operand order causing the explicit scope to be ignored, (3) wrong client type (`createServerClient` vs `createAdminClient`). Add `console.log(targetClinicId, data?.length, error)` *first* before changing filter logic.
+
+---
+
+## Session 6 — Smart Queue Foundation (2026-06-29)
+
+### What Was Built
+
+**Goal:** Give every queue entry tracked estimated duration, actual duration, arrival status, and wait time. Design the architecture so future AI optimisation can plug in without refactoring the caller layer.
+
+### Architecture
+
+```
+DB layer:    queue_entries + doctor_treatment_stats  (schema additions + RPC)
+Shared pkg:  packages/shared/src/utils/queueEngine.ts  (pure functions)
+Query layer: lib/queries/queue.ts                   (compute estimates server-side)
+Action layer: lib/actions/queue.ts + appointments.ts  (enrich entries at key events)
+UI layer:    DoctorQueueColumns.tsx                 (display wait time + arrival badge)
+```
+
+The engine (`queueEngine.ts`) is a pure-function module — no DB access, no side effects, fully testable. The AI hook is `rankQueueEntries()`: currently rule-based (priority → FIFO), but its signature is stable so callers never change when an ML model is wired in.
+
+### New Migration — `20260629000003_smart_queue_foundation.sql`
+**Run this in Supabase SQL Editor.**
+
+- `queue_entries`: adds `estimated_duration_minutes`, `actual_duration_minutes`, `scheduled_start_time`, `arrival_status` (EARLY/ON_TIME/LATE/NO_SHOW)
+- `appointments`: adds `estimated_duration_minutes`
+- New table `doctor_treatment_stats(doctor_id, treatment_type, sample_count, total_duration_minutes, avg_duration_minutes [generated], min/max, updated_at)` — accumulates real data each time a consultation completes
+- New RPC `record_consultation_complete(p_entry_id)` — atomically marks COMPLETED, sets `actual_duration_minutes`, upserts into `doctor_treatment_stats`
+
+### New Shared Package — `queueEngine.ts`
+Exported via `@careflow/shared`:
+
+| Export | Purpose |
+|---|---|
+| `DEFAULT_TREATMENT_DURATIONS` | Global default durations by treatment type |
+| `FALLBACK_DURATION_MINUTES` (30) | When no type or history exists |
+| `DoctorDurationProfile` | `{ defaultMinutes, byTreatmentType }` |
+| `QueueEntryInput` | Minimal entry shape for engine input |
+| `QueuePositionEstimate` | `{ entryId, positionFromNow, estimatedStartTime, estimatedEndTime, estimatedWaitMinutes }` |
+| `rankQueueEntries()` | **AI hook** — currently priority→FIFO |
+| `getEstimatedDuration()` | Doctor profile → treatment type → global default → fallback |
+| `classifyArrival()` | Returns EARLY/ON_TIME/LATE based on scheduled vs actual arrival |
+| `computeActualDuration()` | called_at → completed_at in minutes |
+| `computeQueueEstimates()` | Produces `QueuePositionEstimate[]` for all WAITING entries |
+
+### Changes to Existing Files
+
+**`lib/queries/queue.ts`**
+- `QueueEntryData`: added `estimatedDurationMinutes`, `actualDurationMinutes`, `scheduledStartTime`, `arrivalStatus`, `estimatedWaitMinutes`
+- `getTodayQueueData`: selects the 4 new columns; fetches `doctor_treatment_stats`; calls `computeQueueEstimates` per doctor queue; populates `estimatedWaitMinutes` on each WAITING entry
+
+**`lib/actions/queue.ts`**
+- `completeConsultation`: now calls `record_consultation_complete` RPC (records duration + updates stats); falls back to direct update if migration hasn't been applied
+- `addWalkIn`: captures the entry `id` returned by `join_queue` RPC; sets `estimated_duration_minutes` based on treatment type
+- `quickCheckInByCode`: captures entry `id` returned by `check_in_appointment` RPC; calls `enrichCheckInEntry` to set `scheduled_start_time`, `arrival_status`, `estimated_duration_minutes`
+- New private helper `enrichCheckInEntry(supabase, entryId, appt)` — shared by both code and phone check-in paths
+
+**`lib/actions/appointments.ts`**
+- `checkInAppointment`: same enrichment via `classifyArrival` + `getEstimatedDuration`; best-effort (silently ignored if migration pending)
+
+**`components/queue/DoctorQueueColumns.tsx`**
+- WAITING entries: shows `~Xm` estimated wait (amber if >30 min)
+- IN_CONSULTATION entries: shows elapsed time since called_at
+- APPOINTMENT entries: shows LATE/EARLY arrival badge (ON_TIME hidden to reduce noise)
+
+### Graceful Degradation
+All enrichment updates use `as never` type cast and don't check errors — they fail silently if migration 20260629000003 hasn't been applied. Core check-in/complete functionality still works without the migration.
+
+---
+
+## Session 5 — Receptionist Workflow Redesign (2026-06-29)
+
+### What Was Built
+
+**Phase: Dental Clinic Workflow Redesign** — full redesign of the reception experience based on a workflow analysis for a 3-dentist, 5-chair Malaysian dental clinic.
+
+**Key success criteria met:**
+| Workflow | Before | After |
+|---|---|---|
+| Check-in | ~25 seconds (navigate + search) | ~7 seconds (type code + Enter) |
+| Walk-in | ~55 seconds (7 steps, phone required) | ~20 seconds (name only, optional phone) |
+| Emergency | ~75 seconds (9 steps) | ~8 seconds (Emergency button) |
+| Reschedule | Not possible (cancel + rebook) | ~15 seconds (new Reschedule button) |
+| Queue visibility | Requires navigation | Always on screen |
+| Change dentist | ~90 seconds | 3 clicks (Reassign dropdown) |
+
+**New: Quick Check-in Bar** (`components/queue/QuickCheckIn.tsx`)
+- Persistent input at top of Queue Management page — type appointment code (6-char hex) or phone number
+- Auto-detects code vs phone; searches today's CONFIRMED appointments client-side
+- The 6-char code on the patient app NOW WORKS for the first time — closes the biggest UX gap
+- Toast confirms: "Ali Hassan — checked in"
+
+**New: Emergency Button** (`components/queue/EmergencyButton.tsx`)
+- Red button in the top action bar
+- Minimal overlay: name only required (no phone)
+- Creates a guest profile automatically
+- Priority 1 auto-places at front of queue — no "Move to Top" step needed
+- Doctor selector shows live queue depths
+
+**New: Per-Doctor Queue Columns** (`components/queue/DoctorQueueColumns.tsx`)
+- Replaces the combined mixed-doctor list
+- One card column per doctor, side by side
+- Each column: doctor name, status badge, waiting count, per-column Call Next button
+- IN_CONSULTATION / CALLED entries highlighted in green/blue
+- Emergency patients shown with red "!" badge
+- Treatment type shown inline
+- Click any patient to open detail panel
+
+**Redesigned: Queue Management View** (`components/queue/QueueManagementView.tsx`)
+- New layout: Quick Check-in bar → stats → Doctor Columns + detail panel
+- Detail panel now includes:
+  - Separate "Call" (specific patient) vs column-level "Call Next"
+  - "Complete Consultation" button when patient is in chair
+  - "Reassign to doctor" dropdown — moves patient to another doctor's queue in 3 clicks
+  - All existing actions (pause, delay notify, skip, remove, requeue)
+
+**Walk-in improvements** (`components/queue/AddWalkInDialog.tsx`)
+- Phone number now **optional** — no longer blocks walk-ins without phones
+- Doctor selector shows live queue depths: "Dr. Ahmad (3 waiting)"
+- Treatment type quick-select: Checkup / Cleaning / Filling / Extraction / Root Canal / Crown / Other
+
+**New: Reschedule Button** (`components/scheduling/AppointmentList.tsx` + `RescheduleDialog.tsx`)
+- "Reschedule" button on every CONFIRMED/PENDING appointment row
+- Shows current appointment summary, date picker, available slots for same doctor
+- Atomically frees old slot + books new slot (direct DB update, same as patient-side reschedule)
+- Success state with confirmation
+
+**Overdue appointment highlighting** (`AppointmentList.tsx`)
+- CONFIRMED appointments 15+ minutes past their slot time get amber background + alert icon
+- "X Overdue — Mark No Show" sweep button appears in the filter bar when overdue exist
+- Single click marks all overdue as NO_SHOW
+
+**Bug fixes included:**
+- `profiles.phone` → `profiles.phone_number` in `queries/appointments.ts` (fixes silent empty appointment list bug)
+- Same fix in `actions/appointments.ts` (`lookupPatientByPhone` and `createStaffAppointment`)
+- `.single()` → `.maybeSingle()` in `lookupPatientByPhone` and `createStaffAppointment`
+
+**New server actions:**
+- `quickCheckInByCode(code)` — check in by appointment code or phone
+- `addEmergency({ name, queueId })` — priority-1 guest walk-in
+- `reassignEntry(entryId, targetQueueId)` — move patient between doctor queues
+- `rescheduleAppointment(appointmentId, newDate, newStartTime)` — atomic reschedule
+
+**New migration:**
+- `supabase/migrations/20260629000002_treatment_type.sql` — adds `treatment_type TEXT` column to `appointments` and `queue_entries`. Run in Supabase SQL Editor before using treatment type.
+
+---
+
 ## Session 4 — What Was Built (2026-06-26)
 
 ### Group B screens — first batch
@@ -267,11 +449,13 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 - **expo-notifications crash in Expo Go (SDK 53+)** — Fixed in session 2 & 3: lazy import + full try/catch around API calls. Works in a dev build with EAS.
 - **Fake "Live Queue Updates" data** in `queue/[queueId].tsx` — hardcoded scripted feed + hardcoded timestamps. Explicitly out of scope for now (Phase 2 handles real push; the fake feed is a separate cleanup).
 - **Realtime needs manual setup** in Supabase dashboard: Database → Replication → toggle on `queue_entries` + `queues`, then run `ALTER TABLE queue_entries REPLICA IDENTITY FULL;`.
-- **Four pending migrations not yet applied**:
-  - `supabase/migrations/20260620000000_doctor_breaks.sql` — doctor break slots
-  - `supabase/migrations/20260620000001_book_appointment_fn.sql` — `book_appointment()` patient function
-  - `supabase/migrations/20260626000001_staff_book_appointment_fn.sql` — `staff_book_appointment()` for New Appointment dialog
-  - `supabase/migrations/20260626000002_reschedule_appointment_fn.sql` — `reschedule_appointment()` for Reschedule screen
+- **All migrations applied** (as of 2026-06-29):
+  - `supabase/migrations/20260620000000_doctor_breaks.sql` ✅
+  - `supabase/migrations/20260620000001_book_appointment_fn.sql` ✅
+  - `supabase/migrations/20260626000001_staff_book_appointment_fn.sql` ✅
+  - `supabase/migrations/20260626000002_reschedule_appointment_fn.sql` ✅
+  - `supabase/migrations/20260629000000_extend_staff_role_enum.sql` ✅ (adds CLINIC_ADMIN + SUPER_ADMIN to staff_role enum)
+  - `supabase/migrations/20260629000001_platform_admins.sql` ✅
 - **Phase 2 push requires one-time setup:**
   - Supabase Vault secret `send_notification_url` pointing to the Edge Function URL.
   - `pg_cron` extension enabled for the reminder job.
@@ -341,6 +525,188 @@ await supabase.rpc("staff_book_appointment", {
 - Import `SafeAreaView` from `"react-native"` — use `react-native-safe-area-context`
 - Select `consultation_fee` anywhere — column doesn't exist, Postgrest silently drops the whole query
 - Use template-literal pathnames in `router.push` — use `pathname: "/route/[param]"` + `params: {}`
+
+---
+
+## Session 8 — Receptionist-First UX (2026-07-01)
+
+### What Was Changed
+
+**Goal:** Queue Board becomes the landing page. Dashboard becomes owner-only. Navigation is simplified by role. Every common receptionist task is reachable in ≤ 3 clicks.
+
+### Files Changed
+
+**`apps/clinic-web/src/middleware.ts`**
+- Post-login redirect changed from `/dashboard` → `/queue`
+- Platform admin redirect (→ `/platform/overview`) unchanged
+- Effect: every staff member who logs in lands on the Queue Board — the screen they use all day
+
+**`apps/clinic-web/src/components/shared/SidebarNav.tsx`**
+- Now accepts `userRole: UserRole` prop (passed from layout)
+- Nav items are role-scoped:
+  - **Receptionist**: Queue, Appointments (2 items — nothing irrelevant)
+  - **Doctor**: Queue, Appointments, My Schedule (3 items)
+  - **Clinic Admin**: Queue, Appointments + Management section (Dashboard, Doctors, Schedules, Settings)
+- Queue is always first
+- Admins see a "Management" section label separating daily-ops from configuration items
+- Extracted `NavLink` sub-component to eliminate the inline repetition
+
+**`apps/clinic-web/src/app/(dashboard)/layout.tsx`**
+- Passes `user.role` to `<SidebarNav userRole={user.role} />`
+- Removed the "CareFlow App" promo card (promotes the patient mobile app which is frozen per Phase 1 roadmap)
+- Sidebar subtitle is now role-specific: "Reception" / "Doctor Portal" / "Admin Portal" (instead of "Clinic Portal" for everyone)
+- Removed unused `Smartphone` import
+
+**`apps/clinic-web/src/app/(dashboard)/dashboard/page.tsx`**
+- Receptionist and Doctor roles are redirected to `/queue` if they land on `/dashboard`
+- Clinic Admins and Super Admins continue to see the Dashboard
+- Note: ROUTE_PERMISSIONS intentionally left unchanged — middleware still allows the route; the page redirects gracefully to `/queue` rather than the harsh `/unauthorized` page
+
+### Before vs After
+
+| Metric | Before | After |
+|---|---|---|
+| Landing page after login | Dashboard (metrics) | Queue Board (live queue) |
+| Nav items for receptionist | 6 (all roles same) | 2 (Queue, Appointments) |
+| Nav items for doctor | 6 | 3 (Queue, Appointments, My Schedule) |
+| Nav items for clinic admin | 6 | 6 (same, now grouped) |
+| Dashboard access | All roles | Clinic Admin + Super Admin only |
+| Sidebar subtitle | "Clinic Portal" always | Role-specific label |
+| Promo card | Shown to everyone | Removed |
+| Clicks to reach Queue (receptionist) | 2 (login → Dashboard → Queue nav) | 0 (login lands on Queue) |
+
+### Workflow Improvements
+
+| Task | Before | After |
+|---|---|---|
+| Start the workday | Login → see metrics → click Queue | Login → Queue Board immediately |
+| Check-in a patient | Navigate to Queue + type code | Already on Queue, type code (1 action) |
+| Add walk-in | Navigate to Queue + click Walk-in | Already on Queue, click Walk-in (1 click) |
+| Add emergency | Navigate to Queue + Emergency button | Already on Queue, Emergency button (1 click) |
+| Receptionist sees Dashboard | Visible (confusing) | Redirected to Queue |
+| Receptionist nav cognitive load | 6 items, must learn which matter | 2 items, all relevant |
+
+---
+
+## Session 9 — Chair Management + Treatment Templates (2026-07-01)
+
+### Status: PLANNED — not yet implemented (filesystem access was blocked during session)
+
+---
+
+### Chair Management — Plan
+
+**Goal:** Model physical chairs as a first-class clinic resource. Queue Board displays live chair status. Appointments and queue entries are assigned to both a doctor and a chair.
+
+#### Database
+- New table `chairs`: `id`, `clinic_id`, `name`, `status` (AVAILABLE / OCCUPIED / CLEANING / RESERVED / OUT_OF_SERVICE), `notes`, `display_order`, `is_active`
+- `queue_entries`: add nullable `chair_id UUID REFERENCES chairs(id) ON DELETE SET NULL`
+- `appointments`: add nullable `chair_id UUID REFERENCES chairs(id) ON DELETE SET NULL`
+- Migration file: `supabase/migrations/20260701000001_chairs.sql`
+- Seed: 3 chairs for CareFlow Family Clinic
+
+#### Status Transition Map
+```
+AVAILABLE  → callNext()           → OCCUPIED
+OCCUPIED   → completeConsultation → CLEANING
+CLEANING   → markClean() (1 click)→ AVAILABLE
+ANY        → outOfService()       → OUT_OF_SERVICE
+OUT_OF_SERVICE → restore()        → AVAILABLE
+```
+Automatic: callNext auto-assigns first AVAILABLE chair; completeConsultation sets CLEANING.
+Manual (1 click): CLEANING→AVAILABLE, ANY→OUT_OF_SERVICE.
+
+#### New Files
+- `supabase/migrations/20260701000001_chairs.sql`
+- `apps/clinic-web/src/lib/queries/chairs.ts` — `getClinicChairs()`, `getChairsWithOccupancy()`
+- `apps/clinic-web/src/lib/actions/chairs.ts` — `updateChairStatus()`, `assignChair()`
+- `apps/clinic-web/src/components/queue/ChairStatusGrid.tsx` — colour-coded grid above doctor columns
+
+#### Modified Files
+- `lib/actions/queue.ts` — `callNext()` auto-assigns chair; `completeConsultation()` sets CLEANING
+- `lib/queries/queue.ts` — include `chairName` on each queue entry
+- `components/queue/QueueManagementView.tsx` — add `<ChairStatusGrid>` above doctor columns
+- `components/queue/DoctorQueueColumns.tsx` — show chair name badge on IN_CONSULTATION cards
+
+---
+
+### Treatment Templates — Plan
+
+**Goal:** Receptionists no longer manually estimate duration. Selecting a treatment auto-fills duration. Clinic owners can configure templates. Architecture supports future AI duration prediction.
+
+#### What Already Exists (reuse)
+- `treatment_type TEXT` on `appointments` + `queue_entries`
+- `DEFAULT_TREATMENT_DURATIONS` hardcoded in `packages/shared/src/utils/queueEngine.ts`
+- `getEstimatedDuration(doctorProfile, treatmentType)` — priority chain already built
+- `doctor_treatment_stats` — accumulates real per-doctor durations
+- Treatment type pills already in `AddWalkInDialog.tsx`
+
+#### Database
+- New table `treatment_templates`: `id`, `clinic_id` (NULL = global default, non-NULL = clinic override), `name`, `duration_minutes`, `display_order`, `is_active`, `ai_suggested_minutes` (nullable), `ai_confidence` (nullable)
+- Unique constraint: `(clinic_id, name)`
+- Migration file: `supabase/migrations/20260701000002_treatment_templates.sql`
+
+#### Global seed defaults
+| Treatment | Duration |
+|---|---|
+| Consultation | 15 min |
+| Scaling | 30 min |
+| Filling | 30 min |
+| Extraction | 45 min |
+| Crown | 60 min |
+| Whitening | 60 min |
+| Root Canal | 90 min |
+| Implant | 120 min |
+
+#### Duration Resolution Priority
+1. Doctor's real history (`doctor_treatment_stats`) — most accurate
+2. AI prediction (`ai_suggested_minutes` when `ai_confidence > 0.7`) — future
+3. Clinic-specific template (`treatment_templates WHERE clinic_id = this clinic`)
+4. Global template (`treatment_templates WHERE clinic_id IS NULL`)
+5. `FALLBACK_DURATION_MINUTES` (30 min)
+
+#### New Files
+- `supabase/migrations/20260701000002_treatment_templates.sql`
+- `apps/clinic-web/src/lib/queries/treatments.ts` — `getTreatmentTemplates(clinicId)`
+- `apps/clinic-web/src/lib/actions/treatments.ts` — `upsertTemplate()`, `deleteTemplate()`
+- `apps/clinic-web/src/components/settings/TreatmentTemplates.tsx` — owner config UI
+
+#### Modified Files
+- `apps/clinic-web/src/app/(dashboard)/settings/page.tsx` — add TreatmentTemplates section (admin only)
+- `apps/clinic-web/src/components/scheduling/NewAppointmentDialog.tsx` — treatment dropdown auto-fills duration
+- `apps/clinic-web/src/components/queue/AddWalkInDialog.tsx` — treatment pills source from DB templates
+- `packages/shared/src/utils/queueEngine.ts` — remove hardcoded map; accept `templateDurations` as param
+
+---
+
+### Treatment Templates — DONE ✅
+
+**Files created:**
+- `supabase/migrations/20260701000002_treatment_templates.sql` — table, RLS, partial unique indexes, global seed (8 treatments)
+- `apps/clinic-web/src/lib/actions/treatments.ts` — `fetchTreatmentTemplates()`, `upsertTreatmentTemplate()`, `deleteTreatmentTemplate()`
+- `apps/clinic-web/src/components/settings/TreatmentTemplates.tsx` — inline-editable table with optimistic updates
+
+**Files modified:**
+- `packages/shared/src/utils/queueEngine.ts` — `getEstimatedDuration()` now accepts optional `templateDurations` param (backward-compatible; AI predictions slot in here in future)
+- `apps/clinic-web/src/components/queue/AddWalkInDialog.tsx` — fetches templates on open; pills sourced from DB; shows `~X min` duration hint when treatment selected; passes `estimatedDurationMinutes` to `addWalkIn`
+- `apps/clinic-web/src/components/scheduling/NewAppointmentDialog.tsx` — treatment type pills in notes step; duration hint displayed; `treatmentType` passed to `createStaffAppointment`
+- `apps/clinic-web/src/lib/actions/queue.ts` — `addWalkIn` accepts `estimatedDurationMinutes`; uses template duration instead of recomputing from engine when provided
+- `apps/clinic-web/src/lib/actions/appointments.ts` — `StaffBookingParams` gains `treatmentType`; saved to appointment after RPC (RPC predates the column)
+- `apps/clinic-web/src/app/(dashboard)/settings/page.tsx` — fetches templates server-side; renders `<TreatmentTemplates>` section above Staff Accounts
+
+**Duration resolution priority (in `getEstimatedDuration`):**
+1. Doctor history (`doctor_treatment_stats`)
+2. Clinic/global template (`templateDurations` param — new)
+3. Hardcoded defaults (`DEFAULT_TREATMENT_DURATIONS` — fallback)
+4. Doctor's default (`profile.defaultMinutes`)
+
+**⚠️ Run migration in Supabase SQL Editor before testing:**
+`supabase/migrations/20260701000002_treatment_templates.sql`
+
+### Pending Implementation Checklist
+- [x] Treatment Templates ✅
+- [ ] Implement Chair Management (migration + queries + actions + UI)
+- [ ] Commit both features
 
 ---
 

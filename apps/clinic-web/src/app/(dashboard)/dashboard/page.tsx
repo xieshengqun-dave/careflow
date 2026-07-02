@@ -22,7 +22,9 @@ import { getMYTToday } from "@careflow/shared";
 
 export default async function DashboardPage() {
   const user = await requireRole(["doctor", "receptionist", "clinic_admin", "super_admin"]);
-  if (!user) redirect("/login");
+  if (!user) redirect("/unauthorized");
+  // Dashboard is owner-only; receptionists and doctors land on the queue board
+  if (user.role === "receptionist" || user.role === "doctor") redirect("/queue");
 
   const todayDate = getMYTToday();
   const now = new Date();

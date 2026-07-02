@@ -18,6 +18,8 @@ export const STAFF_ROLE_MAP: Record<string, UserRole> = {
   DOCTOR: "doctor",
   RECEPTIONIST: "receptionist",
   ADMIN: "clinic_admin",
+  CLINIC_ADMIN: "clinic_admin",
+  SUPER_ADMIN: "super_admin",
 };
 
 export const ROLE_LABELS: Record<UserRole, string> = {

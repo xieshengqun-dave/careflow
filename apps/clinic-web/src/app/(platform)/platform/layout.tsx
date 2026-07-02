@@ -1,32 +1,23 @@
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import { requireRole } from "@/lib/auth";
+import { getServerUser } from "@/lib/auth";
+import { PlatformNav } from "@/components/platform/PlatformNav";
 import { UserMenu } from "@/components/shared/UserMenu";
-import { SidebarNav } from "@/components/shared/SidebarNav";
 import { Separator } from "@/components/ui/separator";
 
-const ROLE_LABELS: Record<string, string> = {
-  receptionist: "Reception",
-  doctor:        "Doctor Portal",
-  clinic_admin:  "Admin Portal",
-};
-
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const user = await requireRole(["doctor", "receptionist", "clinic_admin", "super_admin"]);
-  if (!user) redirect("/unauthorized");
-  if (user.role === "super_admin") redirect("/platform/overview");
+export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
+  const user = await getServerUser();
+  if (!user || user.role !== "super_admin") redirect("/unauthorized");
 
   return (
     <div className="flex h-screen bg-background">
       <aside className="w-60 flex flex-col border-r bg-white shrink-0">
         <div className="p-5">
           <Image src="/logo.png" alt="CareFlow" width={140} height={63} priority />
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {ROLE_LABELS[user.role] ?? "Clinic Portal"}
-          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">Platform Console</p>
         </div>
         <Separator />
-        <SidebarNav userRole={user.role} />
+        <PlatformNav />
         <Separator />
         <div className="p-3">
           <UserMenu user={user} />

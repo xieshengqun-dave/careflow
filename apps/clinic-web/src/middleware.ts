@@ -42,7 +42,22 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isAuthRoute) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/queue", request.url));
+  }
+
+  // Platform admins bypass all route permission checks
+  const { data: platformAdmin } = await supabase
+    .from("platform_admins")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (platformAdmin) {
+    // Redirect platform admins away from clinic dashboard to platform console
+    if (pathname === "/" || pathname.startsWith("/dashboard")) {
+      return NextResponse.redirect(new URL("/platform/overview", request.url));
+    }
+    return response;
   }
 
   const requiredRoles = Object.entries(ROUTE_PERMISSIONS).find(([route]) =>

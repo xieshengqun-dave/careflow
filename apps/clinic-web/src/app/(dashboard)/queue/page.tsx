@@ -5,7 +5,7 @@ import { QueueManagementView } from "@/components/queue/QueueManagementView";
 
 export default async function QueuePage() {
   const user = await requireRole(["doctor", "receptionist", "clinic_admin", "super_admin"]);
-  if (!user) redirect("/login");
+  if (!user) redirect("/unauthorized");
 
   const clinicId = user.clinicId ?? "";
   const [summary, boardData] = await Promise.all([
@@ -13,14 +13,13 @@ export default async function QueuePage() {
     getTodayQueueData(clinicId),
   ]);
 
-  const doctorOptions = boardData.activeQueues.map((q) => ({ queueId: q.queueId, doctorName: q.doctorName }));
   const lastUpdated = new Date().toLocaleTimeString("en-MY", { hour: "numeric", minute: "2-digit" });
 
   return (
     <QueueManagementView
       summary={summary}
+      boardData={boardData}
       clinicId={clinicId}
-      doctorOptions={doctorOptions}
       lastUpdated={lastUpdated}
     />
   );

@@ -1,4 +1,5 @@
 export type QueueEntryType = "APPOINTMENT" | "WALK_IN";
+export type ArrivalStatusValue = "EARLY" | "ON_TIME" | "LATE" | "NO_SHOW";
 
 export type QueuePriority = 1 | 2 | 3;
 

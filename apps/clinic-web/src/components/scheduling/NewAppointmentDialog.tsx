@@ -19,6 +19,7 @@ import {
   fetchSlotsForDialog,
   fetchClinicDoctors,
 } from "@/lib/actions/appointments";
+import { fetchTreatmentTemplates, type TreatmentTemplate } from "@/lib/actions/treatments";
 import { getMYTToday } from "@careflow/shared";
 import { Plus, Search, CheckCircle2, Clock, User } from "lucide-react";
 
@@ -212,13 +213,16 @@ export function NewAppointmentDialog({ clinicId }: NewAppointmentDialogProps) {
 
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [slots, setSlots] = useState<Slot[]>([]);
+  const [templates, setTemplates] = useState<TreatmentTemplate[]>([]);
+  const [treatmentType, setTreatmentType] = useState("");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  // Load doctors when dialog opens
+  // Load doctors + templates when dialog opens
   useEffect(() => {
     if (!open) return;
     fetchClinicDoctors(clinicId).then(setDoctors);
+    fetchTreatmentTemplates(clinicId).then(setTemplates);
   }, [open, clinicId]);
 
   // Load slots when doctor + date changes
@@ -227,11 +231,13 @@ export function NewAppointmentDialog({ clinicId }: NewAppointmentDialogProps) {
     fetchSlotsForDialog(clinicId, doctor.id, date).then(setSlots);
   }, [doctor, date, clinicId]);
 
+  const selectedTemplate = templates.find((t) => t.name === treatmentType);
+
   function reset() {
     setStep("patient");
     setPatientId(""); setPatientName(""); setPatientPhone("");
     setDoctor(null); setDate(getMYTToday()); setStartTime(""); setEndTime("");
-    setNotes(""); setError("");
+    setNotes(""); setTreatmentType(""); setError("");
   }
 
   function handleClose(v: boolean) {
@@ -265,6 +271,7 @@ export function NewAppointmentDialog({ clinicId }: NewAppointmentDialogProps) {
         startTime,
         endTime,
         notes: notes.trim() || undefined,
+        treatmentType: treatmentType || undefined,
       });
       if (result.error) { setError(result.error); return; }
       setStep("done");
@@ -360,6 +367,32 @@ export function NewAppointmentDialog({ clinicId }: NewAppointmentDialogProps) {
               <p className="text-slate-500">{doctor?.name} · {doctor?.specialization ?? "GP"}</p>
               <p className="text-slate-500">{fmt(startTime)} – {fmt(endTime)} · {date}</p>
             </div>
+
+            <div className="space-y-1.5">
+              <Label>Treatment Type <span className="text-slate-400 font-normal">(optional)</span></Label>
+              <div className="flex flex-wrap gap-1.5">
+                {templates.map((t) => (
+                  <button
+                    key={t.name}
+                    type="button"
+                    onClick={() => setTreatmentType(treatmentType === t.name ? "" : t.name)}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      treatmentType === t.name
+                        ? "bg-cf-primary-700 text-white border-cf-primary-700"
+                        : "border-slate-200 text-slate-600 hover:border-cf-primary-300 hover:text-cf-primary-700"
+                    }`}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+              {selectedTemplate && (
+                <p className="text-xs text-slate-400">
+                  Estimated duration: <span className="font-medium text-slate-600">~{selectedTemplate.durationMinutes} min</span>
+                </p>
+              )}
+            </div>
+
             <div className="space-y-1.5">
               <Label htmlFor="notes">Notes (optional)</Label>
               <Textarea
@@ -367,7 +400,7 @@ export function NewAppointmentDialog({ clinicId }: NewAppointmentDialogProps) {
                 placeholder="Reason for visit, special requirements…"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                rows={3}
+                rows={2}
                 className="resize-none"
               />
             </div>

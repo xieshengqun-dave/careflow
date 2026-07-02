@@ -23,7 +23,7 @@ async function getDoctors(clinicId: string) {
 
 export default async function DoctorsPage() {
   const user = await requireRole(["doctor", "receptionist", "clinic_admin", "super_admin"]);
-  if (!user) redirect("/login");
+  if (!user) redirect("/unauthorized");
 
   const doctors = user.clinicId ? await getDoctors(user.clinicId) : [];
   const canManage = user.role === "clinic_admin" || user.role === "super_admin";

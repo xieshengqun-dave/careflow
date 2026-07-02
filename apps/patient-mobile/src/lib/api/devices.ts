@@ -3,9 +3,13 @@ import { Platform } from "react-native";
 import { supabase } from "@/lib/supabase";
 
 export async function registerForPushNotificationsAsync(): Promise<{ token?: string; error?: string }> {
-  // Dynamic import keeps expo-notifications out of the module graph at startup.
-  // It crashes Expo Go on SDK 53+ (remote push removed), which would poison
-  // the React module state and break hooks in the entire app if imported statically.
+  // Expo Go SDK 53+ removed remote push notifications entirely. The native module
+  // throws during construction before any JS try/catch can intercept it, which
+  // poisons React's module state. Bail out before touching expo-notifications.
+  if (Constants.appOwnership === "expo") {
+    return { error: "Push notifications require a development build, not Expo Go" };
+  }
+
   let Notifications: typeof import("expo-notifications");
   try {
     Notifications = await import("expo-notifications");
@@ -13,8 +17,6 @@ export async function registerForPushNotificationsAsync(): Promise<{ token?: str
     return { error: "expo-notifications not available in this environment" };
   }
 
-  // Expo Go (SDK 53+) removes remote push support — the module loads but
-  // individual APIs throw. Wrap everything so the app never crashes here.
   try {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;

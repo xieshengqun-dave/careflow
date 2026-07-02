@@ -7,6 +7,24 @@ export async function getServerUser(): Promise<AuthUser | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
+  // Platform admin check — takes priority over clinic staff
+  const { data: platformAdmin } = await supabase
+    .from("platform_admins")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (platformAdmin) {
+    return {
+      id: user.id,
+      email: user.email ?? null,
+      phone: user.phone ?? null,
+      role: "super_admin",
+      clinicId: null,
+      fullName: user.user_metadata?.full_name ?? user.email ?? "Platform Admin",
+    };
+  }
+
   const { data: staffData } = await supabase
     .from("clinic_staff")
     .select("role, clinic_id")

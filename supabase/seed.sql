@@ -32,17 +32,17 @@ BEGIN
   --    Supabase SQL Editor runs as superuser and can write to auth.users
   -- ===========================================================================
   INSERT INTO auth.users (
-    id, aud, role, email, phone,
+    instance_id, id, aud, role, email, phone,
     encrypted_password, email_confirmed_at, phone_confirmed_at,
     created_at, updated_at,
     raw_app_meta_data, raw_user_meta_data,
     is_super_admin, confirmation_token, recovery_token,
     email_change_token_new, email_change
   ) VALUES
-    (v_user_ahmad,     'authenticated', 'authenticated', 'ahmad.rizal@careflow.my',    '+60111234001', '', NOW(), NOW(), NOW(), NOW(), '{"provider":"phone","providers":["phone"]}', '{}', false, '', '', '', ''),
-    (v_user_sarah,     'authenticated', 'authenticated', 'sarah.lim@careflow.my',      '+60111234002', '', NOW(), NOW(), NOW(), NOW(), '{"provider":"phone","providers":["phone"]}', '{}', false, '', '', '', ''),
-    (v_user_rajan,     'authenticated', 'authenticated', 'rajan.krishnan@careflow.my', '+60111234003', '', NOW(), NOW(), NOW(), NOW(), '{"provider":"phone","providers":["phone"]}', '{}', false, '', '', '', ''),
-    (v_user_reception, 'authenticated', 'authenticated', 'reception@careflowclinic.my','+60111234004', '', NOW(), NOW(), NOW(), NOW(), '{"provider":"phone","providers":["phone"]}', '{}', false, '', '', '', '')
+    ('00000000-0000-0000-0000-000000000000', v_user_ahmad,     'authenticated', 'authenticated', 'ahmad.rizal@careflow.my',    '+60111234001', '', NOW(), NOW(), NOW(), NOW(), '{"provider":"phone","providers":["phone"]}', '{}', false, '', '', '', ''),
+    ('00000000-0000-0000-0000-000000000000', v_user_sarah,     'authenticated', 'authenticated', 'sarah.lim@careflow.my',      '+60111234002', '', NOW(), NOW(), NOW(), NOW(), '{"provider":"phone","providers":["phone"]}', '{}', false, '', '', '', ''),
+    ('00000000-0000-0000-0000-000000000000', v_user_rajan,     'authenticated', 'authenticated', 'rajan.krishnan@careflow.my', '+60111234003', '', NOW(), NOW(), NOW(), NOW(), '{"provider":"phone","providers":["phone"]}', '{}', false, '', '', '', ''),
+    ('00000000-0000-0000-0000-000000000000', v_user_reception, 'authenticated', 'authenticated', 'reception@careflowclinic.my','+60111234004', '', NOW(), NOW(), NOW(), NOW(), '{"provider":"phone","providers":["phone"]}', '{}', false, '', '', '', '')
   ON CONFLICT (id) DO NOTHING;
 
   -- ===========================================================================

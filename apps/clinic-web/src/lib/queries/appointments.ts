@@ -37,7 +37,7 @@ export async function getClinicAppointments(
         specialization,
         clinic_staff ( full_name )
       ),
-      profiles ( full_name, phone )
+      profiles ( full_name, phone_number )
     `)
     .eq("clinic_id", clinicId)
     .eq("appointment_date", targetDate)
@@ -53,7 +53,7 @@ export async function getClinicAppointments(
       specialization: string | null;
       clinic_staff: { full_name: string } | Array<{ full_name: string }> | null;
     } | null;
-    const profile = row.profiles as unknown as { full_name: string | null; phone: string | null } | null;
+    const profile = row.profiles as unknown as { full_name: string | null; phone_number: string | null } | null;
     const staffEntry = Array.isArray(doc?.clinic_staff) ? doc?.clinic_staff[0] : doc?.clinic_staff;
 
     return {
@@ -64,7 +64,7 @@ export async function getClinicAppointments(
       status: row.status as AppointmentStatus,
       notes: row.notes ?? null,
       patientName: profile?.full_name ?? "Patient",
-      patientPhone: profile?.phone ?? null,
+      patientPhone: profile?.phone_number ?? null,
       doctorId: doc?.id ?? "",
       doctorName: staffEntry?.full_name ?? "Doctor",
       specialization: doc?.specialization ?? null,

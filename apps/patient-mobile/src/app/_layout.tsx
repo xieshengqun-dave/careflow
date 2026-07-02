@@ -56,9 +56,11 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts(fontsToLoad);
+  const [fontsLoaded, fontError] = useFonts(fontsToLoad);
 
-  if (!fontsLoaded) {
+  // fontError: fonts failed to download (network issue, etc.) — proceed with system fonts
+  // rather than hanging on the native splash screen forever.
+  if (!fontsLoaded && !fontError) {
     return null;
   }
 
