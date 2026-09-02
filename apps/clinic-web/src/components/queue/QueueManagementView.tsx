@@ -14,6 +14,8 @@ import { AddWalkInDialog } from "./AddWalkInDialog";
 import { QuickCheckIn } from "./QuickCheckIn";
 import { EmergencyButton } from "./EmergencyButton";
 import { DoctorQueueColumns } from "./DoctorQueueColumns";
+import { ChairStatusGrid } from "./ChairStatusGrid";
+import type { ChairData } from "@/lib/queries/chairs";
 import {
   callNext,
   callSpecific,
@@ -75,9 +77,10 @@ interface Props {
   boardData: QueuePageData;
   clinicId: string;
   lastUpdated: string;
+  chairs: ChairData[];
 }
 
-export function QueueManagementView({ summary, boardData, clinicId, lastUpdated }: Props) {
+export function QueueManagementView({ summary, boardData, clinicId, lastUpdated, chairs }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -109,6 +112,11 @@ export function QueueManagementView({ summary, boardData, clinicId, lastUpdated 
     doctorName: q.doctorName,
     waitingCount: q.waiting.length,
   }));
+
+  const chairMap = useMemo(
+    () => new Map(chairs.map((c) => [c.id, c.name])),
+    [chairs],
+  );
 
   const otherDoctorOptions = selectedInfo
     ? doctorOptions.filter((d) => d.queueId !== selectedInfo.queueId)
@@ -163,6 +171,13 @@ export function QueueManagementView({ summary, boardData, clinicId, lastUpdated 
         ))}
       </div>
 
+      {/* Chair status strip */}
+      {chairs.length > 0 && (
+        <div className="bg-white rounded-[18px] border shadow-sm px-4 py-3">
+          <ChairStatusGrid chairs={chairs} boardData={boardData} />
+        </div>
+      )}
+
       {/* Per-doctor columns + detail panel */}
       <div className="flex gap-4">
         <div className="flex-1 min-w-0 min-h-[480px] flex flex-col">
@@ -172,6 +187,7 @@ export function QueueManagementView({ summary, boardData, clinicId, lastUpdated 
             onSelect={setSelectedId}
             onCallNext={(queueId) => runAction(() => callNext(queueId))}
             isPending={isPending}
+            chairMap={chairMap}
           />
         </div>
 

@@ -38,11 +38,12 @@ interface EntryRowProps {
   position: number;
   isSelected: boolean;
   onClick: () => void;
+  chairName?: string | null;
 }
 
 const FALLBACK_ROW = { row: "", badge: null, label: null };
 
-function EntryRow({ entry, position, isSelected, onClick }: EntryRowProps) {
+function EntryRow({ entry, position, isSelected, onClick, chairName }: EntryRowProps) {
   const sc = STATUS_ROW[entry.status] ?? FALLBACK_ROW;
   const ps = priorityStyle(entry.priority);
   const isEmergency = entry.priority === 1;
@@ -76,6 +77,11 @@ function EntryRow({ entry, position, isSelected, onClick }: EntryRowProps) {
             {sc.badge && sc.label && (
               <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${sc.badge}`}>
                 {sc.label}
+              </span>
+            )}
+            {chairName && (
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                {chairName}
               </span>
             )}
           </div>
@@ -119,9 +125,10 @@ interface DoctorColumnProps {
   onSelect: (entryId: string) => void;
   onCallNext: () => void;
   isPending: boolean;
+  chairMap: Map<string, string>; // chairId → chair name
 }
 
-function DoctorColumn({ queue, selectedId, onSelect, onCallNext, isPending }: DoctorColumnProps) {
+function DoctorColumn({ queue, selectedId, onSelect, onCallNext, isPending, chairMap }: DoctorColumnProps) {
   const allActive = [
     ...(queue.inConsultation ? [queue.inConsultation] : []),
     ...queue.called,
@@ -197,6 +204,7 @@ function DoctorColumn({ queue, selectedId, onSelect, onCallNext, isPending }: Do
               position={idx + 1}
               isSelected={entry.id === selectedId}
               onClick={() => onSelect(entry.id)}
+              chairName={entry.chairId ? chairMap.get(entry.chairId) : null}
             />
           ))
         )}
@@ -211,9 +219,10 @@ interface Props {
   onSelect: (entryId: string) => void;
   onCallNext: (queueId: string) => void;
   isPending: boolean;
+  chairMap: Map<string, string>;
 }
 
-export function DoctorQueueColumns({ boardData, selectedId, onSelect, onCallNext, isPending }: Props) {
+export function DoctorQueueColumns({ boardData, selectedId, onSelect, onCallNext, isPending, chairMap }: Props) {
   if (boardData.activeQueues.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center bg-white rounded-[18px] border shadow-sm">
@@ -238,6 +247,7 @@ export function DoctorQueueColumns({ boardData, selectedId, onSelect, onCallNext
           onSelect={onSelect}
           onCallNext={() => onCallNext(queue.queueId)}
           isPending={isPending}
+          chairMap={chairMap}
         />
       ))}
     </div>

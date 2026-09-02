@@ -1,6 +1,6 @@
 # CareFlow — Session Handoff
 
-**Last updated:** 2026-07-02 (Session 9 — treatment templates implemented; chair management planned)
+**Last updated:** 2026-09-02 (Session 10 — chair management committed; stale join.tsx pending item closed; type-check verified green)
 **Branch:** `main`
 **Repo:** https://github.com/xieshengqun-dave/careflow (private)
 
@@ -703,10 +703,30 @@ Manual (1 click): CLEANING→AVAILABLE, ANY→OUT_OF_SERVICE.
 **⚠️ Run migration in Supabase SQL Editor before testing:**
 `supabase/migrations/20260701000002_treatment_templates.sql`
 
-### Pending Implementation Checklist
-- [x] Treatment Templates ✅
-- [ ] Implement Chair Management (migration + queries + actions + UI)
-- [ ] Commit both features
+### Chair Management — DONE ✅
+
+**Files created:**
+- `supabase/migrations/20260701000003_chairs.sql` — `chairs` table, `chair_id` on `queue_entries`, RLS, 3 seed chairs
+- `apps/clinic-web/src/lib/queries/chairs.ts` — `getClinicChairs()`, `ChairData` type
+- `apps/clinic-web/src/lib/actions/chairs.ts` — `updateChairStatus()` server action
+- `apps/clinic-web/src/components/queue/ChairStatusGrid.tsx` — compact status bar: dots, occupied-by patient name, "Mark Clean" button
+
+**Files modified:**
+- `lib/actions/queue.ts` — `callNext()` auto-assigns first AVAILABLE chair (→ OCCUPIED); `completeConsultation()` sets chair to CLEANING
+- `lib/queries/queue.ts` — `QueueEntryData` gains `chairId`; `mapEntry` reads `chair_id`; select includes `chair_id`
+- `queue/page.tsx` — fetches chairs, passes to `QueueManagementView`
+- `QueueManagementView.tsx` — renders `<ChairStatusGrid>`, derives `chairMap`, passes to columns
+- `DoctorQueueColumns.tsx` — chair name badge on CALLED/IN_CONSULTATION rows
+
+**Status flow:** `AVAILABLE → (callNext) → OCCUPIED → (completeConsultation) → CLEANING → (Mark Clean) → AVAILABLE`
+
+**⚠️ Run migration before testing:** `supabase/migrations/20260701000003_chairs.sql`
+
+### Pending
+- [x] ~~Fix `queue/join.tsx` (patient mobile)~~ — stale item: already fixed in Phase 3/4 (`2f0b06e`/`9dc793f`); it selects `consultation_duration_minutes`, filters on `queues.is_active`, and shows fee as a "—" placeholder. Verified against migrations 2026-09-02.
+- [ ] Real patient OTP login (patient mobile dev-stub) — Phase 5.1, launch-blocking
+- [ ] Patients module + `profiles` RLS tightening — Phase 5.2
+- [ ] Apply `supabase/migrations/20260701000003_chairs.sql` in Supabase SQL Editor (chair feature is committed but the live DB doesn't have the table yet)
 
 ---
 

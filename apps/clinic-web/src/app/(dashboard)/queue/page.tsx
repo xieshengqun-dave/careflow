@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import { getCombinedQueue, getTodayQueueData } from "@/lib/queries/queue";
+import { getClinicChairs } from "@/lib/queries/chairs";
 import { QueueManagementView } from "@/components/queue/QueueManagementView";
 
 export default async function QueuePage() {
@@ -8,9 +9,10 @@ export default async function QueuePage() {
   if (!user) redirect("/unauthorized");
 
   const clinicId = user.clinicId ?? "";
-  const [summary, boardData] = await Promise.all([
+  const [summary, boardData, chairs] = await Promise.all([
     getCombinedQueue(clinicId),
     getTodayQueueData(clinicId),
+    getClinicChairs(clinicId),
   ]);
 
   const lastUpdated = new Date().toLocaleTimeString("en-MY", { hour: "numeric", minute: "2-digit" });
@@ -21,6 +23,7 @@ export default async function QueuePage() {
       boardData={boardData}
       clinicId={clinicId}
       lastUpdated={lastUpdated}
+      chairs={chairs}
     />
   );
 }

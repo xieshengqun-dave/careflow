@@ -27,6 +27,7 @@ export interface QueueEntryData {
   scheduledStartTime: string | null;
   arrivalStatus: string | null;
   estimatedWaitMinutes: number | null; // computed by queue engine, set on WAITING entries
+  chairId: string | null;
 }
 
 /** A single row in the combined, cross-doctor "Current Queue" table. */
@@ -186,6 +187,7 @@ function mapEntry(e: Record<string, unknown>): QueueEntryData {
     scheduledStartTime: (e.scheduled_start_time as string | null) ?? null,
     arrivalStatus: (e.arrival_status as string | null) ?? null,
     estimatedWaitMinutes: null, // populated by queue engine after mapping
+    chairId: (e.chair_id as string | null) ?? null,
   };
 }
 
@@ -225,6 +227,7 @@ export async function getTodayQueueData(clinicId: string): Promise<QueuePageData
         actual_duration_minutes,
         scheduled_start_time,
         arrival_status,
+        chair_id,
         profiles ( full_name, phone_number )
       )
     `)

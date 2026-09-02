@@ -55,12 +55,37 @@ export async function callNext(queueId: string) {
 
   if (!next) return { error: "No waiting patients." };
 
+  // Auto-assign the first available chair in this clinic
+  const { data: chair } = await supabase
+    .from("chairs" as "queues")
+    .select("id")
+    .eq("clinic_id" as "doctor_id", user.clinicId!)
+    .eq("status" as "doctor_id", "AVAILABLE")
+    .eq("is_active" as "doctor_id", true)
+    .order("display_order" as "doctor_id")
+    .limit(1)
+    .maybeSingle();
+
+  const chairId = (chair as unknown as { id: string } | null)?.id ?? null;
+
+  const entryUpdate: Record<string, unknown> = { status: "CALLED", called_at: new Date().toISOString() };
+  if (chairId) entryUpdate.chair_id = chairId;
+
   const { error } = await supabase
     .from("queue_entries")
-    .update({ status: "CALLED", called_at: new Date().toISOString() })
+    .update(entryUpdate as never)
     .eq("id", next.id);
 
   if (error) return { error: error.message };
+
+  // Mark chair as occupied
+  if (chairId) {
+    await supabase
+      .from("chairs" as "queues")
+      .update({ status: "OCCUPIED", updated_at: new Date().toISOString() } as never)
+      .eq("id" as "doctor_id", chairId);
+  }
+
   revalidatePath("/queue");
   return { success: true };
 }
@@ -98,6 +123,14 @@ export async function completeConsultation(entryId: string) {
   const { user, supabase } = await getAuthedSupabase();
   if (!user || !supabase) return { error: "Unauthorized" };
 
+  // Get chair assignment before completing (RPC clears it)
+  const { data: entryRow } = await supabase
+    .from("queue_entries")
+    .select("chair_id")
+    .eq("id", entryId)
+    .maybeSingle();
+  const chairId = (entryRow as unknown as { chair_id: string | null } | null)?.chair_id ?? null;
+
   // Use atomic RPC when available (records actual duration + updates doctor stats).
   // Falls back to direct update if migration 20260629000003 hasn't been applied yet.
   const { error: rpcError } = await supabase.rpc("record_consultation_complete", {
@@ -109,6 +142,14 @@ export async function completeConsultation(entryId: string) {
       .update({ status: "COMPLETED", completed_at: new Date().toISOString() })
       .eq("id", entryId);
     if (error) return { error: error.message };
+  }
+
+  // Release chair → CLEANING so receptionist knows to prepare it
+  if (chairId) {
+    await supabase
+      .from("chairs" as "queues")
+      .update({ status: "CLEANING", updated_at: new Date().toISOString() } as never)
+      .eq("id" as "doctor_id", chairId);
   }
 
   revalidatePath("/queue");
