@@ -235,8 +235,10 @@ All migrations have been applied to the live Supabase project:
 - `supabase/migrations/20260629000002_treatment_type.sql` — `treatment_type TEXT` on `appointments` + `queue_entries` ✅
 - `supabase/migrations/20260629000003_smart_queue_foundation.sql` — smart queue fields, `doctor_treatment_stats`, `record_consultation_complete()` RPC ✅
 
-### Pending Migrations
-None — all migrations applied.
+### Pending Migrations (written, NOT yet run in Supabase SQL Editor)
+- `supabase/migrations/20260701000002_treatment_templates.sql` — application not confirmed; templates UI falls back gracefully without it
+- `supabase/migrations/20260701000003_chairs.sql` — chair grid stays hidden and chair assignment no-ops without it
+- `supabase/migrations/20260902000001_profiles_rls_tighten.sql` — until applied, the profiles PII leak remains open (any clinic staff can read every patient); code already prefers the new RPC and falls back to direct reads
 
 ### Key Tables
 | Table | Purpose |
@@ -258,6 +260,7 @@ None — all migrations applied.
 - `auth.clinic_id()` helper reads from JWT `app_metadata.clinic_id`
 - `service_role` key only in Edge Functions — never in client code
 - `anon` key only for public clinic directory reads
+- **`profiles` staff read is relationship-scoped** (migration `20260902000001`): staff only see patients with an appointment or queue entry at their clinic (`staff_can_view_patient()` SECURITY DEFINER helper). Never add a new direct global `profiles` read with the server client — use `findPatientByPhone()` in `apps/clinic-web/src/lib/patients.ts`, which calls the audited `staff_lookup_patient_by_phone()` RPC (exact phone match, returns only id + full_name, logs to `activity_log`)
 
 ### Timezone
 All dates use Malaysian time (MYT, UTC+8). Use `getMYTToday()` from `@careflow/shared` for the current date string.

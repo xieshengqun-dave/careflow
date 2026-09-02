@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createServerClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { findPatientByPhone } from "@/lib/patients";
 import { requireRole } from "@/lib/auth";
 import {
   getMYTToday,
@@ -268,14 +269,10 @@ export async function addWalkIn(data: {
   if (hasPhone) {
     const formattedPhone = data.phoneNumber.startsWith("+") ? data.phoneNumber : `+6${data.phoneNumber}`;
 
-    const { data: existingProfile } = await admin
-      .from("profiles")
-      .select("id")
-      .eq("phone_number", formattedPhone)
-      .maybeSingle();
+    const existingProfile = await findPatientByPhone(supabase, formattedPhone);
 
     if (existingProfile) {
-      patientId = existingProfile.id as string;
+      patientId = existingProfile.id;
     } else {
       const { data: authData, error: createError } = await admin.auth.admin.createUser({
         phone: formattedPhone,
@@ -401,11 +398,7 @@ export async function quickCheckInByCode(code: string): Promise<{ patientName?: 
 
   // Phone number fallback
   const formatted = input.startsWith("+") ? input : `+6${input}`;
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, full_name")
-    .eq("phone_number", formatted)
-    .maybeSingle();
+  const profile = await findPatientByPhone(supabase, formatted);
 
   if (!profile) return { error: "No patient found with this phone number" };
 
@@ -431,7 +424,7 @@ export async function quickCheckInByCode(code: string): Promise<{ patientName?: 
 
   revalidatePath("/appointments");
   revalidatePath("/queue");
-  return { patientName: profile.full_name ?? "Patient" };
+  return { patientName: profile.fullName || "Patient" };
 }
 
 export async function reassignEntry(entryId: string, targetQueueId: string) {

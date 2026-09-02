@@ -2,6 +2,7 @@
 
 import { createServerClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { findPatientByPhone } from "@/lib/patients";
 import { getDoctorSlotsForDate } from "@/lib/queries/slots";
 import { classifyArrival, getEstimatedDuration, FALLBACK_DURATION_MINUTES } from "@careflow/shared";
 
@@ -136,11 +137,7 @@ export async function createStaffAppointment(
   const supabase = await createServerClient();
 
   // Look up patient by phone number
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("phone_number", params.patientPhone)
-    .maybeSingle();
+  const profile = await findPatientByPhone(supabase, params.patientPhone);
 
   if (!profile) {
     return { error: "No patient found with this phone number. Ask them to register via the patient app first." };
@@ -181,13 +178,7 @@ export async function lookupPatientByPhone(
   phone: string,
 ): Promise<{ id: string; fullName: string } | null> {
   const supabase = await createServerClient();
-  const { data } = await supabase
-    .from("profiles")
-    .select("id, full_name")
-    .eq("phone_number", phone)
-    .maybeSingle();
-  if (!data) return null;
-  return { id: data.id, fullName: data.full_name ?? "" };
+  return findPatientByPhone(supabase, phone);
 }
 
 export async function rescheduleAppointment(

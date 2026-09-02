@@ -1,6 +1,6 @@
 # CareFlow — Session Handoff
 
-**Last updated:** 2026-09-02 (Session 10 — chair management committed; stale join.tsx pending item closed; type-check verified green)
+**Last updated:** 2026-09-02 (Session 10 — chair management committed; profiles RLS PII-leak fix (Phase 5.2 part 1); stale join.tsx pending item closed)
 **Branch:** `main`
 **Repo:** https://github.com/xieshengqun-dave/careflow (private)
 
@@ -16,7 +16,7 @@ Phases come from `CAREFLOW_FIX_PROMPT.md`. Work done in order — each phase com
 | **Phase 2** | Push notifications (device tokens, Edge Function, event triggers) | ✅ **Done** — commits `dc432be`, `4bd88ad` |
 | **Phase 3** | Operational gaps (slot generation cron, wait estimates, skip recovery, audit log) | ✅ **Done** — commit `2f0b06e` |
 | **Phase 4** | Polish / data quality (no-show rate fix, PENDING enum, migration dedup, doc fix) | ✅ **Done** — commit `9dc793f` |
-| **Phase 5** | Multi-tenant platform (real OTP login, patients module, super_admin/platform console) | 🔄 **In Progress** — Phase 5.3 (super admin / platform console) done; 5.1 (OTP login) + 5.2 (patients module) pending |
+| **Phase 5** | Multi-tenant platform (real OTP login, patients module, super_admin/platform console) | 🔄 **In Progress** — 5.3 (platform console) done; 5.2 RLS fix done (session 10) — `/patients` page still pending; 5.1 (OTP login) pending |
 | **Phase 6** | Design fidelity (token audit, screen-by-screen rebuild against design_handoff_careflow/) | 🔄 **In Progress** — patient-mobile done; clinic-web Appointments + Schedule + Queue done; Dashboard pending further polish |
 
 ---
@@ -725,8 +725,34 @@ Manual (1 click): CLEANING→AVAILABLE, ANY→OUT_OF_SERVICE.
 ### Pending
 - [x] ~~Fix `queue/join.tsx` (patient mobile)~~ — stale item: already fixed in Phase 3/4 (`2f0b06e`/`9dc793f`); it selects `consultation_duration_minutes`, filters on `queues.is_active`, and shows fee as a "—" placeholder. Verified against migrations 2026-09-02.
 - [ ] Real patient OTP login (patient mobile dev-stub) — Phase 5.1, launch-blocking
-- [ ] Patients module + `profiles` RLS tightening — Phase 5.2
-- [ ] Apply `supabase/migrations/20260701000003_chairs.sql` in Supabase SQL Editor (chair feature is committed but the live DB doesn't have the table yet)
+- [x] `profiles` RLS tightening — Phase 5.2 part 1, done session 10 (see below); `/patients` page (part 2) still pending
+- [ ] `/patients` search/view/create page — Phase 5.2 part 2
+- [ ] Apply pending migrations in Supabase SQL Editor: `20260701000002_treatment_templates.sql` (if not already run), `20260701000003_chairs.sql`, `20260902000001_profiles_rls_tighten.sql` — **the PII leak stays open until the last one runs**
+
+---
+
+## Session 10 — Chairs committed + profiles RLS fix (2026-09-02)
+
+### Chair management committed
+Session 9's chair implementation sat uncommitted for two months; committed as `ae974fb` after verifying `pnpm type-check` green. Also closed the stale "queue/join.tsx is broken" pending item — that bug was actually fixed back in Phase 3/4 (verified against migrations: it selects `consultation_duration_minutes`, filters `queues.is_active`).
+
+### Phase 5.2 part 1 — profiles RLS tightened (PII leak fix)
+
+**The leak:** `"profiles: clinic staff read"` policy was `USING (get_user_clinic_id() IS NOT NULL)` — any active staff at any clinic could read every patient profile on the platform.
+
+**New migration `20260902000001_profiles_rls_tighten.sql`** (⚠️ run in Supabase SQL Editor):
+- `staff_can_view_patient(p_patient_id)` — SECURITY DEFINER helper: true only if the caller's clinic has an appointment or queue entry for that patient. Replaces the policy's predicate (same policy name).
+- `staff_lookup_patient_by_phone(p_phone)` — SECURITY DEFINER RPC, the one sanctioned path to a patient with no prior relationship to the clinic (first visit). Staff-only (raises `NOT_CLINIC_STAFF`), exact phone match, returns only `(id, full_name)`, writes a `PATIENT_PHONE_LOOKUP` row to `activity_log` per Phase 5.3's audit requirement.
+- Guest walk-in profiles become visible to staff the moment `join_queue` inserts their entry; platform console (admin client) and patient owner-reads unaffected.
+
+**Code changes (clinic-web):**
+- New `src/lib/patients.ts` — `findPatientByPhone(supabase, phone)`: tries the RPC, falls back to a direct `profiles` read if the RPC errors (migration not applied yet — graceful-degradation pattern, same as `record_consultation_complete`). After the migration, the fallback can only see clinic-related patients anyway.
+- `actions/appointments.ts` — `createStaffAppointment` + `lookupPatientByPhone` now use `findPatientByPhone` (were direct global reads via server client)
+- `actions/queue.ts` — `quickCheckInByCode` phone fallback and `addWalkIn` existing-patient lookup now use `findPatientByPhone` (walk-in lookup previously used the admin client — now audited)
+
+**Rule going forward:** never add a direct global `profiles` query with the server client; use `findPatientByPhone`.
+
+**Suspected latent bug (flagged, not fixed):** `profiles.phone_number` is `NOT NULL UNIQUE` in both schema migrations, but the guest/emergency upserts write only `{ id, full_name }` with no error check — the phone-less walk-in flow may be silently broken unless the live DB was hand-altered. Needs verification against the live schema.
 
 ---
 
