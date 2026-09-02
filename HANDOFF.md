@@ -1,6 +1,6 @@
 # CareFlow — Session Handoff
 
-**Last updated:** 2026-09-02 (Session 10 — chair management committed; Phase 5.2 complete: profiles RLS PII-leak fix + `/patients` page)
+**Last updated:** 2026-09-02 (Session 10 — chair management committed; Phase 5.2 complete (RLS fix + `/patients`); Phase 5.1 complete (real OTP login + onboarding, SMS provider config pending))
 **Branch:** `main`
 **Repo:** https://github.com/xieshengqun-dave/careflow (private)
 
@@ -16,7 +16,7 @@ Phases come from `CAREFLOW_FIX_PROMPT.md`. Work done in order — each phase com
 | **Phase 2** | Push notifications (device tokens, Edge Function, event triggers) | ✅ **Done** — commits `dc432be`, `4bd88ad` |
 | **Phase 3** | Operational gaps (slot generation cron, wait estimates, skip recovery, audit log) | ✅ **Done** — commit `2f0b06e` |
 | **Phase 4** | Polish / data quality (no-show rate fix, PENDING enum, migration dedup, doc fix) | ✅ **Done** — commit `9dc793f` |
-| **Phase 5** | Multi-tenant platform (real OTP login, patients module, super_admin/platform console) | 🔄 **In Progress** — 5.3 (platform console) done; 5.2 (RLS fix + `/patients` page) done (session 10); 5.1 (OTP login) pending |
+| **Phase 5** | Multi-tenant platform (real OTP login, patients module, super_admin/platform console) | ✅ **Done (code-side)** — 5.3 platform console; 5.2 RLS fix + `/patients` page; 5.1 OTP login + onboarding (session 10). OTP delivery needs an SMS provider or dashboard test phone numbers — see Session 10 notes |
 | **Phase 6** | Design fidelity (token audit, screen-by-screen rebuild against design_handoff_careflow/) | 🔄 **In Progress** — patient-mobile done; clinic-web Appointments + Schedule + Queue done; Dashboard pending further polish |
 
 ---
@@ -167,7 +167,7 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 
 | Screen | Build location | Backend dep | Status |
 |---|---|---|---|
-| Patient — Onboarding / name capture | `apps/patient-mobile/src/app/onboarding/index.tsx` | Phase 5.1 | ❌ Pending |
+| Patient — Onboarding / name capture | `apps/patient-mobile/src/app/onboarding/index.tsx` | Phase 5.1 ✅ | ✅ Done (session 10) |
 | Patient — Check-In (QR / confirm) | `apps/patient-mobile/src/app/(tabs)/checkin.tsx` | Phase 1.3 ✅ | ✅ Done (session 4) |
 | Patient — Reschedule | new `apps/patient-mobile/src/app/booking/reschedule.tsx` | `reschedule_appointment` fn | ✅ Done (session 4) |
 | Patient — UI states (skeleton/empty/error) | reusable components | — | ✅ Done (session 4) |
@@ -724,10 +724,10 @@ Manual (1 click): CLEANING→AVAILABLE, ANY→OUT_OF_SERVICE.
 
 ### Pending
 - [x] ~~Fix `queue/join.tsx` (patient mobile)~~ — stale item: already fixed in Phase 3/4 (`2f0b06e`/`9dc793f`); it selects `consultation_duration_minutes`, filters on `queues.is_active`, and shows fee as a "—" placeholder. Verified against migrations 2026-09-02.
-- [ ] Real patient OTP login (patient mobile dev-stub) — Phase 5.1, launch-blocking
+- [x] Real patient OTP login + onboarding — Phase 5.1, done session 10 (see below); **user must configure SMS provider or test phone numbers in Supabase**
 - [x] `profiles` RLS tightening — Phase 5.2 part 1, done session 10 (see below)
 - [x] `/patients` search/view/create page — Phase 5.2 part 2, done session 10 (see below)
-- [ ] Apply pending migrations in Supabase SQL Editor: `20260701000002_treatment_templates.sql` (if not already run), `20260701000003_chairs.sql`, `20260902000001_profiles_rls_tighten.sql` — **the PII leak stays open until the last one runs**
+- [ ] Apply pending migrations in Supabase SQL Editor: `20260701000002_treatment_templates.sql` (if not already run), `20260701000003_chairs.sql`, `20260902000001_profiles_rls_tighten.sql` (**PII leak open until run**), `20260902000002_phone_normalization.sql` (**staff can't find OTP-registered patients by phone until run**)
 
 ---
 
@@ -769,6 +769,20 @@ Patients module for clinic staff (Queue/Appointments/Patients in the ops nav for
 - `packages/shared/src/types/auth.ts` — `/patients` route permission (all clinic roles)
 - `components/shared/SidebarNav.tsx` — Patients nav item in ops section
 - `components/scheduling/NewAppointmentDialog.tsx` — patient step now offers inline "Register & Continue" (name field) when phone lookup finds nobody, instead of the dead-end "ask them to register via the app" error — closes the Group B "Add Patient dialog" item
+
+### Phase 5.1 — Real patient OTP login + onboarding
+
+The login/OTP screens already had the real `sendOTP`/`verifyOtp` flow wired (the HANDOFF claim that login "never navigates to otp.tsx" was stale). What session 10 actually did:
+
+- **Removed the dev-login entirely** — `__DEV__` "Skip Login (Test Patient)" button and hardcoded `test.patient@careflow.asia` credentials deleted from `login.tsx`
+- **Removed the fabricated "Test Patient" profile** from `authStore.loadUser()` (it auto-created a profile with a fake phone for email logins). `loadUser` now reads the profile with `.maybeSingle()` and reports `fullName: null` when the name is empty
+- **New `onboarding/index.tsx`** — name capture for fresh OTP signups (their trigger-created profile has an empty `full_name`). Saves via `updateProfile()`, falls back to insert for legacy pre-trigger accounts, then `loadUser()` → root layout routes onward
+- **Root layout** (`_layout.tsx`) — signed-in users with no name are routed to `/onboarding`; everyone else with a session skips auth/onboarding straight to tabs
+- **New migration `20260902000002_phone_normalization.sql`** — fixes a real lookup bug: Supabase stores `auth.users.phone` WITHOUT the leading `+`, so `handle_new_user()` wrote bare digits into `profiles.phone_number` while all staff lookups search `+`-prefixed. The migration re-declares the trigger to store `+`-prefixed E.164, backfills existing bare rows (collision-safe), and makes `staff_lookup_patient_by_phone()` compare digits-only
+
+**⚠️ To actually receive OTPs, one of these must be configured in the Supabase Dashboard (user action):**
+1. **Production:** Authentication → Providers → Phone → enable an SMS provider (Twilio/MessageBird/Vonage) with real credentials. The previous Twilio config was reported invalid — re-enter it.
+2. **Development (no SMS provider needed):** Authentication → Providers → Phone → **Test phone numbers** — add e.g. `+60123456789` with a fixed OTP like `123456`. Logging in with that number then always accepts that code and creates a real user; the full login → OTP → onboarding flow is testable in Expo Go.
 
 ---
 

@@ -241,6 +241,7 @@ All migrations have been applied to the live Supabase project:
 - `supabase/migrations/20260701000002_treatment_templates.sql` — application not confirmed; templates UI falls back gracefully without it
 - `supabase/migrations/20260701000003_chairs.sql` — chair grid stays hidden and chair assignment no-ops without it
 - `supabase/migrations/20260902000001_profiles_rls_tighten.sql` — until applied, the profiles PII leak remains open (any clinic staff can read every patient); code already prefers the new RPC and falls back to direct reads
+- `supabase/migrations/20260902000002_phone_normalization.sql` — until applied, patients who registered via phone OTP have `phone_number` without the leading `+` and staff phone lookups can't find them
 
 ### Key Tables
 | Table | Purpose |
@@ -307,7 +308,7 @@ After `20260629000003_smart_queue_foundation.sql`:
 7. **Ratings and geolocation** are not in the DB — placeholders (4.8★, distances) are hardcoded in the UI
 8. **`SafeAreaView` must come from `react-native-safe-area-context`**, never `"react-native"` core — see Patient Mobile App section above
 9. **No fee/price column in the schema** — never `select` `consultation_fee`; see Database section above
-10. **patient-mobile Login (`(auth)/login.tsx`) is a dev-mode stub** — it calls `supabase.auth.signInWithPassword()` with a hardcoded dev account instead of the real phone-OTP flow, and never navigates to `otp.tsx`. The OTP screen itself works if reached directly (`/​(auth)/otp?phone=...`), but real OTP login is not wired up yet.
+10. **patient-mobile login is real phone OTP (Phase 5.1, session 10)** — `(auth)/login.tsx` → `sendOTP()` (`signInWithOtp`) → `otp.tsx` → `verifyOtp({ type: "sms" })`. New signups get a profile row with an empty `full_name` from the `handle_new_user()` trigger; the root layout routes any user with no name to `/onboarding` (name capture) before the tabs. There is NO password/dev fallback anymore. OTP delivery requires an SMS provider (e.g. Twilio) configured in Supabase — for development, use Dashboard → Authentication → Providers → Phone → **Test phone numbers** (fixed OTP codes, no SMS provider needed). Note: Supabase stores `auth.users.phone` WITHOUT the leading `+`; migration `20260902000002` normalizes `profiles.phone_number` to `+`-prefixed and makes `staff_lookup_patient_by_phone()` compare digits-only.
 11. **clinic-web requires `apps/clinic-web/postcss.config.mjs`** to exist or Tailwind produces zero CSS — see Clinic Web App section above
 12. **`profiles.phone_number`** (not `profiles.phone`) — see Database section above; using the wrong column silently returns no rows
 13. **Walk-in + emergency guest profiles** — patients added without a phone get a generated `guest.{timestamp}@careflow.internal` auth user. Do not query by phone for these users. See Database section above.

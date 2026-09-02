@@ -33,6 +33,9 @@ function RootLayoutNav() {
 
     if (!user) {
       if (!inAuthGroup) router.replace("/(auth)/login");
+    } else if (!user.fullName) {
+      // Signed in but no name yet (fresh OTP signup) — capture it first
+      if (!inOnboarding) router.replace("/onboarding");
     } else {
       if (inAuthGroup || inOnboarding) router.replace("/(tabs)");
     }

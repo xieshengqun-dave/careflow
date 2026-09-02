@@ -7,38 +7,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Icon } from "@/components/Icon";
 import { sendOTP } from "@/lib/auth";
-import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { palette, radius, spacing } from "@/theme/careflow-tokens";
 import { fontFamily, textStyle } from "@/theme/typography";
 
-// Dev-only test account — see HANDOFF.md. Real phone OTP delivery is blocked
-// by an invalid Twilio config on the Supabase project (not fixable from the
-// app); this lets you log in and test the rest of the app in the meantime.
-const DEV_TEST_EMAIL = "test.patient@careflow.asia";
-const DEV_TEST_PASSWORD = "CareFlowTest2026";
-
 export default function LoginScreen() {
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
-  const [devLoading, setDevLoading] = useState(false);
-
-  const handleDevLogin = async () => {
-    if (devLoading) return;
-    setDevLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: DEV_TEST_EMAIL,
-        password: DEV_TEST_PASSWORD,
-      });
-      if (error) Alert.alert("Dev login failed", error.message);
-      // Navigation handled automatically by useAuth → onAuthStateChange → loadUser
-    } finally {
-      setDevLoading(false);
-    }
-  };
 
   const handleSend = async () => {
     if (loading || phone.length < 9) return;
@@ -132,20 +109,6 @@ export default function LoginScreen() {
             </Text>
           </Card>
 
-          {__DEV__ && (
-            <TouchableOpacity
-              style={[styles.devBtn, devLoading && styles.devBtnDisabled]}
-              onPress={handleDevLogin}
-              disabled={devLoading}
-              activeOpacity={0.85}
-            >
-              <Icon name="bug-outline" size={16} color={palette.amber700} />
-              <Text style={styles.devBtnText}>
-                {devLoading ? "Signing in…" : "Dev: Skip Login (Test Patient)"}
-              </Text>
-            </TouchableOpacity>
-          )}
-
           {/* Help row */}
           <Card style={styles.helpRow} padded={false}>
             <TouchableOpacity style={styles.helpRowInner} activeOpacity={0.7}>
@@ -212,14 +175,6 @@ const styles = StyleSheet.create({
 
   terms: { ...textStyle("caption"), fontFamily: fontFamily(400), color: palette.slate400, textAlign: "center", lineHeight: 18, marginTop: spacing.xs },
   termsLink: { color: palette.primary600, fontFamily: fontFamily(500) },
-
-  devBtn: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.sm,
-    backgroundColor: palette.amber100, borderWidth: 1.5, borderColor: palette.amber500, borderStyle: "dashed",
-    borderRadius: radius.md, paddingVertical: 13, marginBottom: spacing.lg,
-  },
-  devBtnDisabled: { opacity: 0.6 },
-  devBtnText: { color: palette.amber700, ...textStyle("label") },
 
   helpRow: { borderRadius: radius.lg },
   helpRowInner: {
