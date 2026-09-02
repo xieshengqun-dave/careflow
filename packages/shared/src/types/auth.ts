@@ -44,4 +44,5 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   "/settings":  ["clinic_admin", "super_admin"],
   "/queue":     ["doctor", "receptionist", "clinic_admin", "super_admin"],
   "/appointments": ["doctor", "receptionist", "clinic_admin", "super_admin"],
+  "/patients":  ["doctor", "receptionist", "clinic_admin", "super_admin"],
 };

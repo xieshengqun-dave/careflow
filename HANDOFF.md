@@ -1,6 +1,6 @@
 # CareFlow — Session Handoff
 
-**Last updated:** 2026-09-02 (Session 10 — chair management committed; profiles RLS PII-leak fix (Phase 5.2 part 1); stale join.tsx pending item closed)
+**Last updated:** 2026-09-02 (Session 10 — chair management committed; Phase 5.2 complete: profiles RLS PII-leak fix + `/patients` page)
 **Branch:** `main`
 **Repo:** https://github.com/xieshengqun-dave/careflow (private)
 
@@ -16,7 +16,7 @@ Phases come from `CAREFLOW_FIX_PROMPT.md`. Work done in order — each phase com
 | **Phase 2** | Push notifications (device tokens, Edge Function, event triggers) | ✅ **Done** — commits `dc432be`, `4bd88ad` |
 | **Phase 3** | Operational gaps (slot generation cron, wait estimates, skip recovery, audit log) | ✅ **Done** — commit `2f0b06e` |
 | **Phase 4** | Polish / data quality (no-show rate fix, PENDING enum, migration dedup, doc fix) | ✅ **Done** — commit `9dc793f` |
-| **Phase 5** | Multi-tenant platform (real OTP login, patients module, super_admin/platform console) | 🔄 **In Progress** — 5.3 (platform console) done; 5.2 RLS fix done (session 10) — `/patients` page still pending; 5.1 (OTP login) pending |
+| **Phase 5** | Multi-tenant platform (real OTP login, patients module, super_admin/platform console) | 🔄 **In Progress** — 5.3 (platform console) done; 5.2 (RLS fix + `/patients` page) done (session 10); 5.1 (OTP login) pending |
 | **Phase 6** | Design fidelity (token audit, screen-by-screen rebuild against design_handoff_careflow/) | 🔄 **In Progress** — patient-mobile done; clinic-web Appointments + Schedule + Queue done; Dashboard pending further polish |
 
 ---
@@ -174,7 +174,7 @@ Confirm `careflow-tokens.ts` in both apps matches the design package (platform n
 | Clinic staff Login (web) | `apps/clinic-web/src/app/(auth)/login/page.tsx` | Phase 1.4 ✅ | ✅ Done (existed) |
 | Clinic Forgot/Reset password (web) | `(auth)/forgot-password`, `reset-password` | Supabase auth | ✅ Done (session 4, logo polish) |
 | New Appointment dialog (staff) | `components/scheduling/NewAppointmentDialog.tsx` | `staff_book_appointment` fn | ✅ Done (session 4) |
-| Add Patient dialog (staff) | modal, reused by New Appointment | Phase 5.2 | ❌ Pending |
+| Add Patient dialog (staff) | modal, reused by New Appointment | Phase 5.2 | ✅ Done (session 10) |
 | Table loading/empty states | Appointments + Queue tables | — | ✅ Done (session 4) |
 | Platform Console — Login | new `(platform)` route group | Phase 5.3 | ❌ Pending |
 | Platform Console — Shell/nav | `(platform)` layout | Phase 5.3 | ❌ Pending |
@@ -725,8 +725,8 @@ Manual (1 click): CLEANING→AVAILABLE, ANY→OUT_OF_SERVICE.
 ### Pending
 - [x] ~~Fix `queue/join.tsx` (patient mobile)~~ — stale item: already fixed in Phase 3/4 (`2f0b06e`/`9dc793f`); it selects `consultation_duration_minutes`, filters on `queues.is_active`, and shows fee as a "—" placeholder. Verified against migrations 2026-09-02.
 - [ ] Real patient OTP login (patient mobile dev-stub) — Phase 5.1, launch-blocking
-- [x] `profiles` RLS tightening — Phase 5.2 part 1, done session 10 (see below); `/patients` page (part 2) still pending
-- [ ] `/patients` search/view/create page — Phase 5.2 part 2
+- [x] `profiles` RLS tightening — Phase 5.2 part 1, done session 10 (see below)
+- [x] `/patients` search/view/create page — Phase 5.2 part 2, done session 10 (see below)
 - [ ] Apply pending migrations in Supabase SQL Editor: `20260701000002_treatment_templates.sql` (if not already run), `20260701000003_chairs.sql`, `20260902000001_profiles_rls_tighten.sql` — **the PII leak stays open until the last one runs**
 
 ---
@@ -753,6 +753,22 @@ Session 9's chair implementation sat uncommitted for two months; committed as `a
 **Rule going forward:** never add a direct global `profiles` query with the server client; use `findPatientByPhone`.
 
 **Suspected latent bug (flagged, not fixed):** `profiles.phone_number` is `NOT NULL UNIQUE` in both schema migrations, but the guest/emergency upserts write only `{ id, full_name }` with no error check — the phone-less walk-in flow may be silently broken unless the live DB was hand-altered. Needs verification against the live schema.
+
+### Phase 5.2 part 2 — `/patients` page
+
+Patients module for clinic staff (Queue/Appointments/Patients in the ops nav for every role; `/patients` added to `ROUTE_PERMISSIONS`).
+
+**New files:**
+- `lib/queries/patients.ts` — `getClinicPatients()`: roster built from DISTINCT patients with appointments or queue entries at the clinic (explicitly relationship-scoped — identical results whether or not the RLS migration is applied; never a bare `profiles` select), with per-patient appointment/queue counts + last visit; profile fetch chunked `.in()` batches of 200
+- `lib/actions/patients.ts` — `createPatient()` (find-or-create by phone: audited RPC lookup → `admin.auth.admin.createUser({ phone, phone_confirm })` + profile upsert, mirrors `addWalkIn`; logs `PATIENT_CREATED` to `activity_log`; returns `existed: true` instead of erroring on duplicates) + `fetchPatientHistory()` (last 20 appointments at caller's clinic)
+- `app/(dashboard)/patients/page.tsx` + `loading.tsx`
+- `components/patients/PatientsView.tsx` — client-side search (name/phone), roster table, right-hand detail panel with lazy-loaded appointment history
+- `components/patients/AddPatientDialog.tsx` — name + phone; "already registered" success state on duplicate phone
+
+**Modified:**
+- `packages/shared/src/types/auth.ts` — `/patients` route permission (all clinic roles)
+- `components/shared/SidebarNav.tsx` — Patients nav item in ops section
+- `components/scheduling/NewAppointmentDialog.tsx` — patient step now offers inline "Register & Continue" (name field) when phone lookup finds nobody, instead of the dead-end "ask them to register via the app" error — closes the Group B "Add Patient dialog" item
 
 ---
 

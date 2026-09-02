@@ -20,8 +20,9 @@ import {
   fetchClinicDoctors,
 } from "@/lib/actions/appointments";
 import { fetchTreatmentTemplates, type TreatmentTemplate } from "@/lib/actions/treatments";
+import { createPatient } from "@/lib/actions/patients";
 import { getMYTToday } from "@careflow/shared";
-import { Plus, Search, CheckCircle2, Clock, User } from "lucide-react";
+import { Plus, Search, CheckCircle2, Clock, User, UserPlus } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -46,17 +47,33 @@ function PatientStep({
 }) {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
+  const [notFound, setNotFound] = useState(false);
+  const [newName, setNewName] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const lookup = () => {
     if (!phone.trim()) { setError("Enter a phone number."); return; }
     setError("");
+    setNotFound(false);
     startTransition(async () => {
       const result = await lookupPatientByPhone(phone.trim());
       if (!result) {
-        setError("No patient found. Ask them to register via the CareFlow patient app first.");
+        setNotFound(true);
       } else {
         onFound(result.id, result.fullName, phone.trim());
+      }
+    });
+  };
+
+  const register = () => {
+    if (!newName.trim()) { setError("Enter the patient's name."); return; }
+    setError("");
+    startTransition(async () => {
+      const result = await createPatient({ fullName: newName.trim(), phone: phone.trim() });
+      if (result.error || !result.patient) {
+        setError(result.error ?? "Failed to register patient.");
+      } else {
+        onFound(result.patient.id, result.patient.fullName, phone.trim());
       }
     });
   };
@@ -81,13 +98,36 @@ function PatientStep({
           </Button>
         </div>
       </div>
+      {notFound && (
+        <div className="rounded-lg border border-cf-primary-100 bg-cf-primary-50/50 p-3 space-y-2.5">
+          <p className="text-xs text-slate-600">
+            No patient with this number yet — register them now:
+          </p>
+          <Input
+            placeholder="Patient full name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") register(); }}
+          />
+          <Button
+            type="button"
+            onClick={register}
+            disabled={isPending || !newName.trim()}
+            className="w-full"
+            size="sm"
+          >
+            <UserPlus className="h-4 w-4 mr-1.5" />
+            {isPending ? "Registering…" : "Register & Continue"}
+          </Button>
+        </div>
+      )}
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
       <p className="text-xs text-slate-400">
-        The patient must have registered via the CareFlow app before booking.
+        Existing patients are found by phone number; new ones can be registered on the spot.
       </p>
     </div>
   );

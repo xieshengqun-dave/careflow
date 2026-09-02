@@ -9,6 +9,7 @@ import {
   Stethoscope,
   CalendarClock,
   Settings as SettingsIcon,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@careflow/shared";
@@ -18,6 +19,7 @@ type NavItem = { href: string; label: string; icon: React.ElementType };
 const OPS_ITEMS: NavItem[] = [
   { href: "/queue",        label: "Queue",        icon: ListOrdered },
   { href: "/appointments", label: "Appointments", icon: CalendarDays },
+  { href: "/patients",     label: "Patients",     icon: Users },
 ];
 
 const DOCTOR_EXTRA: NavItem = { href: "/schedules", label: "My Schedule", icon: CalendarClock };

@@ -157,12 +157,14 @@ src/
 │   ├── appointments/        # Appointments page (slot view + list view)
 │   ├── dashboard/           # Metrics dashboard
 │   ├── doctors/             # Doctor CRUD
+│   ├── patients/            # Patient roster (search, create, history detail panel)
 │   ├── queue/               # Queue management board
 │   ├── schedules/           # Doctor schedule management
 │   └── settings/            # Clinic settings
 ├── components/
 │   ├── scheduling/          # AppointmentList, ScheduleBoard, SlotGrid
 │   ├── queue/               # QueueBoard, QueueCard
+│   ├── patients/            # PatientsView, AddPatientDialog
 │   ├── doctors/             # Doctor forms, DoctorCard
 │   └── shared/              # Shared UI pieces
 ├── lib/
