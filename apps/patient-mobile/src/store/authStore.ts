@@ -16,20 +16,36 @@ interface AuthStore {
   setUser: (user: PatientUser | null) => void;
 }
 
+// The splash screen shows until loadUser() finishes, so nothing in it may
+// block forever — getSession() can hang in release builds when a cold start
+// hits an expired token (supabase-js lock + inline refresh).
+const AUTH_TIMEOUT_MS = 10000;
+function withTimeout<T>(promise: PromiseLike<T>, label: string): Promise<T> {
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out`)), AUTH_TIMEOUT_MS),
+    ),
+  ]);
+}
+
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   isLoading: true,
 
   loadUser: async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await withTimeout(supabase.auth.getSession(), "getSession");
       if (!session?.user) { set({ user: null, isLoading: false }); return; }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, phone_number")
-        .eq("id", session.user.id)
-        .maybeSingle();
+      const { data: profile } = await withTimeout(
+        supabase
+          .from("profiles")
+          .select("full_name, phone_number")
+          .eq("id", session.user.id)
+          .maybeSingle(),
+        "profile fetch",
+      );
 
       // A null fullName means onboarding hasn't captured a name yet — the
       // root layout routes these users to /onboarding. The phone-OTP trigger
