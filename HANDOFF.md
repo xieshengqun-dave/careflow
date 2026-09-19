@@ -727,7 +727,8 @@ Manual (1 click): CLEANING→AVAILABLE, ANY→OUT_OF_SERVICE.
 - [x] Real patient OTP login + onboarding — Phase 5.1, done session 10 (see below); **user must configure SMS provider or test phone numbers in Supabase**
 - [x] `profiles` RLS tightening — Phase 5.2 part 1, done session 10 (see below)
 - [x] `/patients` search/view/create page — Phase 5.2 part 2, done session 10 (see below)
-- [ ] Apply pending migrations in Supabase SQL Editor: `20260701000002_treatment_templates.sql` (if not already run), `20260701000003_chairs.sql`, `20260902000001_profiles_rls_tighten.sql` (**PII leak open until run**), `20260902000002_phone_normalization.sql` (**staff can't find OTP-registered patients by phone until run**)
+- [x] All migrations applied to live DB — verified 2026-09-19 (chairs seeded 3/clinic; `staff_lookup_patient_by_phone` live → **PII leak closed**; phones normalized). The chairs migration needed a syntax fix first (`CREATE POLICY IF NOT EXISTS` is not valid Postgres — commit `da3ee5e`); that's why earlier SQL Editor runs appeared to do nothing.
+- [ ] OTP delivery still needs Supabase SMS provider config or dashboard test phone numbers (see Session 10 notes)
 
 ---
 

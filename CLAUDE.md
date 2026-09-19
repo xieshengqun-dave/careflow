@@ -227,8 +227,14 @@ Route group `apps/clinic-web/src/app/(platform)/` — gated to `super_admin` onl
 
 ## Supabase / Database
 
-### Applied Migrations (all current as of 2026-06-29)
-All migrations have been applied to the live Supabase project:
+### Applied Migrations (all current as of 2026-09-19)
+All migrations have been applied to the live Supabase project, including (verified against the live DB 2026-09-19):
+- `20260701000002_treatment_templates.sql` ✅
+- `20260701000003_chairs.sql` ✅ — 3 chairs seeded per clinic (note: the original file had invalid `CREATE POLICY IF NOT EXISTS` syntax; fixed in commit `da3ee5e` before it was applied)
+- `20260902000001_profiles_rls_tighten.sql` ✅ — profiles PII leak closed; `staff_lookup_patient_by_phone()` live
+- `20260902000002_phone_normalization.sql` ✅ — all bare-digit phone numbers backfilled to `+`-prefixed (one profile has an empty-string phone; treated as a guest, harmless)
+
+Earlier migrations:
 - `supabase/migrations/20260620000000_doctor_breaks.sql` — doctor break slots ✅
 - `supabase/migrations/20260620000001_book_appointment_fn.sql` — `book_appointment()` patient function ✅
 - `supabase/migrations/20260626000001_staff_book_appointment_fn.sql` — `staff_book_appointment()` for staff-initiated bookings ✅
@@ -237,11 +243,8 @@ All migrations have been applied to the live Supabase project:
 - `supabase/migrations/20260629000002_treatment_type.sql` — `treatment_type TEXT` on `appointments` + `queue_entries` ✅
 - `supabase/migrations/20260629000003_smart_queue_foundation.sql` — smart queue fields, `doctor_treatment_stats`, `record_consultation_complete()` RPC ✅
 
-### Pending Migrations (written, NOT yet run in Supabase SQL Editor)
-- `supabase/migrations/20260701000002_treatment_templates.sql` — application not confirmed; templates UI falls back gracefully without it
-- `supabase/migrations/20260701000003_chairs.sql` — chair grid stays hidden and chair assignment no-ops without it
-- `supabase/migrations/20260902000001_profiles_rls_tighten.sql` — until applied, the profiles PII leak remains open (any clinic staff can read every patient); code already prefers the new RPC and falls back to direct reads
-- `supabase/migrations/20260902000002_phone_normalization.sql` — until applied, patients who registered via phone OTP have `phone_number` without the leading `+` and staff phone lookups can't find them
+### Pending Migrations
+None — everything in `supabase/migrations/` is applied (verified 2026-09-19).
 
 ### Key Tables
 | Table | Purpose |
