@@ -47,24 +47,30 @@ CREATE TRIGGER chairs_updated_at
 -- RLS
 ALTER TABLE chairs ENABLE ROW LEVEL SECURITY;
 
--- Clinic staff can read their clinic's chairs
-CREATE POLICY IF NOT EXISTS "chairs_read_own_clinic"
+-- NOTE: CREATE POLICY has no IF NOT EXISTS in Postgres — the original version
+-- of this file used it and aborted with a syntax error (rolling back the whole
+-- migration). DROP + CREATE is the idempotent pattern used repo-wide.
+-- Policies use is_clinic_staff() like every other clinic-scoped table; staff
+-- JWTs cannot be relied on to carry app_metadata.clinic_id (see Session 7).
+
+DROP POLICY IF EXISTS "chairs_read_own_clinic" ON chairs;
+CREATE POLICY "chairs_read_own_clinic"
   ON chairs FOR SELECT
-  USING (clinic_id = (auth.jwt() -> 'app_metadata' ->> 'clinic_id')::uuid);
+  USING (public.is_clinic_staff(clinic_id));
 
--- Clinic staff can update chair status (receptionist marks clean, etc.)
-CREATE POLICY IF NOT EXISTS "chairs_update_own_clinic"
+DROP POLICY IF EXISTS "chairs_update_own_clinic" ON chairs;
+CREATE POLICY "chairs_update_own_clinic"
   ON chairs FOR UPDATE
-  USING (clinic_id = (auth.jwt() -> 'app_metadata' ->> 'clinic_id')::uuid);
+  USING (public.is_clinic_staff(clinic_id));
 
--- Clinic admin can insert / manage chairs
-CREATE POLICY IF NOT EXISTS "chairs_insert_own_clinic"
+DROP POLICY IF EXISTS "chairs_insert_own_clinic" ON chairs;
+CREATE POLICY "chairs_insert_own_clinic"
   ON chairs FOR INSERT
-  WITH CHECK (clinic_id = (auth.jwt() -> 'app_metadata' ->> 'clinic_id')::uuid);
+  WITH CHECK (public.is_clinic_staff(clinic_id));
 
--- Seed 3 chairs for CareFlow Family Clinic
-INSERT INTO chairs (clinic_id, name, display_order) VALUES
-  ('a1000000-0000-0000-0000-000000000001', 'Chair 1', 1),
-  ('a1000000-0000-0000-0000-000000000001', 'Chair 2', 2),
-  ('a1000000-0000-0000-0000-000000000001', 'Chair 3', 3)
-ON CONFLICT DO NOTHING;
+-- Seed 3 chairs for every clinic that has none yet
+INSERT INTO chairs (clinic_id, name, display_order)
+SELECT c.id, 'Chair ' || n, n
+FROM clinics c
+CROSS JOIN generate_series(1, 3) AS n
+WHERE NOT EXISTS (SELECT 1 FROM chairs ch WHERE ch.clinic_id = c.id);
