@@ -7,7 +7,6 @@ import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
 import { SplashView } from "@/components/SplashView";
 import { fontsToLoad } from "@/theme/typography";
-import { palette } from "@/theme/careflow-tokens";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -45,17 +44,10 @@ function RootLayoutNav() {
     return <SplashView />;
   }
 
-  return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="clinic/search"    options={{ headerShown: true,  title: "Find a Clinic", headerBackTitle: "Back", headerTintColor: palette.primary600 }} />
-      <Stack.Screen name="clinic/[clinicId]" options={{ headerShown: true, title: "Clinic", headerBackTitle: "Back", headerTintColor: palette.primary600 }} />
-      <Stack.Screen name="queue/[queueId]"  options={{ headerShown: true,  title: "Queue Status", headerBackTitle: "Back", headerTintColor: palette.primary600 }} />
-      <Stack.Screen name="queue/join"       options={{ headerShown: true,  title: "Join Queue",   headerBackTitle: "Back", headerTintColor: palette.primary600 }} />
-      <Stack.Screen name="booking/[doctorId]" options={{ headerShown: true, title: "Book Appointment", headerBackTitle: "Back", headerTintColor: palette.primary600 }} />
-      <Stack.Screen name="booking/confirm"    options={{ headerShown: true, title: "Confirm Booking",  headerBackTitle: "Back", headerTintColor: palette.primary600 }} />
-    </Stack>
-  );
+  // No native stack headers anywhere: every pushed screen draws its own
+  // in-page header with a back button (matching the /UI mockups). Enabling
+  // both produced a doubled header + back button on device builds.
+  return <Stack screenOptions={{ headerShown: false }} />;
 }
 
 export default function RootLayout() {
